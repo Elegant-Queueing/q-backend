@@ -25,12 +25,6 @@
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 
-		<!-- Jersey annotations -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jersey</artifactId>
-		</dependency>
-
 		<!-- Lombok integration -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
