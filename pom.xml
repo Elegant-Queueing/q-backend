@@ -19,6 +19,13 @@
 	</properties>
 
 	<dependencies>
+		<!-- Firebase integration -->
+		<dependency>
+			<groupId>com.google.firebase</groupId>
+			<artifactId>firebase-admin</artifactId>
+			<version>6.12.2</version>
+		</dependency>
+
 		<!-- Redis integration -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
