@@ -1,3 +1,6 @@
+### Firebase Account Key ###
+service_account_key.json
+
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar

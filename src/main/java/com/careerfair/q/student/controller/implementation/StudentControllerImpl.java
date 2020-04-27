@@ -11,7 +11,8 @@ import com.careerfair.q.student.workflow.response.UpdateStudentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("/student")
+@RestController
+@RequestMapping("student")
 public class StudentControllerImpl implements StudentController {
 
     @Autowired private StudentService studentService;

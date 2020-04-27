@@ -16,7 +16,7 @@ public class FirebaseService implements DatabaseService {
     @PostConstruct
     public void init() throws IOException {
         FileInputStream serviceAccount =
-                new FileInputStream("path/to/serviceAccountKey.json");
+                new FileInputStream("./service_account_key.json");
 
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
