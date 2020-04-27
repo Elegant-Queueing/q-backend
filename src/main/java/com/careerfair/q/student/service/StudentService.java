@@ -45,4 +45,9 @@ public interface StudentService {
      * @return
      */
     UpdateStudentResponse uploadStudentResume(String id, UpdateStudentRequest uploadStudentResume);
+
+    /**
+     *
+     */
+    void testDatabaseConnection();
 }

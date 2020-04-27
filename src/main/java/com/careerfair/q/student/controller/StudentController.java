@@ -45,4 +45,10 @@ public interface StudentController {
      * @return
      */
     UpdateStudentResponse uploadStudentResume(String id, UpdateStudentRequest uploadStudentResume);
+
+    /**
+     *
+     * @return
+     */
+    String ping();
 }

@@ -48,4 +48,11 @@ public class StudentControllerImpl implements StudentController {
                                                      @RequestBody UpdateStudentRequest uploadStudentResume) {
         return studentService.uploadStudentResume(id, uploadStudentResume);
     }
+
+    @GetMapping("/")
+    @Override
+    public String ping() {
+        studentService.testDatabaseConnection();
+        return "Pong";
+    }
 }

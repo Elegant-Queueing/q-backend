@@ -40,4 +40,9 @@ public class StudentServiceImpl implements StudentService {
     public UpdateStudentResponse uploadStudentResume(String id, UpdateStudentRequest uploadStudentResume) {
         return studentWorkflow.uploadStudentResume(id, uploadStudentResume);
     }
+
+    @Override
+    public void testDatabaseConnection() {
+        studentWorkflow.testDatabaseConnection();
+    }
 }

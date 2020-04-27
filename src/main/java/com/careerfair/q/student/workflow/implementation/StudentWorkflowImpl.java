@@ -1,7 +1,6 @@
 package com.careerfair.q.student.workflow.implementation;
 
 import com.careerfair.q.database.service.student.StudentFirebase;
-import com.careerfair.q.database.service.student.implementation.StudentFirebaseImpl;
 import com.careerfair.q.student.workflow.StudentWorkflow;
 import com.careerfair.q.student.workflow.request.AddStudentRequest;
 import com.careerfair.q.student.workflow.request.UpdateStudentRequest;
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class StudentWorkflowImpl implements StudentWorkflow {
 
-    @Autowired private StudentFirebaseImpl studentFirebase;
+    @Autowired private StudentFirebase studentFirebase;
 
     @Override
     public GetStudentResponse getStudent(String id) {
@@ -38,7 +37,6 @@ public class StudentWorkflowImpl implements StudentWorkflow {
     @Override
     public AddStudentResponse addStudent(AddStudentRequest addStudentRequest) {
         // TODO
-        studentFirebase.test();
         return null;
     }
 
@@ -46,5 +44,10 @@ public class StudentWorkflowImpl implements StudentWorkflow {
     public UpdateStudentResponse uploadStudentResume(String id, UpdateStudentRequest uploadStudentResume) {
         // TODO
         return null;
+    }
+
+    @Override
+    public void testDatabaseConnection() {
+        studentFirebase.test();
     }
 }

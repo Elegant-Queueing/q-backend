@@ -12,11 +12,13 @@ import java.util.HashMap;
 @Service
 public class StudentFirebaseImpl implements StudentFirebase {
 
+    // Use this method to test your firebase connection
+    @Override
     public void test() {
         Firestore dbFirestore = FirestoreClient.getFirestore();
         HashMap<String, String> map = new HashMap<>();
-        map.put("name", "TestName");
-        map.put("temp", "TestTemp");
+        String name = "TEST NAME";  // change this to your name when testing
+        map.put("name", name);
         ApiFuture<DocumentReference> collectionsApiFuture = dbFirestore.collection("test").add(map);
     }
 }
