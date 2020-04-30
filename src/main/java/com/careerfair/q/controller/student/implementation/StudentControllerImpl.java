@@ -49,7 +49,7 @@ public class StudentControllerImpl implements StudentController {
         return studentService.uploadStudentResume(id, uploadStudentResume);
     }
 
-    @GetMapping("/")
+    @GetMapping()
     @Override
     public String ping() {
         studentService.testDatabaseConnection();
