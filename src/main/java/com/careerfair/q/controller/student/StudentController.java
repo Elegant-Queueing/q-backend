@@ -1,13 +1,13 @@
-package com.careerfair.q.student.workflow;
+package com.careerfair.q.controller.student;
 
-import com.careerfair.q.student.workflow.request.AddStudentRequest;
-import com.careerfair.q.student.workflow.request.UpdateStudentRequest;
-import com.careerfair.q.student.workflow.response.AddStudentResponse;
-import com.careerfair.q.student.workflow.response.DeleteStudentResponse;
-import com.careerfair.q.student.workflow.response.GetStudentResponse;
-import com.careerfair.q.student.workflow.response.UpdateStudentResponse;
+import com.careerfair.q.service.student.request.AddStudentRequest;
+import com.careerfair.q.service.student.request.UpdateStudentRequest;
+import com.careerfair.q.service.student.response.AddStudentResponse;
+import com.careerfair.q.service.student.response.DeleteStudentResponse;
+import com.careerfair.q.service.student.response.GetStudentResponse;
+import com.careerfair.q.service.student.response.UpdateStudentResponse;
 
-public interface StudentWorkflow {
+public interface StudentController {
 
     /**
      *
@@ -48,6 +48,7 @@ public interface StudentWorkflow {
 
     /**
      *
+     * @return
      */
-    void testDatabaseConnection();
+    String ping();
 }

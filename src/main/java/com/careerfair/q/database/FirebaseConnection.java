@@ -1,6 +1,5 @@
-package com.careerfair.q.database.service.implementation;
+package com.careerfair.q.database;
 
-import com.careerfair.q.database.service.DatabaseService;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -11,7 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 @Service
-public class FirebaseService implements DatabaseService {
+public class FirebaseConnection {
 
     @PostConstruct
     public void init() throws IOException {

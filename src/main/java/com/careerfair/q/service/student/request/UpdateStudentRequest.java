@@ -1,4 +1,4 @@
-package com.careerfair.q.student.workflow.request;
+package com.careerfair.q.service.student.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

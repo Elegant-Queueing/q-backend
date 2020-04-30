@@ -1,6 +1,6 @@
-package com.careerfair.q.database.service.student.implementation;
+package com.careerfair.q.service.database.implementation;
 
-import com.careerfair.q.database.service.student.StudentFirebase;
+import com.careerfair.q.service.database.StudentFirebase;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;

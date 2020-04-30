@@ -1,4 +1,4 @@
-package com.careerfair.q.student.workflow.response;
+package com.careerfair.q.service.student.response;
 
 public class GetStudentResponse extends StudentResponse {
 }
