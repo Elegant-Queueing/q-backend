@@ -8,7 +8,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -23,7 +22,7 @@ public class RedisConfiguration {
 
     @Bean
     JedisConnectionFactory redisConnectionFactory() {
-        return new JedisConnectionFactory();
+        return new JedisConnectionFactory(new RedisStandaloneConfiguration(hostname, port));
     }
 
     @Bean
