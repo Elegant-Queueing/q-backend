@@ -1,4 +1,4 @@
-package com.careerfair.q.database.service.student;
+package com.careerfair.q.service.database;
 
 public interface StudentFirebase {
     /**
