@@ -1,4 +1,4 @@
 package com.careerfair.q.service.employee.request;
 
-public class AddStudentRequest {
+public class UpdateEmployeeRequest {
 }
