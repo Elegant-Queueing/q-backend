@@ -1,6 +1,6 @@
 package com.careerfair.q.service.queue;
 
-import com.careerfair.q.enums.Role;
+import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.response.*;
 
 public interface QueueService {

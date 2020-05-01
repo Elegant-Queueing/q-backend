@@ -1,8 +1,8 @@
 package com.careerfair.q.service.queue.response;
 
-import com.careerfair.q.enums.QueueType;
-import com.careerfair.q.enums.Role;
-import com.careerfair.q.model.Employee;
+import com.careerfair.q.util.enums.QueueType;
+import com.careerfair.q.util.enums.Role;
+import com.careerfair.q.model.db.Employee;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.Timestamp;

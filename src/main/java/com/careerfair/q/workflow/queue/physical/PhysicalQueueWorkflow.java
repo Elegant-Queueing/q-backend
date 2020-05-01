@@ -1,6 +1,6 @@
 package com.careerfair.q.workflow.queue.physical;
 
-import com.careerfair.q.enums.Role;
+import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
 

@@ -1,6 +1,6 @@
 package com.careerfair.q.service.queue.implementation;
 
-import com.careerfair.q.enums.Role;
+import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.workflow.queue.physical.PhysicalQueueWorkflow;
@@ -52,8 +52,8 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public AddQueueResponse addQueue(String companyId, String employeeId, Role role) {
-        // TODO
-        return null;
+        // TODO: what happens to virtualQueueWorkflow.addQueue?
+        return new AddQueueResponse(physicalQueueWorkflow.addQueue(companyId, employeeId, role));
     }
 
     @Override

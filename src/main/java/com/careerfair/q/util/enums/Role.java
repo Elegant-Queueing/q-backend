@@ -1,10 +1,10 @@
-package com.careerfair.q.enums;
+package com.careerfair.q.util.enums;
 
 public enum Role {
 
-    SWE("Software Engineering"),
-    PM("Product Management"),
-    DS("Data Science");
+    SWE("Software_Engineering"),
+    PM("Product_Management"),
+    DS("Data_Science");
 
     private final String role;
 

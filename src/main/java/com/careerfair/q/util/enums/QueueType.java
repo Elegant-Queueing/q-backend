@@ -1,4 +1,4 @@
-package com.careerfair.q.enums;
+package com.careerfair.q.util.enums;
 
 public enum QueueType {
     VIRTUAL, WINDOW, PHYSICAL

@@ -1,6 +1,7 @@
 package com.careerfair.q.configuration.redis;
 
-import com.careerfair.q.model.Student;
+import com.careerfair.q.util.enums.Role;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,10 +27,23 @@ public class RedisConfiguration {
     }
 
     @Bean
-    RedisTemplate<String, Student> studentRedisTemplate() {
-        RedisTemplate<String, Student> redisTemplate = new RedisTemplate<>();
+    @Qualifier("redisVirtualQueueTemplate")
+    RedisTemplate<String, Role> redisVirtualQueueTemplate() {
+        RedisTemplate<String, Role> redisTemplate = new RedisTemplate<>();
+        return configureTemplate(redisTemplate);
+    }
+
+    @Bean
+    @Qualifier("redisEmployeeTemplate")
+    RedisTemplate<String, String> redisEmployeeTemplate() {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+        return configureTemplate(redisTemplate);
+    }
+
+    private <K, V> RedisTemplate<K, V> configureTemplate(RedisTemplate<K, V> redisTemplate) {
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         return redisTemplate;
     }
+
 }
