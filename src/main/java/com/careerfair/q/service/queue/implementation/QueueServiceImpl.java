@@ -16,56 +16,67 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
+        // TODO
         return null;
     }
 
     @Override
     public GetWaitTimeResponse getAllCompaniesWaitTime(Role role) {
+        // TODO
         return null;
     }
 
     @Override
     public JoinQueueResponse joinVirtualQueue(String companyId, String studentId, Role role) {
+        // TODO
         return null;
     }
 
     @Override
     public JoinQueueResponse joinEmployeeQueue(String companyId, String employeeId, String studentId, Role role) {
+        // TODO
         return null;
     }
 
     @Override
     public LeaveQueueResponse leaveQueue(String companyId, String studentId, Role role) {
+        // TODO
         return null;
     }
 
     @Override
-    public GetQueueStatusResponse getQueueStatusStatus(String studentId) {
+    public GetQueueStatusResponse getQueueStatus(String studentId) {
+        // TODO
         return null;
     }
 
     @Override
     public AddQueueResponse addQueue(String companyId, String employeeId, Role role) {
+        // TODO
         return null;
     }
 
     @Override
     public GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId) {
+        // TODO
         return null;
     }
 
     @Override
     public PauseQueueResponse pauseQueue(String companyId, String employeeId) {
+        // TODO
         return null;
     }
 
     @Override
     public RemoveStudentResponse removeStudent(String employeeId, String studentId) {
+        // TODO
         return null;
     }
 
     @Override
     public RemoveStudentResponse skipStudent(String employeeId, String studentId) {
+        // TODO
         return null;
     }
 }

@@ -53,7 +53,7 @@ public interface QueueService {
      * @param studentId
      * @return
      */
-    GetQueueStatusResponse getQueueStatusStatus(String studentId);
+    GetQueueStatusResponse getQueueStatus(String studentId);
 
     /**
      *

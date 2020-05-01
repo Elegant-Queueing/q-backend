@@ -53,7 +53,7 @@ public class QueueControllerImpl implements QueueController {
     @GetMapping("/status/student-id/{student-id}")
     @Override
     public GetQueueStatusResponse getQueueStatus(@PathVariable("student-id") String studentId) {
-        return queueService.getQueueStatusStatus(studentId);
+        return queueService.getQueueStatus(studentId);
     }
 
     @PostMapping("/add/company-id/{company-id}/employee-id/{employee-id}/role/{role}")
