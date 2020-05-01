@@ -2,55 +2,70 @@ package com.careerfair.q.service.queue.implementation;
 
 import com.careerfair.q.enums.Role;
 import com.careerfair.q.service.queue.QueueService;
-import com.careerfair.q.service.queue.response.PhysicalQueueDataResponse;
-import com.careerfair.q.service.queue.response.RealTimeStatusResponse;
+import com.careerfair.q.service.queue.response.*;
+import com.careerfair.q.workflow.queue.physical.PhysicalQueueWorkflow;
+import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.Map;
-
+@Service
 public class QueueServiceImpl implements QueueService {
 
-    @Override
-    public int getWaitTime(String companyId, Role role) {
-        return 0;
-    }
+    @Autowired private VirtualQueueWorkflow virtualQueueWorkflow;
+    @Autowired private PhysicalQueueWorkflow physicalQueueWorkflow;
 
     @Override
-    public Map<String, Integer> getWaitTime(Role role) {
+    public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
         return null;
     }
 
     @Override
-    public RealTimeStatusResponse getRealTimeStatus(String studentId) {
+    public GetWaitTimeResponse getAllCompaniesWaitTime(Role role) {
         return null;
     }
 
     @Override
-    public RealTimeStatusResponse joinVirtualQueue(String companyId, String studentId, Role role) {
+    public JoinQueueResponse joinVirtualQueue(String companyId, String studentId, Role role) {
         return null;
     }
 
     @Override
-    public RealTimeStatusResponse joinPhysicalQueue(String employeeId, String studentId) {
+    public JoinQueueResponse joinEmployeeQueue(String companyId, String employeeId, String studentId, Role role) {
         return null;
     }
 
     @Override
-    public PhysicalQueueDataResponse addQueue(String companyId, String employeeId, Role role) {
+    public LeaveQueueResponse leaveQueue(String companyId, String studentId, Role role) {
         return null;
     }
 
     @Override
-    public PhysicalQueueDataResponse getPhysicalQueueData(String employeeId, Role role) {
+    public GetQueueStatusResponse getQueueStatusStatus(String studentId) {
         return null;
     }
 
     @Override
-    public PhysicalQueueDataResponse pauseQueue(String companyId, String employeeId) {
+    public AddQueueResponse addQueue(String companyId, String employeeId, Role role) {
         return null;
     }
 
     @Override
-    public PhysicalQueueDataResponse removeFromQueue(String employeeId, String studentId) {
+    public GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId) {
+        return null;
+    }
+
+    @Override
+    public PauseQueueResponse pauseQueue(String companyId, String employeeId) {
+        return null;
+    }
+
+    @Override
+    public RemoveStudentResponse removeStudent(String employeeId, String studentId) {
+        return null;
+    }
+
+    @Override
+    public RemoveStudentResponse skipStudent(String employeeId, String studentId) {
         return null;
     }
 }

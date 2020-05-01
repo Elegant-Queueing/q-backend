@@ -1,29 +1,30 @@
 package com.careerfair.q.service.queue;
 
 import com.careerfair.q.enums.Role;
-import com.careerfair.q.service.queue.response.PhysicalQueueDataResponse;
-import com.careerfair.q.service.queue.response.RealTimeStatusResponse;
-
-import java.util.Map;
+import com.careerfair.q.service.queue.response.*;
 
 public interface QueueService {
 
-    int getWaitTime(String companyId, Role role);
+    GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role);
 
-    Map<String, Integer> getWaitTime(Role role);
+    GetWaitTimeResponse getAllCompaniesWaitTime(Role role);
 
-    RealTimeStatusResponse getRealTimeStatus(String studentId);
+    JoinQueueResponse joinVirtualQueue(String companyId, String studentId, Role role);
 
-    RealTimeStatusResponse joinVirtualQueue(String companyId, String studentId, Role role);
+    JoinQueueResponse joinEmployeeQueue(String companyId, String employeeId, String studentId, Role role);
 
-    RealTimeStatusResponse joinPhysicalQueue(String employeeId, String studentId);
+    LeaveQueueResponse leaveQueue(String companyId, String studentId, Role role);
 
-    PhysicalQueueDataResponse addQueue(String companyId, String employeeId, Role role);
+    GetQueueStatusResponse getQueueStatusStatus(String studentId);
 
-    PhysicalQueueDataResponse getPhysicalQueueData(String employeeId, Role role);
+    AddQueueResponse addQueue(String companyId, String employeeId, Role role);
 
-    PhysicalQueueDataResponse pauseQueue(String companyId, String employeeId);
+    GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId);
 
-    PhysicalQueueDataResponse removeFromQueue(String employeeId, String studentId);
+    PauseQueueResponse pauseQueue(String companyId, String employeeId);
+
+    RemoveStudentResponse removeStudent(String employeeId, String studentId);
+
+    RemoveStudentResponse skipStudent(String employeeId, String studentId);
 
 }
