@@ -52,7 +52,6 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public AddQueueResponse addQueue(String companyId, String employeeId, Role role) {
-        // TODO: what happens to virtualQueueWorkflow.addQueue?
         return new AddQueueResponse(physicalQueueWorkflow.addQueue(companyId, employeeId, role));
     }
 
