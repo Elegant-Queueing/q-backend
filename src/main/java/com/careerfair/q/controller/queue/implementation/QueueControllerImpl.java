@@ -76,17 +76,17 @@ public class QueueControllerImpl implements QueueController {
         return queueService.pauseQueue(companyId, employeeId);
     }
 
+    @PostMapping("/register-student/employee-id/{employee-id}/student-id/{student-id}")
+    @Override
+    public RemoveStudentResponse registerStudent(@PathVariable("employee-id") String employeeId,
+                                               @PathVariable("student-id") String studentId) {
+        return queueService.registerStudent(employeeId, studentId);
+    }
+
     @DeleteMapping("/remove-student/employee-id/{employee-id}/student-id/{student-id}")
     @Override
     public RemoveStudentResponse removeStudent(@PathVariable("employee-id") String employeeId,
                                                @PathVariable("student-id") String studentId) {
         return queueService.removeStudent(employeeId, studentId);
-    }
-
-    @DeleteMapping("/skip-student/employee-id/{employee-id}/student-id/{student-id}")
-    @Override
-    public RemoveStudentResponse skipStudent(@PathVariable("employee-id") String employeeId,
-                                             @PathVariable("student-id") String studentId) {
-        return queueService.skipStudent(employeeId, studentId);
     }
 }

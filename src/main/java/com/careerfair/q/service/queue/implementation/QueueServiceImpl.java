@@ -69,13 +69,13 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
-    public RemoveStudentResponse removeStudent(String employeeId, String studentId) {
+    public RemoveStudentResponse registerStudent(String employeeId, String studentId) {
         // TODO
         return null;
     }
 
     @Override
-    public RemoveStudentResponse skipStudent(String employeeId, String studentId) {
+    public RemoveStudentResponse removeStudent(String employeeId, String studentId) {
         // TODO
         return null;
     }

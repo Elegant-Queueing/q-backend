@@ -80,18 +80,18 @@ public interface QueueController {
     PauseQueueResponse pauseQueue(String companyId, String employeeId);
 
     /**
-     *
+     * Should be used when an employee is done talking to a student
+     * @param employeeId
+     * @param studentId
+     * @return
+     */
+    RemoveStudentResponse registerStudent(String employeeId, String studentId);
+
+    /**
+     * Should be used when an employee wants to skip a student
      * @param employeeId
      * @param studentId
      * @return
      */
     RemoveStudentResponse removeStudent(String employeeId, String studentId);
-
-    /**
-     *
-     * @param employeeId
-     * @param studentId
-     * @return
-     */
-    RemoveStudentResponse skipStudent(String employeeId, String studentId);
 }

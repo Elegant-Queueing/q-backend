@@ -48,7 +48,7 @@ public interface PhysicalQueueWorkflow {
      * @param studentId
      * @return
      */
-    EmployeeQueueData removeStudent(String employeeId, String studentId);
+    EmployeeQueueData registerStudent(String employeeId, String studentId);
 
     /**
      *
@@ -56,7 +56,7 @@ public interface PhysicalQueueWorkflow {
      * @param studentId
      * @return
      */
-    EmployeeQueueData skipStudent(String employeeId, String studentId);
+    EmployeeQueueData removeStudent(String employeeId, String studentId);
 
     /**
      *

@@ -34,13 +34,13 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
     }
 
     @Override
-    public EmployeeQueueData removeStudent(String employeeId, String studentId) {
+    public EmployeeQueueData registerStudent(String employeeId, String studentId) {
         // TODO
         return null;
     }
 
     @Override
-    public EmployeeQueueData skipStudent(String employeeId, String studentId) {
+    public EmployeeQueueData removeStudent(String employeeId, String studentId) {
         // TODO
         return null;
     }

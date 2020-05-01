@@ -85,7 +85,7 @@ public interface QueueService {
      * @param studentId
      * @return
      */
-    RemoveStudentResponse removeStudent(String employeeId, String studentId);
+    RemoveStudentResponse registerStudent(String employeeId, String studentId);
 
     /**
      *
@@ -93,6 +93,6 @@ public interface QueueService {
      * @param studentId
      * @return
      */
-    RemoveStudentResponse skipStudent(String employeeId, String studentId);
+    RemoveStudentResponse removeStudent(String employeeId, String studentId);
 
 }
