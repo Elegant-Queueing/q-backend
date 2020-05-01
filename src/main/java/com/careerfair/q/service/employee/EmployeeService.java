@@ -36,12 +36,4 @@ public interface EmployeeService {
      * @return
      */
     AddEmployeeResponse addEmployee(AddEmployeeRequest addEmployeeRequest);
-
-    /**
-     *
-     * @param id
-     * @param uploadEmployeeResume
-     * @return
-     */
-    UpdateEmployeeResponse uploadEmployeeResume(String id, UpdateEmployeeRequest uploadEmployeeResume);
 }
