@@ -4,15 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddQueueResponse {
 
-    @JsonProperty("companies")
-    private final List<String> companies;
-
-    @JsonProperty("wait-times")
-    private final List<Integer> waitTimes;
+    @JsonProperty("data")
+    private final EmployeeQueueData employeeQueueData;
 }
