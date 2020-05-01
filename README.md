@@ -19,3 +19,6 @@ Assuming you've already cloned the repo:
 - Run the Spring server and open Postman. We will now test the Firebase connection.
 - Make an API call to the student/ endpoint. It should return 'Pong'. If you receive this, then that means that the Spring setup is fine and you're calling the right endpoint to test the connection.
 - Open the test collection. You should now see a document with the name that you gave in it. If so, the test passed, otherwise, it failed.
+
+## Other setups
+- Install the Lombok plugin so that the @Data tag works
