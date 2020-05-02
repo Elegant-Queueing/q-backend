@@ -7,12 +7,14 @@ import com.careerfair.q.service.queue.response.QueueStatus;
 public interface PhysicalQueueWorkflow {
 
     /**
+     * Adds the given student to the given employee's queue associated with the given company and
+     * role
      *
-     * @param companyId
-     * @param employeeId
-     * @param studentId
-     * @param role
-     * @return
+     * @param companyId id of the company that the employee is associated with
+     * @param employeeId id of the employee whose queue to join
+     * @param studentId id of the student requesting to join
+     * @param role role for which the student is requesting to join
+     * @return QueueStatus
      */
     QueueStatus joinQueue(String companyId, String employeeId, String studentId, Role role);
 
@@ -20,10 +22,9 @@ public interface PhysicalQueueWorkflow {
      *
      * @param companyId
      * @param studentId
-     * @param role
      * @return
      */
-    QueueStatus leaveQueue(String companyId, String studentId, Role role);
+    QueueStatus leaveQueue(String companyId, String employeeId, String studentId);
 
     /**
      * Add the given employee's queue associated with the given company and given role to the fair

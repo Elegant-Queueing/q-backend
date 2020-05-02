@@ -30,14 +30,17 @@ public interface QueueService {
     JoinQueueResponse joinVirtualQueue(String companyId, String studentId, Role role);
 
     /**
+     * Adds the given student to the given employee's queue associated with the given company and
+     * role
      *
-     * @param companyId
-     * @param employeeId
-     * @param studentId
-     * @param role
-     * @return
+     * @param companyId id of the company that the employee is associated with
+     * @param employeeId id of the employee whose queue to join
+     * @param studentId id of the student requesting to join
+     * @param role role for which the student is requesting to join
+     * @return JoinQueueResponse
      */
-    JoinQueueResponse joinEmployeeQueue(String companyId, String employeeId, String studentId, Role role);
+    JoinQueueResponse joinEmployeeQueue(String companyId, String employeeId, String studentId,
+                                        Role role);
 
     /**
      *

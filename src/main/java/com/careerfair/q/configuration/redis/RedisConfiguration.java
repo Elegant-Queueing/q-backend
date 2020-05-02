@@ -12,8 +12,6 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.util.UUID;
-
 @Configuration
 @PropertySource(value = "application.properties")
 public class RedisConfiguration {
@@ -30,20 +28,20 @@ public class RedisConfiguration {
     }
 
     @Bean
-    @Qualifier("redisCompanyTemplate")
-    RedisTemplate<String, Role> redisCompanyTemplate() {
+    @Qualifier("companyRedisTemplate")
+    RedisTemplate<String, Role> companyRedisTemplate() {
         return configureTemplate();
     }
 
     @Bean
-    @Qualifier("redisEmployeeTemplate")
-    RedisTemplate<String, String> redisEmployeeTemplate() {
+    @Qualifier("employeeRedisTemplate")
+    RedisTemplate<String, String> employeeRedisTemplate() {
         return configureTemplate();
     }
 
     @Bean
-    @Qualifier("redisQueueTemplate")
-    RedisTemplate<String, Student> redisQueueTemplate() {
+    @Qualifier("queueRedisTemplate")
+    RedisTemplate<String, Student> queueRedisTemplate() {
         return configureTemplate();
     }
 

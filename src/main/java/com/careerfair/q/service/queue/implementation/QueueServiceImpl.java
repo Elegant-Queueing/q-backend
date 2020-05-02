@@ -33,9 +33,10 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
-    public JoinQueueResponse joinEmployeeQueue(String companyId, String employeeId, String studentId, Role role) {
-        // TODO
-        return null;
+    public JoinQueueResponse joinEmployeeQueue(String companyId, String employeeId,
+                                               String studentId, Role role) {
+        return new JoinQueueResponse(physicalQueueWorkflow.joinQueue(companyId, employeeId,
+                studentId, role));
     }
 
     @Override
@@ -57,7 +58,8 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId) {
-        return new GetEmployeeQueueDataResponse(physicalQueueWorkflow.getEmployeeQueueData(employeeId));
+        return new GetEmployeeQueueDataResponse(physicalQueueWorkflow.getEmployeeQueueData(
+                employeeId));
     }
 
     @Override
@@ -74,7 +76,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public RemoveStudentResponse removeStudent(String employeeId, String studentId) {
-        // TODO
-        return null;
+        return new RemoveStudentResponse(physicalQueueWorkflow.removeStudent(employeeId,
+                studentId));
     }
 }

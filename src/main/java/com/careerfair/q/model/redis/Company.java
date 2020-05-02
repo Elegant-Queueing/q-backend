@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Data
-public class VirtualQueue implements Serializable {
+public class Company implements Serializable {
     private final String virtualQueueId;
     private final Set<String> employeeIds;
 }

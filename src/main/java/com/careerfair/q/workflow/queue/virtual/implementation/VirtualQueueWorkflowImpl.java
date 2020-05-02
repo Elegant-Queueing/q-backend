@@ -1,6 +1,5 @@
 package com.careerfair.q.workflow.queue.virtual.implementation;
 
-import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
@@ -17,12 +16,6 @@ public class VirtualQueueWorkflowImpl implements VirtualQueueWorkflow {
 
     @Override
     public QueueStatus leaveQueue(String companyId, String studentId, Role role) {
-        // TODO
-        return null;
-    }
-
-    @Override
-    public EmployeeQueueData addQueue(String companyId, String employeeId, Role role) {
         // TODO
         return null;
     }

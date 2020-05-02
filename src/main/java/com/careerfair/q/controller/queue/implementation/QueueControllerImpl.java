@@ -4,7 +4,6 @@ import com.careerfair.q.controller.queue.QueueController;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.response.*;
-import com.careerfair.q.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
