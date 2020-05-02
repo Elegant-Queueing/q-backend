@@ -196,6 +196,13 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
         }
     }
 
+    /**
+     * Gets and returns index of the given student in the given queue
+     *
+     * @param studentId id of the student to find in the queue
+     * @param queue queue to find the student in
+     * @return int position of the student in the queue. -1 if not present
+     */
     private int getStudentIndexInQueue(String studentId, List<Student> queue) {
         List<String> studentIdsInWindowQueue = queue.stream()
                 .map(Student::getId)
