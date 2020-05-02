@@ -47,7 +47,7 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
         Student student = studentsInWindowQueue.get(positionInWindowQueue);
         queueRedisTemplate.opsForList().remove(employee.getWindowQueueId(), 1, student);
 
-        if (student.getJoinedWindowQueueAt().getSeconds() + WINDOW > Timestamp.now().getSeconds()) {
+        if (student.getJoinedWindowQueueAt().getSeconds() + WINDOW < Timestamp.now().getSeconds()) {
             throw new InvalidRequestException("Student with student id=" + studentId +
                     " did not scan QR code in time. Student has been removed from queue");
         }
@@ -102,25 +102,12 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
 
     @Override
     public EmployeeQueueData removeStudent(String employeeId, String studentId) {
-        checkEmployeeExists(employeeId);
+        removeFirstStudentInQueue(employeeId, studentId);
 
         Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
                 employeeId);
         assert employee != null;
 
-        List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
-                .range(employee.getPhysicalQueueId(), 0L, -1L);
-        assert studentsInPhysicalQueue != null;
-
-        int position = getStudentIndexInQueue(studentId, studentsInPhysicalQueue);
-        checkStudentPresentInQueue(employeeId, studentId, position);
-
-        if (position != 0) {
-            throw new InvalidRequestException("Student with student id=" + studentId +
-                    " is not at the head of the queue of employee with employee id=" + employeeId);
-        }
-
-        queueRedisTemplate.opsForList().leftPop(employee.getPhysicalQueueId());
         List<Student> studentsLeftInQueue = queueRedisTemplate.opsForList()
                 .range(employee.getPhysicalQueueId(), 0L, -1L);
 
@@ -194,6 +181,35 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
             throw new InvalidRequestException("Student with student id=" + studentId +
                     " is not present in the queue of employee with employee id=" + employeeId);
         }
+    }
+
+    /**
+     * Removes the first student in the employee's queue
+     *
+     * @param employeeId id of the employee from whose queue the student is to be removed
+     * @param studentId id of the student to be removed
+     */
+    private void removeFirstStudentInQueue(String employeeId, String studentId) {
+        checkEmployeeExists(employeeId);
+
+        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
+                employeeId);
+        assert employee != null;
+
+        List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
+                .range(employee.getPhysicalQueueId(), 0L, -1L);
+        assert studentsInPhysicalQueue != null;
+
+        int position = getStudentIndexInQueue(studentId, studentsInPhysicalQueue);
+        checkStudentPresentInQueue(employee.getId(), studentId, position);
+
+        if (position != 0) {
+            throw new InvalidRequestException("Student with student id=" + studentId +
+                    " is not at the head of the queue of employee with employee id=" +
+                    employee.getId());
+        }
+
+        queueRedisTemplate.opsForList().leftPop(employee.getPhysicalQueueId());
     }
 
     /**
