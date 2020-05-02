@@ -57,8 +57,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId) {
-        // TODO
-        return null;
+        return new GetEmployeeQueueDataResponse(physicalQueueWorkflow.getEmployeeQueueData(employeeId));
     }
 
     @Override

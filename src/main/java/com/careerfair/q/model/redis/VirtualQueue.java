@@ -8,6 +8,6 @@ import java.util.UUID;
 
 @Data
 public class VirtualQueue implements Serializable {
-    private final UUID virtualQueueId;
+    private final String virtualQueueId;
     private final Set<String> employeeIds;
 }

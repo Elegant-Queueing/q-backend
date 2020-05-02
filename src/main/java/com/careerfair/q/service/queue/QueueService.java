@@ -56,18 +56,20 @@ public interface QueueService {
     GetQueueStatusResponse getQueueStatus(String studentId);
 
     /**
+     * Add the given employee's queue associated with the given company and given role to the fair
      *
-     * @param companyId
-     * @param employeeId
-     * @param role
-     * @return
+     * @param companyId id of the company associated with the employee
+     * @param employeeId id of the employee whose queue is to be added
+     * @param role role associated with the given employee
+     * @return AddQueueResponse
      */
     AddQueueResponse addQueue(String companyId, String employeeId, Role role);
 
     /**
+     * Returns the data for the given employee's queue
      *
-     * @param employeeId
-     * @return
+     * @param employeeId id of employee whose queue's data is to be retrieved
+     * @return GetEmployeeQueueDataResponse
      */
     GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId);
 

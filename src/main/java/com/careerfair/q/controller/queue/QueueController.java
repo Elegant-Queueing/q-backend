@@ -66,9 +66,10 @@ public interface QueueController {
     AddQueueResponse addQueue(String companyId, String employeeId, Role role);
 
     /**
+     * Returns the data for the given employee's queue
      *
-     * @param employeeId
-     * @return
+     * @param employeeId id of employee whose queue's data is to be retrieved
+     * @return GetEmployeeQueueDataResponse
      */
     GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId);
 
