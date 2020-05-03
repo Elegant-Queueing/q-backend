@@ -1,5 +1,6 @@
 package com.careerfair.q.workflow.queue.window;
 
+import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.Role;
 
@@ -19,12 +20,12 @@ public interface WindowQueueWorkflow {
      * @param studentId
      * @return
      */
-    boolean removeFromQueue(String employeeId, String studentId);
+    Student removeFromQueue(String employeeId, String studentId);
 
     /**
      *
      * @param employeeId
      * @return
      */
-    int size(String employeeId);
+    Long size(String employeeId);
 }

@@ -85,18 +85,20 @@ public interface QueueService {
     PauseQueueResponse pauseQueue(String companyId, String employeeId);
 
     /**
+     * Registers that the given student has completed their talk with the given employee
      *
-     * @param employeeId
-     * @param studentId
-     * @return
+     * @param employeeId id of the employee who the student has talked to
+     * @param studentId id of the student
+     * @return RemoveStudentResponse
      */
     RemoveStudentResponse registerStudent(String employeeId, String studentId);
 
     /**
+     * Removes the given student from the given employee's queue
      *
-     * @param employeeId
-     * @param studentId
-     * @return
+     * @param employeeId id of the employee from whose queue the student is to be removed
+     * @param studentId id of the student being removed
+     * @return RemoveStudentResponse
      */
     RemoveStudentResponse removeStudent(String employeeId, String studentId);
 

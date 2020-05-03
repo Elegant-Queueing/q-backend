@@ -1,13 +1,16 @@
 package com.careerfair.q.workflow.queue.physical.implementation;
 
 import com.careerfair.q.model.redis.Student;
+import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Company;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
+import com.careerfair.q.workflow.queue.AbstractQueueWorkflow;
 import com.careerfair.q.workflow.queue.physical.PhysicalQueueWorkflow;
 
 import com.google.cloud.Timestamp;
@@ -16,42 +19,37 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
 
 @Component
-public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
+public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
+        implements PhysicalQueueWorkflow {
 
     @Autowired private RedisTemplate<String, Role> companyRedisTemplate;
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
 
-    private static final String EMPLOYEE_CACHE_NAME = "employees";
-    private static final int WINDOW = 300;  // in seconds
+    @Autowired private StudentFirebase studentFirebase;
 
     @Override
-    public QueueStatus joinQueue(String companyId, String employeeId, String studentId, Role role) {
+    public QueueStatus joinQueue(String employeeId, Role role, Student student) {
         Employee employee = getEmployeeWithId(employeeId);
-        checkEmployeeHasQueueOpen(companyId, employeeId, role);
+        String physicalQueueId = employee.getPhysicalQueueId();
+        List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
+                .range(physicalQueueId, 0L, -1L);
+        assert studentsInPhysicalQueue != null;
 
-        List<Student> studentsInWindowQueue = queueRedisTemplate.opsForList()
-                .range(employee.getWindowQueueId(), 0L, -1L);
-        assert studentsInWindowQueue != null;
-
-        int positionInWindowQueue = getStudentIndexInQueue(employeeId, studentId,
-                studentsInWindowQueue);
-
-        Student student = studentsInWindowQueue.get(positionInWindowQueue);
-        queueRedisTemplate.opsForList().remove(employee.getWindowQueueId(), 1, student);
-
-        if (student.getJoinedWindowQueueAt().getSeconds() + WINDOW < Timestamp.now().getSeconds()) {
-            throw new InvalidRequestException("Student with student id=" + studentId +
-                    " did not scan QR code in time. Student has been removed from queue");
+        if (getStudentIndexInQueue(student.getId(), studentsInPhysicalQueue) != -1) {
+            throw new InvalidRequestException("Student with student id=" + student.getId() +
+                    " is already present in the queue of the employee with employee id=" +
+                    employeeId);
         }
 
-        queueRedisTemplate.opsForList().rightPush(employee.getPhysicalQueueId(), student);
-        Long positionInPhysicalQueue = queueRedisTemplate.opsForList()
-                .size(employee.getPhysicalQueueId());
-        assert positionInPhysicalQueue != null;
+        student.setJoinedPhysicalQueueAt(Timestamp.now());
+        queueRedisTemplate.opsForList().rightPush(physicalQueueId, student);
+
+        Long positionInPhysicalQueue = size(employeeId);
         int waitTime = (int) (calcEmployeeAverageTime(employee) * positionInPhysicalQueue);
 
         return new QueueStatus(employee.getPhysicalQueueId(), QueueType.PHYSICAL, role,
@@ -72,7 +70,7 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
         }
 
         employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId,
-                createRedisEmployee(employeeId));
+                createRedisEmployee(companyId, employeeId));
 
         Company company = (Company) companyRedisTemplate.opsForHash().get(companyId, role);
         if (company == null) {
@@ -92,17 +90,26 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
 
     @Override
     public EmployeeQueueData registerStudent(String employeeId, String studentId) {
-        // TODO
-        return null;
+        Employee employee = getEmployeeWithId(employeeId);
+        Student student = removeFirstStudentInQueue(employee, studentId);
+
+        if (!studentFirebase.registerStudent(student, employee)) {
+            throw new FirebaseException("Unexpected error in firebase");
+        }
+
+        updateRedisEmployee(employee, student);
+        employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
+
+        List<Student> studentsLeftInQueue = queueRedisTemplate.opsForList()
+                .range(employee.getPhysicalQueueId(), 0L, -1L);
+        return new EmployeeQueueData(studentsLeftInQueue, employee.getNumRegisteredStudents(),
+                calcEmployeeAverageTime(employee));
     }
 
     @Override
     public EmployeeQueueData removeStudent(String employeeId, String studentId) {
-        removeFirstStudentInQueue(employeeId, studentId);
-
-        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
-                employeeId);
-        assert employee != null;
+        Employee employee = getEmployeeWithId(employeeId);
+        removeFirstStudentInQueue(employee, studentId);
 
         List<Student> studentsLeftInQueue = queueRedisTemplate.opsForList()
                 .range(employee.getPhysicalQueueId(), 0L, -1L);
@@ -123,90 +130,36 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
         return new EmployeeQueueData(students, numRegisteredStudents, averageTimePerStudent);
     }
 
+    @Override
+    public Long size(String employeeId) {
+        Employee employee = getEmployeeWithId(employeeId);
+        return queueRedisTemplate.opsForList().size(employee.getPhysicalQueueId());
+    }
+
     /**
      * Removes the first student in the employee's queue
      *
-     * @param employeeId id of the employee from whose queue the student is to be removed
+     * @param employee employee from whose queue the student is to be removed
      * @param studentId id of the student to be removed
      */
-    private void removeFirstStudentInQueue(String employeeId, String studentId) {
-        Employee employee = getEmployeeWithId(employeeId);
-
+    private Student removeFirstStudentInQueue(Employee employee, String studentId) {
         List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
                 .range(employee.getPhysicalQueueId(), 0L, -1L);
         assert studentsInPhysicalQueue != null;
 
-        int position = getStudentIndexInQueue(employeeId, studentId, studentsInPhysicalQueue);
+        int position = getStudentIndexInQueue(studentId, studentsInPhysicalQueue);
 
-        if (position != 0) {
+        if (position == -1) {
+            throw new InvalidRequestException("Student with student id=" + studentId +
+                    " is not present in the queue of employee with employee id=" +
+                    employee.getId());
+        } else if (position != 0) {
             throw new InvalidRequestException("Student with student id=" + studentId +
                     " is not at the head of the queue of employee with employee id=" +
                     employee.getId());
         }
 
-        queueRedisTemplate.opsForList().leftPop(employee.getPhysicalQueueId());
-    }
-
-    /**
-     * Checks and returns whether the employee is present at the career fair
-     *
-     * @param employeeId id of the employee to check for
-     * @return Employee
-     * @throws InvalidRequestException throws the exception if the employee is not present at the
-     *      career fair
-     */
-    private Employee getEmployeeWithId(String employeeId) throws InvalidRequestException {
-        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
-                employeeId);
-        if (employee == null) {
-            throw new InvalidRequestException("No such employee with employee id=" + employeeId +
-                    " exists");
-        }
-        return employee;
-    }
-
-    /**
-     * Checks if the given employee is associated with the given company for the given role
-     *
-     * @param companyId id of the company associated with the employee
-     * @param employeeId id of the employee
-     * @param role role for which the employee is recruiting
-     * @throws InvalidRequestException throws the exception if the company is not associated with
-     *      employee for the given role
-     */
-    private void checkEmployeeHasQueueOpen(String companyId, String employeeId, Role role)
-            throws InvalidRequestException {
-        Company company = (Company) companyRedisTemplate.opsForHash().get(companyId, role);
-        if (company == null || !company.getEmployeeIds().contains(employeeId)) {
-            throw new InvalidRequestException("No company with company id=" + companyId +
-                    " is associated with employee with employee id=" + employeeId +
-                    " for role=" + role);
-        }
-    }
-
-    /**
-     * Gets and returns index of the given student in the given queue
-     *
-     * @param employeeId id of the employee in whose queue the student is present
-     * @param studentId id of the student to find in the queue
-     * @param queue queue to find the student in
-     * @return int position of the student in the queue. -1 if not present
-     * @throws InvalidRequestException throws the exception if the student is not present in the
-     *      employee's queue
-     */
-    private int getStudentIndexInQueue(String employeeId, String studentId, List<Student> queue)
-            throws InvalidRequestException {
-        List<String> studentIdsInWindowQueue = queue.stream()
-                .map(Student::getId)
-                .collect(Collectors.toList());
-        int index = studentIdsInWindowQueue.indexOf(studentId);
-        
-        if (index == -1) {
-            throw new InvalidRequestException("Student with student id=" + studentId +
-                    " is not present in the queue of employee with employee id=" + employeeId);
-        }
-        
-        return index;
+        return queueRedisTemplate.opsForList().leftPop(employee.getPhysicalQueueId());
     }
 
     /**
@@ -225,8 +178,22 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
      * @param employeeId id of the newly created employee
      * @return Employee
      */
-    private Employee createRedisEmployee(String employeeId) {
-        return new Employee(employeeId, generateRandomId(), generateRandomId(), 0, 0);
+    private Employee createRedisEmployee(String companyId, String employeeId) {
+        return new Employee(employeeId, companyId, generateRandomId(), generateRandomId());
+    }
+
+    /**
+     * Updates and returns an employee to be stored in Redis
+     *
+     * @param employee employee to update
+     * @param studentRegistered student to register with the employee
+     * @return Employee
+     */
+    private void updateRedisEmployee(Employee employee, Student studentRegistered) {
+        int timeSpent = (int) (Timestamp.now().getSeconds() -
+                studentRegistered.getJoinedWindowQueueAt().getSeconds());
+        employee.setNumRegisteredStudents(employee.getNumRegisteredStudents() + 1);
+        employee.setTotalTimeSpent(employee.getTotalTimeSpent() + timeSpent);
     }
 
     /**

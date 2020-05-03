@@ -1,5 +1,6 @@
 package com.careerfair.q.workflow.queue.physical;
 
+import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
@@ -10,13 +11,12 @@ public interface PhysicalQueueWorkflow {
      * Adds the given student to the given employee's queue associated with the given company and
      * role
      *
-     * @param companyId id of the company that the employee is associated with
      * @param employeeId id of the employee whose queue to join
-     * @param studentId id of the student requesting to join
      * @param role role for which the student is requesting to join
+     * @param student student requesting to join
      * @return QueueStatus
      */
-    QueueStatus joinQueue(String companyId, String employeeId, String studentId, Role role);
+    QueueStatus joinQueue(String employeeId, Role role, Student student);
 
     /**
      *
@@ -45,18 +45,20 @@ public interface PhysicalQueueWorkflow {
     EmployeeQueueData pauseQueue(String companyId, String employeeId);
 
     /**
+     * Registers that the given student has completed their talk with the given employee
      *
-     * @param employeeId
-     * @param studentId
-     * @return
+     * @param employeeId id of the employee who the student has talked to
+     * @param studentId id of the student
+     * @return EmployeeQueueData
      */
     EmployeeQueueData registerStudent(String employeeId, String studentId);
 
     /**
+     * Removes the given student from the given employee's queue
      *
-     * @param employeeId
-     * @param studentId
-     * @return
+     * @param employeeId id of the employee from whose queue the student is to be removed
+     * @param studentId id of the student being removed
+     * @return EmployeeQueueData
      */
     EmployeeQueueData removeStudent(String employeeId, String studentId);
 
@@ -67,4 +69,12 @@ public interface PhysicalQueueWorkflow {
      * @return EmployeeQueueData
      */
     EmployeeQueueData getEmployeeQueueData(String employeeId);
+
+    /**
+     * Returns the size of the given employee's queue
+     *
+     * @param employeeId id of employee whose queue's size is to be returned
+     * @return Long size of employee's queue
+     */
+    Long size(String employeeId);
 }

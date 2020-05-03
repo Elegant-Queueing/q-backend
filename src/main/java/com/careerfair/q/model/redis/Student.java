@@ -10,5 +10,6 @@ public class Student implements Serializable {
     private final String id;
     private final String name;
     private final Timestamp joinedVirtualQueueAt;
-    private final Timestamp joinedWindowQueueAt;
+    private Timestamp joinedWindowQueueAt;
+    private Timestamp joinedPhysicalQueueAt;
 }

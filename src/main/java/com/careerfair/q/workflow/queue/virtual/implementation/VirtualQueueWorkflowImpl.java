@@ -19,4 +19,9 @@ public class VirtualQueueWorkflowImpl implements VirtualQueueWorkflow {
         // TODO
         return null;
     }
+
+    @Override
+    public QueueStatus removeFromQueue(String companyId, String studentId, Role role) {
+        return null;
+    }
 }
