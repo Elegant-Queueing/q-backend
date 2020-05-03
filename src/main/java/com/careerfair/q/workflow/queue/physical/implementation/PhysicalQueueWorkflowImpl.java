@@ -30,19 +30,15 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
 
     @Override
     public QueueStatus joinQueue(String companyId, String employeeId, String studentId, Role role) {
-        checkEmployeeExists(employeeId);
-        checkEmployeeAssociatedWithCompany(companyId, employeeId, role);
-
-        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
-                employeeId);
-        assert employee != null;
+        Employee employee = getEmployeeWithId(employeeId);
+        checkEmployeeHasQueueOpen(companyId, employeeId, role);
 
         List<Student> studentsInWindowQueue = queueRedisTemplate.opsForList()
                 .range(employee.getWindowQueueId(), 0L, -1L);
         assert studentsInWindowQueue != null;
 
-        int positionInWindowQueue = getStudentIndexInQueue(studentId, studentsInWindowQueue);
-        checkStudentPresentInQueue(employeeId, studentId, positionInWindowQueue);
+        int positionInWindowQueue = getStudentIndexInQueue(employeeId, studentId,
+                studentsInWindowQueue);
 
         Student student = studentsInWindowQueue.get(positionInWindowQueue);
         queueRedisTemplate.opsForList().remove(employee.getWindowQueueId(), 1, student);
@@ -117,11 +113,7 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
 
     @Override
     public EmployeeQueueData getEmployeeQueueData(String employeeId) {
-        checkEmployeeExists(employeeId);
-
-        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
-                employeeId);
-        assert employee != null;
+        Employee employee = getEmployeeWithId(employeeId);
 
         double averageTimePerStudent = calcEmployeeAverageTime(employee);
         int numRegisteredStudents = employee.getNumRegisteredStudents();
@@ -132,76 +124,19 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
     }
 
     /**
-     * Checks whether the employee is present at the career fair
-     *
-     * @param employeeId id of the employee to check for
-     * @throws InvalidRequestException throws the exception if the employee is not present at the
-     *      career fair
-     */
-    private void checkEmployeeExists(String employeeId) throws InvalidRequestException {
-        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
-                employeeId);
-        if (employee == null) {
-            throw new InvalidRequestException("No such employee with employee id=" + employeeId +
-                    " exists");
-        }
-    }
-
-    /**
-     * Checks if the given employee is associated with the given company for the given role
-     *
-     * @param companyId id of the company associated with the employee
-     * @param employeeId id of the employee
-     * @param role role for which the employee is recruiting
-     * @throws InvalidRequestException throws the exception if the company is not associated with
-     *      employee for the given role
-     */
-    private void checkEmployeeAssociatedWithCompany(String companyId, String employeeId,
-                                                    Role role) throws InvalidRequestException {
-        Company company = (Company) companyRedisTemplate.opsForHash().get(companyId, role);
-        if (company == null || !company.getEmployeeIds().contains(employeeId)) {
-            throw new InvalidRequestException("No company with company id=" + companyId +
-                    " is associated with employee with employee id=" + employeeId +
-                    " for role=" + role);
-        }
-    }
-
-    /**
-     * Checks if the given student is present in the given employee's queue
-     *
-     * @param employeeId id of the employee in whose queue the student is present
-     * @param studentId id of the student to check for
-     * @param position position of the student in the employee's queue
-     * @throws InvalidRequestException throws the exception if the student is not present in the
-     *      employee's queue
-     */
-    private void checkStudentPresentInQueue(String employeeId, String studentId,
-                                            int position) throws InvalidRequestException {
-        if (position == -1) {
-            throw new InvalidRequestException("Student with student id=" + studentId +
-                    " is not present in the queue of employee with employee id=" + employeeId);
-        }
-    }
-
-    /**
      * Removes the first student in the employee's queue
      *
      * @param employeeId id of the employee from whose queue the student is to be removed
      * @param studentId id of the student to be removed
      */
     private void removeFirstStudentInQueue(String employeeId, String studentId) {
-        checkEmployeeExists(employeeId);
-
-        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
-                employeeId);
-        assert employee != null;
+        Employee employee = getEmployeeWithId(employeeId);
 
         List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
                 .range(employee.getPhysicalQueueId(), 0L, -1L);
         assert studentsInPhysicalQueue != null;
 
-        int position = getStudentIndexInQueue(studentId, studentsInPhysicalQueue);
-        checkStudentPresentInQueue(employee.getId(), studentId, position);
+        int position = getStudentIndexInQueue(employeeId, studentId, studentsInPhysicalQueue);
 
         if (position != 0) {
             throw new InvalidRequestException("Student with student id=" + studentId +
@@ -213,17 +148,65 @@ public class PhysicalQueueWorkflowImpl implements PhysicalQueueWorkflow {
     }
 
     /**
+     * Checks and returns whether the employee is present at the career fair
+     *
+     * @param employeeId id of the employee to check for
+     * @return Employee
+     * @throws InvalidRequestException throws the exception if the employee is not present at the
+     *      career fair
+     */
+    private Employee getEmployeeWithId(String employeeId) throws InvalidRequestException {
+        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
+                employeeId);
+        if (employee == null) {
+            throw new InvalidRequestException("No such employee with employee id=" + employeeId +
+                    " exists");
+        }
+        return employee;
+    }
+
+    /**
+     * Checks if the given employee is associated with the given company for the given role
+     *
+     * @param companyId id of the company associated with the employee
+     * @param employeeId id of the employee
+     * @param role role for which the employee is recruiting
+     * @throws InvalidRequestException throws the exception if the company is not associated with
+     *      employee for the given role
+     */
+    private void checkEmployeeHasQueueOpen(String companyId, String employeeId, Role role)
+            throws InvalidRequestException {
+        Company company = (Company) companyRedisTemplate.opsForHash().get(companyId, role);
+        if (company == null || !company.getEmployeeIds().contains(employeeId)) {
+            throw new InvalidRequestException("No company with company id=" + companyId +
+                    " is associated with employee with employee id=" + employeeId +
+                    " for role=" + role);
+        }
+    }
+
+    /**
      * Gets and returns index of the given student in the given queue
      *
+     * @param employeeId id of the employee in whose queue the student is present
      * @param studentId id of the student to find in the queue
      * @param queue queue to find the student in
      * @return int position of the student in the queue. -1 if not present
+     * @throws InvalidRequestException throws the exception if the student is not present in the
+     *      employee's queue
      */
-    private int getStudentIndexInQueue(String studentId, List<Student> queue) {
+    private int getStudentIndexInQueue(String employeeId, String studentId, List<Student> queue)
+            throws InvalidRequestException {
         List<String> studentIdsInWindowQueue = queue.stream()
                 .map(Student::getId)
                 .collect(Collectors.toList());
-        return studentIdsInWindowQueue.indexOf(studentId);
+        int index = studentIdsInWindowQueue.indexOf(studentId);
+        
+        if (index == -1) {
+            throw new InvalidRequestException("Student with student id=" + studentId +
+                    " is not present in the queue of employee with employee id=" + employeeId);
+        }
+        
+        return index;
     }
 
     /**
