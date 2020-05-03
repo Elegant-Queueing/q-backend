@@ -1,6 +1,7 @@
 package com.careerfair.q.workflow.queue.physical.implementation;
 
 import com.careerfair.q.model.redis.Student;
+import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
@@ -29,12 +30,15 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     @Autowired private RedisTemplate<String, Role> companyRedisTemplate;
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Autowired private StudentFirebase studentFirebase;
 
     @Override
     public QueueStatus joinQueue(String employeeId, Student student) {
         Employee employee = getEmployeeWithId(employeeId);
+        StudentQueueStatus studentQueueStatus = getStudentQueueStatus(student.getId());
+
         String physicalQueueId = employee.getPhysicalQueueId();
         List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
                 .range(physicalQueueId, 0L, -1L);
@@ -46,14 +50,15 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
                     employeeId);
         }
 
-        student.setJoinedPhysicalQueueAt(Timestamp.now());
+//        student.setJoinedPhysicalQueueAt(Timestamp.now());
         queueRedisTemplate.opsForList().rightPush(physicalQueueId, student);
 
         Long positionInPhysicalQueue = size(employeeId);
         int waitTime = (int) (calcEmployeeAverageTime(employee) * positionInPhysicalQueue);
 
-        return new QueueStatus(QueueType.PHYSICAL, positionInPhysicalQueue.intValue(), waitTime,
-                student.getJoinedPhysicalQueueAt(), employee);
+        return null;
+//        return new QueueStatus("", QueueType.PHYSICAL, studentQueueStatus.getRole(), positionInPhysicalQueue.intValue(), waitTime,
+//                //student.getJoinedPhysicalQueueAt(), employee);
     }
 
     @Override
@@ -83,8 +88,21 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
 
     @Override
     public EmployeeQueueData pauseQueue(String employeeId) {
-        // TODO
-        return null;
+        Employee employee = getEmployeeWithId(employeeId);
+
+        Company company = (Company) companyRedisTemplate.opsForHash().get(employee.getCompanyId(),
+                employee.getRole());
+        if (company == null || !company.getEmployeeIds().contains(employeeId)) {
+            throw new InvalidRequestException("Queue for employee with employee id=" + employeeId +
+                    " is already paused");
+        } else if (company.getEmployeeIds().size() == 1) {
+            // TODO: What to do here?
+        }
+
+        company.getEmployeeIds().remove(employeeId);
+        companyRedisTemplate.opsForHash().put(employee.getCompanyId(), employee.getRole(), company);
+
+        return getEmployeeQueueData(employeeId);
     }
 
     @Override
@@ -93,7 +111,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
         Student student = removeStudentInQueue(employee, studentId, true);
 
         if (!studentFirebase.registerStudent(student, employee)) {
-            throw new FirebaseException("Unexpected error in firebase");
+            throw new FirebaseException("Unexpected error in firebase. Student failed to register");
         }
 
         updateRedisEmployee(employee, student);
@@ -120,13 +138,11 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     @Override
     public EmployeeQueueData getEmployeeQueueData(String employeeId) {
         Employee employee = getEmployeeWithId(employeeId);
-
-        double averageTimePerStudent = calcEmployeeAverageTime(employee);
-        int numRegisteredStudents = employee.getNumRegisteredStudents();
         List<Student> students = queueRedisTemplate.opsForList()
                 .range(employee.getPhysicalQueueId(), 0L, -1L);
 
-        return new EmployeeQueueData(students, numRegisteredStudents, averageTimePerStudent);
+        return new EmployeeQueueData(students, employee.getNumRegisteredStudents(),
+                calcEmployeeAverageTime(employee));
     }
 
     @Override
@@ -193,10 +209,10 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
      * @param studentRegistered student to register with the employee
      */
     private void updateRedisEmployee(Employee employee, Student studentRegistered) {
-        int timeSpent = (int) (Timestamp.now().getSeconds() -
-                studentRegistered.getJoinedWindowQueueAt().getSeconds());
-        employee.setNumRegisteredStudents(employee.getNumRegisteredStudents() + 1);
-        employee.setTotalTimeSpent(employee.getTotalTimeSpent() + timeSpent);
+//        int timeSpent = (int) (Timestamp.now().getSeconds() -
+//                studentRegistered.getJoinedWindowQueueAt().getSeconds());
+//        employee.setNumRegisteredStudents(employee.getNumRegisteredStudents() + 1);
+//        employee.setTotalTimeSpent(employee.getTotalTimeSpent() + timeSpent);
     }
 
     /**

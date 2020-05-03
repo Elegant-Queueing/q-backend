@@ -31,7 +31,7 @@ public class WindowQueueWorkflowImpl extends AbstractQueueWorkflow implements Wi
 
     @Override
     public Student removeFromQueue(String employeeId, String studentId) {
-        // TODO: This implementation may not be complete
+        // TODO: This implementation may not be complete or even correct
         Employee employee = getEmployeeWithId(employeeId);
 
         List<Student> studentsInWindowQueue = queueRedisTemplate.opsForList()

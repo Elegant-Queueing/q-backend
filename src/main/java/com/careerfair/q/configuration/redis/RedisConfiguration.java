@@ -45,6 +45,12 @@ public class RedisConfiguration {
         return configureTemplate();
     }
 
+    @Bean
+    @Qualifier("studentRedisTemplate")
+    RedisTemplate<String, String> studentRedisTemplate() {
+        return configureTemplate();
+    }
+
     private <K, V> RedisTemplate<K, V> configureTemplate() {
         RedisTemplate<K, V> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory());

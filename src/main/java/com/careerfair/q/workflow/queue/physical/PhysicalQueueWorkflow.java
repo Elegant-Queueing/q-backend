@@ -35,9 +35,10 @@ public interface PhysicalQueueWorkflow {
     EmployeeQueueData addQueue(String companyId, String employeeId, Role role);
 
     /**
+     * Pauses the given employee's queue
      *
-     * @param employeeId
-     * @return
+     * @param employeeId id of the employee whose queue needs to be paused
+     * @return EmployeeQueueData
      */
     EmployeeQueueData pauseQueue(String employeeId);
 

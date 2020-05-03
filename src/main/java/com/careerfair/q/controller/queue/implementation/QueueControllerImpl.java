@@ -29,7 +29,8 @@ public class QueueControllerImpl implements QueueController {
     @PostMapping("/join/company-id/{company-id}/student-id/{student-id}/role/{role}")
     @Override
     public JoinQueueResponse joinQueue(@PathVariable("company-id") String companyId,
-                                       @PathVariable("student-id") String studentId, @PathVariable("role") Role role) {
+                                       @PathVariable("student-id") String studentId,
+                                       @PathVariable("role") Role role) {
         return queueService.joinVirtualQueue(companyId, studentId, role);
     }
 
@@ -57,7 +58,8 @@ public class QueueControllerImpl implements QueueController {
     @PostMapping("/add/company-id/{company-id}/employee-id/{employee-id}/role/{role}")
     @Override
     public AddQueueResponse addQueue(@PathVariable("company-id") String companyId,
-                                     @PathVariable("employee-id") String employeeId, @PathVariable("role") Role role) {
+                                     @PathVariable("employee-id") String employeeId,
+                                     @PathVariable("role") Role role) {
         return queueService.addQueue(companyId, employeeId, role);
     }
 
@@ -76,7 +78,7 @@ public class QueueControllerImpl implements QueueController {
     @PostMapping("/register-student/employee-id/{employee-id}/student-id/{student-id}")
     @Override
     public RemoveStudentResponse registerStudent(@PathVariable("employee-id") String employeeId,
-                                               @PathVariable("student-id") String studentId) {
+                                                 @PathVariable("student-id") String studentId) {
         return queueService.registerStudent(employeeId, studentId);
     }
 

@@ -7,7 +7,6 @@ import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.workflow.queue.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
 import com.careerfair.q.workflow.queue.window.WindowQueueWorkflow;
-import com.google.cloud.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 public class QueueServiceImpl implements QueueService {
 
     public static final String EMPLOYEE_CACHE_NAME = "employees";
+    public static final String STUDENT_CACHE_NAME = "students";
     public static final int WINDOW = 300;  // in seconds
 
     @Autowired private VirtualQueueWorkflow virtualQueueWorkflow;
@@ -41,8 +41,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public JoinQueueResponse joinEmployeeQueue(String employeeId, String studentId) {
-        Student student = new Student(studentId, "test", Timestamp.now());
-        student.setJoinedWindowQueueAt(Timestamp.now());
+        Student student = new Student(studentId, "test");
                 // windowQueueWorkflow.removeFromQueue(employeeId, studentId);
         return new JoinQueueResponse(physicalQueueWorkflow.joinQueue(employeeId, student));
     }

@@ -2,6 +2,7 @@ package com.careerfair.q.workflow.queue;
 
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
+import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -10,10 +11,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
+import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STUDENT_CACHE_NAME;
 
 public abstract class AbstractQueueWorkflow {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
+    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     /**
      * Checks and returns whether the employee is present at the career fair
@@ -31,6 +34,24 @@ public abstract class AbstractQueueWorkflow {
                     " exists");
         }
         return employee;
+    }
+
+    /**
+     * Checks and returns whether the status of the student present in a queue
+     *
+     * @param studentId id of the student whose status to retrieve
+     * @return StudentQueueStatus
+     * @throws InvalidRequestException throws the exception if the student is not present in a queue
+     */
+    protected StudentQueueStatus getStudentQueueStatus(String studentId)
+            throws InvalidRequestException {
+        StudentQueueStatus studentQueueStatus = (StudentQueueStatus) studentRedisTemplate
+                .opsForHash().get(STUDENT_CACHE_NAME, studentId);
+        if (studentQueueStatus == null) {
+            throw new InvalidRequestException("No student with student id=" + studentId +
+                    " is present in a queue");
+        }
+        return studentQueueStatus;
     }
 
     /**
