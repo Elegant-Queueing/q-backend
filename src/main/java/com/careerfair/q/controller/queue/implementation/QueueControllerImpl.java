@@ -42,10 +42,10 @@ public class QueueControllerImpl implements QueueController {
 
     @DeleteMapping("/leave/company-id/{company-id}/student-id/{student-id}/role/{role}")
     @Override
-    public LeaveQueueResponse leaveQueue(@PathVariable("company-id") String companyId,
+    public void leaveQueue(@PathVariable("company-id") String companyId,
                                          @PathVariable("student-id") String studentId,
                                          @PathVariable("role") Role role) {
-        return queueService.leaveQueue(companyId, studentId, role);
+        queueService.leaveQueue(companyId, studentId, role);
     }
 
     @GetMapping("/status/student-id/{student-id}")

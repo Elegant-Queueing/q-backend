@@ -48,9 +48,8 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
-    public LeaveQueueResponse leaveQueue(String companyId, String studentId, Role role) {
+    public void leaveQueue(String companyId, String studentId, Role role) {
         // TODO
-        return null;
     }
 
     @Override

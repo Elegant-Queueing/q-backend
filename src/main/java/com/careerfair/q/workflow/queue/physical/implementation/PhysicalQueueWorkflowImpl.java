@@ -57,9 +57,9 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     }
 
     @Override
-    public QueueStatus leaveQueue(String employeeId, String studentId) {
-        // TODO
-        return null;
+    public void leaveQueue(String employeeId, String studentId) {
+        Employee employee = getEmployeeWithId(employeeId);
+        removeStudentInQueue(employee, studentId, false);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     @Override
     public EmployeeQueueData registerStudent(String employeeId, String studentId) {
         Employee employee = getEmployeeWithId(employeeId);
-        Student student = removeFirstStudentInQueue(employee, studentId);
+        Student student = removeStudentInQueue(employee, studentId, true);
 
         if (!studentFirebase.registerStudent(student, employee)) {
             throw new FirebaseException("Unexpected error in firebase");
@@ -109,7 +109,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     @Override
     public EmployeeQueueData removeStudent(String employeeId, String studentId) {
         Employee employee = getEmployeeWithId(employeeId);
-        removeFirstStudentInQueue(employee, studentId);
+        removeStudentInQueue(employee, studentId, true);
 
         List<Student> studentsLeftInQueue = queueRedisTemplate.opsForList()
                 .range(employee.getPhysicalQueueId(), 0L, -1L);
@@ -141,8 +141,13 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
      *
      * @param employee employee from whose queue the student is to be removed
      * @param studentId id of the student to be removed
+     * @param isFirst whether the student to be removed should be the first in the queue
+     * @return Student
+     * @throws InvalidRequestException throws if the student is not present in the employee's
+     *      queue or the student is not the first in queue if isFirst flag is set
      */
-    private Student removeFirstStudentInQueue(Employee employee, String studentId) {
+    private Student removeStudentInQueue(Employee employee, String studentId, boolean isFirst)
+            throws InvalidRequestException{
         List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
                 .range(employee.getPhysicalQueueId(), 0L, -1L);
         assert studentsInPhysicalQueue != null;
@@ -153,7 +158,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
             throw new InvalidRequestException("Student with student id=" + studentId +
                     " is not present in the queue of employee with employee id=" +
                     employee.getId());
-        } else if (position != 0) {
+        } else if (isFirst && position != 0) {
             throw new InvalidRequestException("Student with student id=" + studentId +
                     " is not at the head of the queue of employee with employee id=" +
                     employee.getId());

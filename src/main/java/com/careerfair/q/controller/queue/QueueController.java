@@ -30,8 +30,7 @@ public interface QueueController {
     JoinQueueResponse joinQueue(String companyId, String studentId, Role role);
 
     /**
-     * Adds the given student to the given employee's queue associated with the given company and
-     * role
+     * Adds the given student to the given employee's queue
      *
      * @param employeeId id of the employee whose queue to join
      * @param studentId id of the student requesting to join
@@ -44,9 +43,8 @@ public interface QueueController {
      * @param companyId
      * @param studentId
      * @param role
-     * @return
      */
-    LeaveQueueResponse leaveQueue(String companyId, String studentId, Role role);
+    void leaveQueue(String companyId, String studentId, Role role);
 
     /**
      *
