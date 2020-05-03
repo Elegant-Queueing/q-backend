@@ -8,6 +8,7 @@ import java.util.UUID;
 @Data
 public class Employee implements Serializable {
     private final String id;
+    private final String companyId;
     private final String windowQueueId;
     private final String physicalQueueId;
     private final int totalTimeSpent;

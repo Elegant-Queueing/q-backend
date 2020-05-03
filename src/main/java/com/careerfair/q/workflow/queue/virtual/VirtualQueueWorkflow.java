@@ -23,4 +23,13 @@ public interface VirtualQueueWorkflow {
      * @return
      */
     QueueStatus leaveQueue(String companyId, String studentId, Role role);
+
+    /**
+     *
+     * @param companyId
+     * @param studentId
+     * @param role
+     * @return
+     */
+    QueueStatus removeFromQueue(String companyId, String studentId, Role role);
 }
