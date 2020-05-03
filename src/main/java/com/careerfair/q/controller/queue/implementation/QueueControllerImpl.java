@@ -33,13 +33,11 @@ public class QueueControllerImpl implements QueueController {
         return queueService.joinVirtualQueue(companyId, studentId, role);
     }
 
-    @PostMapping("/join/company-id/{company-id}/employee-id/{employee-id}/student-id/{student-id}/role/{role}")
+    @PostMapping("/join/employee-id/{employee-id}/student-id/{student-id}")
     @Override
-    public JoinQueueResponse joinEmployeeQueue(@PathVariable("company-id") String companyId,
-                                               @PathVariable("employee-id") String employeeId,
-                                               @PathVariable("student-id") String studentId,
-                                               @PathVariable("role") Role role) {
-        return queueService.joinEmployeeQueue(companyId, employeeId, studentId, role);
+    public JoinQueueResponse joinEmployeeQueue(@PathVariable("employee-id") String employeeId,
+                                               @PathVariable("student-id") String studentId) {
+        return queueService.joinEmployeeQueue(employeeId, studentId);
     }
 
     @DeleteMapping("/leave/company-id/{company-id}/student-id/{student-id}/role/{role}")
@@ -69,11 +67,10 @@ public class QueueControllerImpl implements QueueController {
         return queueService.getEmployeeQueueData(employeeId);
     }
 
-    @PutMapping("/status/company-id/{company-id}/employee-id/{employee-id}")
+    @PutMapping("/status/employee-id/{employee-id}")
     @Override
-    public PauseQueueResponse pauseQueue(@PathVariable("company-id") String companyId,
-                                         @PathVariable("employee-id") String employeeId) {
-        return queueService.pauseQueue(companyId, employeeId);
+    public PauseQueueResponse pauseQueue(@PathVariable("employee-id") String employeeId) {
+        return queueService.pauseQueue(employeeId);
     }
 
     @PostMapping("/register-student/employee-id/{employee-id}/student-id/{student-id}")

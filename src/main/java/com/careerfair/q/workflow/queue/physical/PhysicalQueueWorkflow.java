@@ -12,19 +12,18 @@ public interface PhysicalQueueWorkflow {
      * role
      *
      * @param employeeId id of the employee whose queue to join
-     * @param role role for which the student is requesting to join
      * @param student student requesting to join
      * @return QueueStatus
      */
-    QueueStatus joinQueue(String employeeId, Role role, Student student);
+    QueueStatus joinQueue(String employeeId, Student student);
 
     /**
      *
-     * @param companyId
+     * @param employeeId
      * @param studentId
      * @return
      */
-    QueueStatus leaveQueue(String companyId, String employeeId, String studentId);
+    QueueStatus leaveQueue(String employeeId, String studentId);
 
     /**
      * Add the given employee's queue associated with the given company and given role to the fair
@@ -38,11 +37,10 @@ public interface PhysicalQueueWorkflow {
 
     /**
      *
-     * @param companyId
      * @param employeeId
      * @return
      */
-    EmployeeQueueData pauseQueue(String companyId, String employeeId);
+    EmployeeQueueData pauseQueue(String employeeId);
 
     /**
      * Registers that the given student has completed their talk with the given employee

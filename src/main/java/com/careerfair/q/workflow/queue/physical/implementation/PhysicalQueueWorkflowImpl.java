@@ -33,7 +33,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     @Autowired private StudentFirebase studentFirebase;
 
     @Override
-    public QueueStatus joinQueue(String employeeId, Role role, Student student) {
+    public QueueStatus joinQueue(String employeeId, Student student) {
         Employee employee = getEmployeeWithId(employeeId);
         String physicalQueueId = employee.getPhysicalQueueId();
         List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
@@ -52,12 +52,12 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
         Long positionInPhysicalQueue = size(employeeId);
         int waitTime = (int) (calcEmployeeAverageTime(employee) * positionInPhysicalQueue);
 
-        return new QueueStatus(employee.getPhysicalQueueId(), QueueType.PHYSICAL, role,
-                positionInPhysicalQueue.intValue(), waitTime, Timestamp.now(), employee);
+        return new QueueStatus(QueueType.PHYSICAL, positionInPhysicalQueue.intValue(), waitTime,
+                student.getJoinedPhysicalQueueAt(), employee);
     }
 
     @Override
-    public QueueStatus leaveQueue(String companyId, String employeeId, String studentId) {
+    public QueueStatus leaveQueue(String employeeId, String studentId) {
         // TODO
         return null;
     }
@@ -70,7 +70,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
         }
 
         employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId,
-                createRedisEmployee(companyId, employeeId));
+                createRedisEmployee(companyId, employeeId, role));
 
         Company company = (Company) companyRedisTemplate.opsForHash().get(companyId, role);
         if (company == null) {
@@ -83,7 +83,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     }
 
     @Override
-    public EmployeeQueueData pauseQueue(String companyId, String employeeId) {
+    public EmployeeQueueData pauseQueue(String employeeId) {
         // TODO
         return null;
     }
@@ -178,8 +178,8 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
      * @param employeeId id of the newly created employee
      * @return Employee
      */
-    private Employee createRedisEmployee(String companyId, String employeeId) {
-        return new Employee(employeeId, companyId, generateRandomId(), generateRandomId());
+    private Employee createRedisEmployee(String companyId, String employeeId, Role role) {
+        return new Employee(employeeId, companyId, role, generateRandomId(), generateRandomId());
     }
 
     /**
@@ -187,7 +187,6 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
      *
      * @param employee employee to update
      * @param studentRegistered student to register with the employee
-     * @return Employee
      */
     private void updateRedisEmployee(Employee employee, Student studentRegistered) {
         int timeSpent = (int) (Timestamp.now().getSeconds() -

@@ -1,5 +1,6 @@
 package com.careerfair.q.workflow.queue.window.implementation;
 
+import com.careerfair.q.model.redis.Company;
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.util.enums.Role;
@@ -20,6 +21,7 @@ import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.WIN
 @Component
 public class WindowQueueWorkflowImpl extends AbstractQueueWorkflow implements WindowQueueWorkflow {
 
+    @Autowired private RedisTemplate<String, Role> companyRedisTemplate;
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
 
     @Override
@@ -53,5 +55,23 @@ public class WindowQueueWorkflowImpl extends AbstractQueueWorkflow implements Wi
     public Long size(String employeeId) {
         Employee employee = getEmployeeWithId(employeeId);
         return queueRedisTemplate.opsForList().size(employee.getWindowQueueId());
+    }
+
+    /**
+     * Checks if the given employee has their queue open
+     *
+     * @param employee employee to validate
+     * @throws InvalidRequestException throws the exception if the employee does not have their
+     *      queue open
+     */
+    private void checkEmployeeHasQueueOpen(Employee employee)
+            throws InvalidRequestException {
+        Company company = (Company) companyRedisTemplate.opsForHash().get(employee.getCompanyId(),
+                employee.getRole());
+        if (company == null || !company.getEmployeeIds().contains(employee.getId())) {
+            throw new InvalidRequestException("No company with company id=" +
+                    employee.getCompanyId() + " is associated with employee with employee id=" +
+                    employee.getId() + " for role=" + employee.getRole());
+        }
     }
 }
