@@ -58,8 +58,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
 
     @Override
     public void leaveQueue(String employeeId, String studentId) {
-        Employee employee = getEmployeeWithId(employeeId);
-        removeStudentInQueue(employee, studentId, false);
+        removeStudentInQueue(getEmployeeWithId(employeeId), studentId, false);
     }
 
     @Override
