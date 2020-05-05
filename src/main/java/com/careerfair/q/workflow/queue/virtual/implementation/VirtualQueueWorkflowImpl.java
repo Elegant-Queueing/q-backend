@@ -1,7 +1,6 @@
 package com.careerfair.q.workflow.queue.virtual.implementation;
 
 import com.careerfair.q.model.redis.Employee;
-import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.VirtualQueueData;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.util.enums.Role;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
 
@@ -40,8 +40,9 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     }
 
     @Override
-    public EmployeeQueueData addQueue(String companyId, String employeeId, Role role) {
-        checkEmployeeHasVirtualQueue(employeeId);
+    public String addQueue(String companyId, String employeeId, Role role) {
+        checkEmployeeHasVirtualQueue(employeeId, "employeeId: " + employeeId + " already " +
+                "has a virtual queue assocaited with it");
 
         VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
         if (virtualQueueData == null) {
@@ -49,8 +50,23 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         }
         virtualQueueData.getEmployeeIds().add(employeeId);
         companyRedisTemplate.opsForHash().put(companyId, role, virtualQueueData);
+        return virtualQueueData.getVirtualQueueId();
+    }
 
-        return createEmployeeQueueData();
+    @Override
+    public void pauseQueueForEmployee(String employeeId) {
+        checkEmployeeHasVirtualQueue(employeeId, "employeeId: " + employeeId + " is not " +
+                " associated with a virtual queue");
+
+        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME, employeeId);
+        if (employee == null) {
+            throw new IllegalStateException("No existing employee object for employeeId: " + employeeId);
+        }
+        String companyId = employee.getCompanyId();
+        Role role = employee.getRole();
+
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
+        virtualQueueData.getEmployeeIds().remove(employeeId);
     }
 
     @Override
@@ -95,13 +111,13 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
 
     /**
      * Checks if the given employeeId has a virtual queue associated with it
-     * @param employeeId
+     * @param employeeId id of the employee
+     * @param message message to be shown with the exception
      * @throws InvalidRequestException if the given employeeId has a virtual queue associated with it
      */
-    private void checkEmployeeHasVirtualQueue(String employeeId) {
+    private void checkEmployeeHasVirtualQueue(String employeeId, String message) {
         if (employeeRedisTemplate.opsForHash().hasKey(EMPLOYEE_CACHE_NAME, employeeId)) {
-            throw new InvalidRequestException("Employee with employee id=" + employeeId +
-                    " already has a queue");
+            throw new InvalidRequestException(message);
         }
     }
 }
