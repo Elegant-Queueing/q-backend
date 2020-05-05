@@ -13,9 +13,9 @@ public class StudentQueueStatus implements Serializable {
     private final String studentId;
     private final Role role;
     private final Timestamp joinedVirtualQueueAt;
+    private String employeeId;
     private String queueId;
     private QueueType queueType;
-    private Employee employee;
     private Timestamp joinedWindowQueueAt;
     private Timestamp joinedPhysicalQueueAt;
 }

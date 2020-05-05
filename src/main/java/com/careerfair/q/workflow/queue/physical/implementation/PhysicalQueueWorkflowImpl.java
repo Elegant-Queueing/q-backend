@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
+import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STUDENT_CACHE_NAME;
 
 @Component
 public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
@@ -39,6 +40,11 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
         Employee employee = getEmployeeWithId(employeeId);
         StudentQueueStatus studentQueueStatus = getStudentQueueStatus(student.getId());
 
+        if (!employeeId.equals(studentQueueStatus.getEmployeeId())) {
+            throw new InvalidRequestException("Mismatch between employee id=" + employeeId +
+                    " and assigned employee id=" + studentQueueStatus.getEmployeeId());
+        }
+
         String physicalQueueId = employee.getPhysicalQueueId();
         List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
                 .range(physicalQueueId, 0L, -1L);
@@ -50,15 +56,19 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
                     employeeId);
         }
 
-//        student.setJoinedPhysicalQueueAt(Timestamp.now());
+        updateStudentQueueStatus(studentQueueStatus, employee);
+        studentRedisTemplate.opsForHash().put(STUDENT_CACHE_NAME, student.getId(),
+                studentQueueStatus);
         queueRedisTemplate.opsForList().rightPush(physicalQueueId, student);
 
         Long positionInPhysicalQueue = size(employeeId);
         int waitTime = (int) (calcEmployeeAverageTime(employee) * positionInPhysicalQueue);
 
-        return null;
-//        return new QueueStatus("", QueueType.PHYSICAL, studentQueueStatus.getRole(), positionInPhysicalQueue.intValue(), waitTime,
-//                //student.getJoinedPhysicalQueueAt(), employee);
+        QueueStatus queueStatus = new QueueStatus(studentQueueStatus.getQueueId(),
+                studentQueueStatus.getQueueType(), studentQueueStatus.getRole(),
+                positionInPhysicalQueue.intValue(), waitTime);
+        queueStatus.setEmployee(employee);
+        return queueStatus;
     }
 
     @Override
@@ -96,7 +106,8 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
             throw new InvalidRequestException("Queue for employee with employee id=" + employeeId +
                     " is already paused");
         } else if (company.getEmployeeIds().size() == 1) {
-            // TODO: What to do here?
+            throw new InvalidRequestException("Only one employee with employee id=" + employeeId +
+                    " is present for the role=" + employee.getRole());
         }
 
         company.getEmployeeIds().remove(employeeId);
@@ -179,6 +190,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
                     employee.getId());
         }
 
+        studentRedisTemplate.opsForHash().delete(STUDENT_CACHE_NAME, studentId);
         return queueRedisTemplate.opsForList().leftPop(employee.getPhysicalQueueId());
     }
 
@@ -209,10 +221,25 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
      * @param studentRegistered student to register with the employee
      */
     private void updateRedisEmployee(Employee employee, Student studentRegistered) {
-//        int timeSpent = (int) (Timestamp.now().getSeconds() -
-//                studentRegistered.getJoinedWindowQueueAt().getSeconds());
-//        employee.setNumRegisteredStudents(employee.getNumRegisteredStudents() + 1);
-//        employee.setTotalTimeSpent(employee.getTotalTimeSpent() + timeSpent);
+        StudentQueueStatus studentQueueStatus = getStudentQueueStatus(studentRegistered.getId());
+        long timeSpent = Timestamp.now().getSeconds() -
+                studentQueueStatus.getJoinedPhysicalQueueAt().getSeconds();
+        employee.setNumRegisteredStudents(employee.getNumRegisteredStudents() + 1);
+        employee.setTotalTimeSpent(employee.getTotalTimeSpent() + timeSpent);
+    }
+
+    /**
+     * Updates the student's queue status based on the given employee
+     *
+     * @param studentQueueStatus the status to update
+     * @param employee the employee to update
+     */
+    private void updateStudentQueueStatus(StudentQueueStatus studentQueueStatus,
+                                          Employee employee) {
+        studentQueueStatus.setEmployeeId(employee.getId());
+        studentQueueStatus.setQueueId(employee.getPhysicalQueueId());
+        studentQueueStatus.setQueueType(QueueType.PHYSICAL);
+        studentQueueStatus.setJoinedPhysicalQueueAt(Timestamp.now());
     }
 
     /**

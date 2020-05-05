@@ -12,6 +12,6 @@ public class Employee implements Serializable {
     private final Role role;
     private final String windowQueueId;
     private final String physicalQueueId;
-    private int totalTimeSpent;
+    private long totalTimeSpent;
     private int numRegisteredStudents;
 }
