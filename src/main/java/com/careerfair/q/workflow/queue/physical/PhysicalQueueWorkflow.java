@@ -40,7 +40,7 @@ public interface PhysicalQueueWorkflow {
      * @param employeeId id of the employee whose queue needs to be paused
      * @return EmployeeQueueData
      */
-    EmployeeQueueData pauseQueue(String employeeId);
+    EmployeeQueueData removeQueue(String employeeId);
 
     /**
      * Registers that the given student has completed their talk with the given employee
@@ -58,7 +58,7 @@ public interface PhysicalQueueWorkflow {
      * @param studentId id of the student being removed
      * @return EmployeeQueueData
      */
-    EmployeeQueueData removeStudent(String employeeId, String studentId);
+    EmployeeQueueData removeStudentFromQueue(String employeeId, String studentId);
 
     /**
      * Returns the data for the given employee's queue

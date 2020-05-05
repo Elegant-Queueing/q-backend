@@ -1,22 +1,17 @@
 package com.careerfair.q.workflow.queue.window.implementation;
 
-import com.careerfair.q.model.redis.Company;
+import com.careerfair.q.model.redis.VirtualQueueData;
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.AbstractQueueWorkflow;
 import com.careerfair.q.workflow.queue.window.WindowQueueWorkflow;
-import com.google.cloud.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.WINDOW;
 
 @Component
 public class WindowQueueWorkflowImpl extends AbstractQueueWorkflow implements WindowQueueWorkflow {
@@ -66,9 +61,9 @@ public class WindowQueueWorkflowImpl extends AbstractQueueWorkflow implements Wi
      */
     private void checkEmployeeHasQueueOpen(Employee employee)
             throws InvalidRequestException {
-        Company company = (Company) companyRedisTemplate.opsForHash().get(employee.getCompanyId(),
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(employee.getCompanyId(),
                 employee.getRole());
-        if (company == null || !company.getEmployeeIds().contains(employee.getId())) {
+        if (virtualQueueData == null || !virtualQueueData.getEmployeeIds().contains(employee.getId())) {
             throw new InvalidRequestException("No company with company id=" +
                     employee.getCompanyId() + " is associated with employee with employee id=" +
                     employee.getId() + " for role=" + employee.getRole());

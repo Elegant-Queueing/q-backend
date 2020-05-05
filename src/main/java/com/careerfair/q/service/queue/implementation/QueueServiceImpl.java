@@ -82,7 +82,8 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public RemoveStudentResponse removeStudent(String employeeId, String studentId) {
-        return new RemoveStudentResponse(physicalQueueWorkflow.removeStudent(employeeId,
-                studentId));
+//        return new RemoveStudentResponse(physicalQueueWorkflow.removeStudent(employeeId,
+//                studentId));
+        return null;
     }
 }

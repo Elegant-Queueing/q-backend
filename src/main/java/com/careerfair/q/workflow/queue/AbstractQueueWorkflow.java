@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
@@ -68,5 +69,14 @@ public abstract class AbstractQueueWorkflow {
                 .map(Student::getId)
                 .collect(Collectors.toList());
         return studentIdsInWindowQueue.indexOf(studentId);
+    }
+
+    /**
+     * Generates and returns a unique random id
+     *
+     * @return String representing the unique id
+     */
+    protected String generateRandomId() {
+        return UUID.randomUUID().toString();
     }
 }

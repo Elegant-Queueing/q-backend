@@ -10,8 +10,9 @@ public class Employee implements Serializable {
     private final String id;
     private final String companyId;
     private final Role role;
-    private final String windowQueueId;
-    private final String physicalQueueId;
+    private String virtualQueueId;
+    private String windowQueueId;
+    private String physicalQueueId;
     private long totalTimeSpent;
     private int numRegisteredStudents;
 }

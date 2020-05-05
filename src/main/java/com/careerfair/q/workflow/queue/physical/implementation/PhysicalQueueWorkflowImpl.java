@@ -6,7 +6,7 @@ import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.model.redis.Employee;
-import com.careerfair.q.model.redis.Company;
+import com.careerfair.q.model.redis.VirtualQueueData;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.exception.FirebaseException;
@@ -80,38 +80,43 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     public EmployeeQueueData addQueue(String companyId, String employeeId, Role role) {
         if (employeeRedisTemplate.opsForHash().hasKey(EMPLOYEE_CACHE_NAME, employeeId)) {
             throw new InvalidRequestException("Employee with employee id=" + employeeId +
-                    " already has a queue.");
+                    " already has a queue");
         }
 
         employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId,
                 createRedisEmployee(companyId, employeeId, role));
 
-        Company company = (Company) companyRedisTemplate.opsForHash().get(companyId, role);
-        if (company == null) {
-            company = createRedisCompany();
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
+        if (virtualQueueData == null) {
+            virtualQueueData = createRedisCompany();
         }
-        company.getEmployeeIds().add(employeeId);
-        companyRedisTemplate.opsForHash().put(companyId, role, company);
+        virtualQueueData.getEmployeeIds().add(employeeId);
+        companyRedisTemplate.opsForHash().put(companyId, role, virtualQueueData);
 
         return createEmployeeQueueData();
     }
 
     @Override
+    public EmployeeQueueData removeQueue(String employeeId) {
+        return null;
+    }
+
+    //@Override
     public EmployeeQueueData pauseQueue(String employeeId) {
         Employee employee = getEmployeeWithId(employeeId);
 
-        Company company = (Company) companyRedisTemplate.opsForHash().get(employee.getCompanyId(),
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(employee.getCompanyId(),
                 employee.getRole());
-        if (company == null || !company.getEmployeeIds().contains(employeeId)) {
+        if (virtualQueueData == null || !virtualQueueData.getEmployeeIds().contains(employeeId)) {
             throw new InvalidRequestException("Queue for employee with employee id=" + employeeId +
                     " is already paused");
-        } else if (company.getEmployeeIds().size() == 1) {
+        } else if (virtualQueueData.getEmployeeIds().size() == 1) {
             throw new InvalidRequestException("Only one employee with employee id=" + employeeId +
                     " is present for the role=" + employee.getRole());
         }
 
-        company.getEmployeeIds().remove(employeeId);
-        companyRedisTemplate.opsForHash().put(employee.getCompanyId(), employee.getRole(), company);
+        virtualQueueData.getEmployeeIds().remove(employeeId);
+        companyRedisTemplate.opsForHash().put(employee.getCompanyId(), employee.getRole(), virtualQueueData);
 
         return getEmployeeQueueData(employeeId);
     }
@@ -135,6 +140,11 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     }
 
     @Override
+    public EmployeeQueueData removeStudentFromQueue(String employeeId, String studentId) {
+        return null;
+    }
+
+    // @Override
     public EmployeeQueueData removeStudent(String employeeId, String studentId) {
         Employee employee = getEmployeeWithId(employeeId);
         removeStudentInQueue(employee, studentId, true);
@@ -211,7 +221,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
      * @return Employee
      */
     private Employee createRedisEmployee(String companyId, String employeeId, Role role) {
-        return new Employee(employeeId, companyId, role, generateRandomId(), generateRandomId());
+        return new Employee(employeeId, companyId, role);//, generateRandomId(), generateRandomId());
     }
 
     /**
@@ -247,8 +257,8 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
      *
      * @return Company
      */
-    private Company createRedisCompany() {
-        return new Company(generateRandomId(), new HashSet<>());
+    private VirtualQueueData createRedisCompany() {
+        return new VirtualQueueData(generateRandomId(), new HashSet<>());
     }
 
     /**
@@ -258,14 +268,5 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
      */
     private EmployeeQueueData createEmployeeQueueData() {
         return new EmployeeQueueData(new ArrayList<>(), 0, 0);
-    }
-
-    /**
-     * Generates and returns a unique random id
-     *
-     * @return String representing the unique id
-     */
-    private String generateRandomId() {
-        return UUID.randomUUID().toString();
     }
 }
