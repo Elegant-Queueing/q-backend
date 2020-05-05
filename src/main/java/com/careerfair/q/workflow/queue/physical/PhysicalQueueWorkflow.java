@@ -1,5 +1,6 @@
 package com.careerfair.q.workflow.queue.physical;
 
+import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
@@ -25,22 +26,21 @@ public interface PhysicalQueueWorkflow {
     void leaveQueue(String employeeId, String studentId);
 
     /**
-     * Add the given employee's queue associated with the given company and given role to the fair
+     * Associates a physical queue to the given employee
      *
-     * @param companyId id of the company associated with the employee
      * @param employeeId id of the employee whose queue is to be added
-     * @param role role associated with the given employee
-     * @return EmployeeQueueData
+     * @return Employee
      */
-    EmployeeQueueData addQueue(String companyId, String employeeId, Role role);
+    Employee addQueue(String employeeId);
 
     /**
-     * Pauses the given employee's queue
+     * Removes the given employee's queue
      *
      * @param employeeId id of the employee whose queue needs to be paused
+     * @param isEmpty flag to assert that queue needs to be empty for successful operation
      * @return EmployeeQueueData
      */
-    EmployeeQueueData removeQueue(String employeeId);
+    Employee removeQueue(String employeeId, boolean isEmpty);
 
     /**
      * Registers that the given student has completed their talk with the given employee

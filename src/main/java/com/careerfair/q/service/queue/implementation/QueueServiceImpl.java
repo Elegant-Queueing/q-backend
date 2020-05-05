@@ -59,7 +59,8 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public AddQueueResponse addQueue(String companyId, String employeeId, Role role) {
-        return new AddQueueResponse(physicalQueueWorkflow.addQueue(companyId, employeeId, role));
+//        physicalQueueWorkflow.addQueue(employeeId);
+        return null;
     }
 
     @Override

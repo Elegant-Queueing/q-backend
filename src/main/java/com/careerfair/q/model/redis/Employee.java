@@ -1,15 +1,15 @@
 package com.careerfair.q.model.redis;
 
 import com.careerfair.q.util.enums.Role;
-import lombok.Data;
+import lombok.*;
 
 import java.io.Serializable;
 
 @Data
 public class Employee implements Serializable {
-    private final String id;
-    private final String companyId;
-    private final Role role;
+    @NonNull private String id;
+    @NonNull private String companyId;
+    @NonNull private Role role;
     private String virtualQueueId;
     private String windowQueueId;
     private String physicalQueueId;

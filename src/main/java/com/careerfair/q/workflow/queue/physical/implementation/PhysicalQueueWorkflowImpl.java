@@ -1,25 +1,22 @@
 package com.careerfair.q.workflow.queue.physical.implementation;
 
+import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.database.StudentFirebase;
-import com.careerfair.q.util.enums.QueueType;
-import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.model.redis.Employee;
-import com.careerfair.q.model.redis.VirtualQueueData;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
+import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.AbstractQueueWorkflow;
 import com.careerfair.q.workflow.queue.physical.PhysicalQueueWorkflow;
-
 import com.google.cloud.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
 
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STUDENT_CACHE_NAME;
@@ -28,7 +25,6 @@ import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STU
 public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
         implements PhysicalQueueWorkflow {
 
-    @Autowired private RedisTemplate<String, Role> companyRedisTemplate;
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
@@ -45,12 +41,12 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
                     " and assigned employee id=" + studentQueueStatus.getEmployeeId());
         }
 
-        String physicalQueueId = employee.getPhysicalQueueId();
+        String physicalQueueId = checkQueueAssociated(employee);
         List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
                 .range(physicalQueueId, 0L, -1L);
         assert studentsInPhysicalQueue != null;
 
-        if (getStudentIndexInQueue(student.getId(), studentsInPhysicalQueue) != -1) {
+        if (getStudentPosition(student.getId(), studentsInPhysicalQueue) != -1) {
             throw new InvalidRequestException("Student with student id=" + student.getId() +
                     " is already present in the queue of the employee with employee id=" +
                     employeeId);
@@ -61,99 +57,74 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
                 studentQueueStatus);
         queueRedisTemplate.opsForList().rightPush(physicalQueueId, student);
 
-        Long positionInPhysicalQueue = size(employeeId);
-        int waitTime = (int) (calcEmployeeAverageTime(employee) * positionInPhysicalQueue);
-
-        QueueStatus queueStatus = new QueueStatus(studentQueueStatus.getQueueId(),
-                studentQueueStatus.getQueueType(), studentQueueStatus.getRole(),
-                positionInPhysicalQueue.intValue(), waitTime);
-        queueStatus.setEmployee(employee);
-        return queueStatus;
+        return createQueueStatus(studentQueueStatus, employee);
     }
 
     @Override
     public void leaveQueue(String employeeId, String studentId) {
-        removeStudentInQueue(getEmployeeWithId(employeeId), studentId, false);
+        removeStudent(getEmployeeWithId(employeeId), studentId, false);
     }
 
     @Override
-    public EmployeeQueueData addQueue(String companyId, String employeeId, Role role) {
-        if (employeeRedisTemplate.opsForHash().hasKey(EMPLOYEE_CACHE_NAME, employeeId)) {
-            throw new InvalidRequestException("Employee with employee id=" + employeeId +
-                    " already has a queue");
-        }
-
-        employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId,
-                createRedisEmployee(companyId, employeeId, role));
-
-        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
-        if (virtualQueueData == null) {
-            virtualQueueData = createRedisCompany();
-        }
-        virtualQueueData.getEmployeeIds().add(employeeId);
-        companyRedisTemplate.opsForHash().put(companyId, role, virtualQueueData);
-
-        return createEmployeeQueueData();
-    }
-
-    @Override
-    public EmployeeQueueData removeQueue(String employeeId) {
-        return null;
-    }
-
-    //@Override
-    public EmployeeQueueData pauseQueue(String employeeId) {
+    public Employee addQueue(String employeeId) {
         Employee employee = getEmployeeWithId(employeeId);
 
-        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(employee.getCompanyId(),
-                employee.getRole());
-        if (virtualQueueData == null || !virtualQueueData.getEmployeeIds().contains(employeeId)) {
-            throw new InvalidRequestException("Queue for employee with employee id=" + employeeId +
-                    " is already paused");
-        } else if (virtualQueueData.getEmployeeIds().size() == 1) {
-            throw new InvalidRequestException("Only one employee with employee id=" + employeeId +
-                    " is present for the role=" + employee.getRole());
+        if (employee.getPhysicalQueueId() != null) {
+            throw new InvalidRequestException("Employee with employee id=" + employeeId +
+                    " is associated with physical queue with id=" + employee.getPhysicalQueueId());
         }
 
-        virtualQueueData.getEmployeeIds().remove(employeeId);
-        companyRedisTemplate.opsForHash().put(employee.getCompanyId(), employee.getRole(), virtualQueueData);
+        employee.setPhysicalQueueId(generateRandomId());
+        employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
+        return employee;
+    }
 
-        return getEmployeeQueueData(employeeId);
+    @Override
+    public Employee removeQueue(String employeeId, boolean isEmpty) {
+        Employee employee = getEmployeeWithId(employeeId);
+        String physicalQueueId = checkQueueAssociated(employee);
+
+        Long size = queueRedisTemplate.opsForList().size(physicalQueueId);
+        assert size != null;
+
+        if (isEmpty && size != 0) {
+            throw new InvalidRequestException("Physical queue with id=" + physicalQueueId +
+                    " is not empty");
+        }
+
+        List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
+                .range(physicalQueueId, 0L, -1L);
+        assert studentsInPhysicalQueue != null;
+
+        for (int i = 0; i < studentsInPhysicalQueue.size(); i++) {
+            queueRedisTemplate.opsForList().leftPop(physicalQueueId);
+        }
+
+        employee.setPhysicalQueueId(null);
+        employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
+        return employee;
     }
 
     @Override
     public EmployeeQueueData registerStudent(String employeeId, String studentId) {
         Employee employee = getEmployeeWithId(employeeId);
-        Student student = removeStudentInQueue(employee, studentId, true);
+        StudentQueueStatus studentQueueStatus = removeStudent(employee, studentId, true);
 
-        if (!studentFirebase.registerStudent(student, employee)) {
+        if (!studentFirebase.registerStudent(studentId, employeeId)) {
             throw new FirebaseException("Unexpected error in firebase. Student failed to register");
         }
 
-        updateRedisEmployee(employee, student);
+        updateRedisEmployee(employee, studentQueueStatus);
         employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
 
-        List<Student> studentsLeftInQueue = queueRedisTemplate.opsForList()
-                .range(employee.getPhysicalQueueId(), 0L, -1L);
-        return new EmployeeQueueData(studentsLeftInQueue, employee.getNumRegisteredStudents(),
-                calcEmployeeAverageTime(employee));
+        return getEmployeeQueueData(employeeId);
     }
 
     @Override
     public EmployeeQueueData removeStudentFromQueue(String employeeId, String studentId) {
-        return null;
-    }
-
-    // @Override
-    public EmployeeQueueData removeStudent(String employeeId, String studentId) {
         Employee employee = getEmployeeWithId(employeeId);
-        removeStudentInQueue(employee, studentId, true);
-
-        List<Student> studentsLeftInQueue = queueRedisTemplate.opsForList()
-                .range(employee.getPhysicalQueueId(), 0L, -1L);
-
-        return new EmployeeQueueData(studentsLeftInQueue, employee.getNumRegisteredStudents(),
-                calcEmployeeAverageTime(employee));
+        removeStudent(employee, studentId, true);
+        return getEmployeeQueueData(employeeId);
     }
 
     @Override
@@ -178,17 +149,17 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
      * @param employee employee from whose queue the student is to be removed
      * @param studentId id of the student to be removed
      * @param isFirst whether the student to be removed should be the first in the queue
-     * @return Student
+     * @return StudentQueueStatus
      * @throws InvalidRequestException throws if the student is not present in the employee's
      *      queue or the student is not the first in queue if isFirst flag is set
      */
-    private Student removeStudentInQueue(Employee employee, String studentId, boolean isFirst)
+    private StudentQueueStatus removeStudent(Employee employee, String studentId, boolean isFirst)
             throws InvalidRequestException{
         List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
                 .range(employee.getPhysicalQueueId(), 0L, -1L);
         assert studentsInPhysicalQueue != null;
 
-        int position = getStudentIndexInQueue(studentId, studentsInPhysicalQueue);
+        int position = getStudentPosition(studentId, studentsInPhysicalQueue);
 
         if (position == -1) {
             throw new InvalidRequestException("Student with student id=" + studentId +
@@ -200,8 +171,18 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
                     employee.getId());
         }
 
+        StudentQueueStatus studentQueueStatus = (StudentQueueStatus) studentRedisTemplate
+                .opsForHash().get(STUDENT_CACHE_NAME, studentId);
         studentRedisTemplate.opsForHash().delete(STUDENT_CACHE_NAME, studentId);
-        return queueRedisTemplate.opsForList().leftPop(employee.getPhysicalQueueId());
+
+        if (isFirst) {
+            queueRedisTemplate.opsForList().leftPop(employee.getPhysicalQueueId());
+        } else {
+            queueRedisTemplate.opsForList().remove(employee.getPhysicalQueueId(), 1L,
+                    studentsInPhysicalQueue.get(position));
+        }
+
+        return studentQueueStatus;
     }
 
     /**
@@ -215,23 +196,31 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     }
 
     /**
-     * Creates and returns an employee to be stored in Redis
+     * Creates and returns QueueStatus based on the given studentQueueStatus and employee
      *
-     * @param employeeId id of the newly created employee
-     * @return Employee
+     * @param studentQueueStatus student's queue status
+     * @param employee employee in whose queue the student is present
+     * @return QueueStatus
      */
-    private Employee createRedisEmployee(String companyId, String employeeId, Role role) {
-        return new Employee(employeeId, companyId, role);//, generateRandomId(), generateRandomId());
+    private QueueStatus createQueueStatus(StudentQueueStatus studentQueueStatus,
+                                          Employee employee) {
+        Long positionInPhysicalQueue = size(employee.getId());
+        int waitTime = (int) (calcEmployeeAverageTime(employee) * positionInPhysicalQueue);
+
+        QueueStatus queueStatus = new QueueStatus(studentQueueStatus.getQueueId(),
+                studentQueueStatus.getQueueType(), studentQueueStatus.getRole(),
+                positionInPhysicalQueue.intValue(), waitTime);
+        queueStatus.setEmployee(employee);
+        return queueStatus;
     }
 
     /**
      * Updates and returns an employee to be stored in Redis
      *
      * @param employee employee to update
-     * @param studentRegistered student to register with the employee
+     * @param studentQueueStatus student's queue status
      */
-    private void updateRedisEmployee(Employee employee, Student studentRegistered) {
-        StudentQueueStatus studentQueueStatus = getStudentQueueStatus(studentRegistered.getId());
+    private void updateRedisEmployee(Employee employee, StudentQueueStatus studentQueueStatus) {
         long timeSpent = Timestamp.now().getSeconds() -
                 studentQueueStatus.getJoinedPhysicalQueueAt().getSeconds();
         employee.setNumRegisteredStudents(employee.getNumRegisteredStudents() + 1);
@@ -253,20 +242,19 @@ public class PhysicalQueueWorkflowImpl extends AbstractQueueWorkflow
     }
 
     /**
-     * Creates and returns a representation of a company to be stored in Redis
+     * Checks whether a physical queue is associated with the given employee
      *
-     * @return Company
+     * @param employee employee to validate
+     * @return String id of the physical queue associated with the given employee
+     * @throws InvalidRequestException throws the exception if no physical queue is associated with
+     *      the employee
      */
-    private VirtualQueueData createRedisCompany() {
-        return new VirtualQueueData(generateRandomId(), new HashSet<>());
-    }
-
-    /**
-     * Creates and returns a snapshot of employee's queue
-     *
-     * @return EmployeeQueueData
-     */
-    private EmployeeQueueData createEmployeeQueueData() {
-        return new EmployeeQueueData(new ArrayList<>(), 0, 0);
+    private String checkQueueAssociated(Employee employee) throws InvalidRequestException {
+        String physicalQueueId = employee.getPhysicalQueueId();
+        if (physicalQueueId == null) {
+            throw new InvalidRequestException("Employee with employee id=" + employee.getId() +
+                    " is not associated with any physical queue");
+        }
+        return physicalQueueId;
     }
 }

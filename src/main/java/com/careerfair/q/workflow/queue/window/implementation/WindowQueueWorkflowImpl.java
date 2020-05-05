@@ -33,7 +33,7 @@ public class WindowQueueWorkflowImpl extends AbstractQueueWorkflow implements Wi
                 .range(employee.getWindowQueueId(), 0L, -1L);
         assert studentsInWindowQueue != null;
 
-        int positionInWindowQueue = getStudentIndexInQueue(studentId, studentsInWindowQueue);
+        int positionInWindowQueue = getStudentPosition(studentId, studentsInWindowQueue);
 
         if (positionInWindowQueue == -1) {
             throw new InvalidRequestException("Student with student id=" + studentId +
