@@ -39,13 +39,21 @@ public interface VirtualQueueWorkflow {
     String addQueue(String companyId, String employeeId, Role role);
 
     /**
+     * Pauses the virtual queue for the employee with the given employeeId
      *
-     * @param employeeId
-     * @return
+     * @param employeeId id of the employee whose
+     * @throws InvalidRequestException if the employee with the given employeeId doesn't have a virtual queue
+     *         associated with them
      */
     void pauseQueueForEmployee(String employeeId);
 
     EmployeeQueueData removeQueue();
 
-    Long size();
+    /**
+     * Returns the size of the virtual queue with the given queueId
+     *
+     * @param queueId
+     * @return size of the queue or -1 if no queue with the given queueId exists
+     */
+    Long size(String queueId);
 }
