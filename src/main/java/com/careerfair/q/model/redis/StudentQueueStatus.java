@@ -9,13 +9,13 @@ import java.io.Serializable;
 
 @Data
 public class StudentQueueStatus implements Serializable {
-    private final String companyId;
     private final String studentId;
-    private final Role role;
-    private final Timestamp joinedVirtualQueueAt;
+    private String companyId;
+    private Role role;
     private String employeeId;
     private String queueId;
     private QueueType queueType;
+    private Timestamp joinedVirtualQueueAt;
     private Timestamp joinedWindowQueueAt;
     private Timestamp joinedPhysicalQueueAt;
 }

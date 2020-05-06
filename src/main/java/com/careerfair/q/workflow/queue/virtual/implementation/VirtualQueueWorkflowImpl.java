@@ -11,6 +11,7 @@ import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.AbstractQueueWorkflow;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
+import com.google.cloud.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -32,9 +33,29 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Override
-    public QueueStatus joinQueue(String companyId, String studentId, Role role) {
-        // TODO
-        return null;
+    public StudentQueueStatus joinQueue(String companyId, String studentId, Role role, String studentName) {
+        // virtual queue should not be responsible for creating student objects
+        StudentQueueStatus studentQueueStatus = getStudentQueueStatus(studentId);
+        if(studentQueueStatus.getQueueType() != QueueType.NONE) {
+            throw new InvalidRequestException("Student with id: " + studentId + " already in a queue");
+        }
+
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
+        if (virtualQueueData == null || virtualQueueData.getEmployeeIds().size() == 0) {
+            throw new InvalidRequestException("No employee with companyId: " + companyId + " is currently " +
+                    "taking students for role: " + role);
+        }
+
+        String virtualQueueId = virtualQueueData.getVirtualQueueId();
+        queueRedisTemplate.opsForList().rightPush(virtualQueueId, new Student(studentId, studentName));
+
+        studentQueueStatus.setCompanyId(companyId);
+        studentQueueStatus.setRole(role);
+        studentQueueStatus.setQueueId(virtualQueueId);
+        studentQueueStatus.setQueueType(QueueType.VIRTUAL);
+        studentQueueStatus.setJoinedVirtualQueueAt(Timestamp.now());
+        studentRedisTemplate.opsForHash().put(STUDENT_CACHE_NAME, studentId, studentQueueStatus);
+        return studentQueueStatus;
     }
 
     @Override
@@ -93,6 +114,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
 
     @Override
     public Long size(String queueId) {
+        // TODO: check if this gives a null pointer
         if (queueRedisTemplate.keys(queueId).size() == 0) {
             return -1L;
         }
@@ -100,8 +122,13 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         return queueRedisTemplate.opsForList().size(queueId);
     }
 
-    private boolean isFalsy(String id) {
-        return id == null || id.equals("");
+    /**
+     * Checks if a given string is falsy
+     * @param str the given string
+     * @return true if the given string is falsy, false otherwise
+     */
+    private boolean isFalsy(String str) {
+        return str == null || str.equals("");
     }
 
     /**
