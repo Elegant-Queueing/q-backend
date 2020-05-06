@@ -145,7 +145,6 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash()
                 .get(companyId, role);
 
-        // change the state of all the employees in this virtual queue
         Set<String> employeeIds = virtualQueueData.getEmployeeIds();
         for(String id: employeeIds) {
             Employee employee = (Employee) employeeRedisTemplate.opsForHash()
@@ -155,7 +154,6 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
             employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, id, employee);
         }
 
-        // change the state of all the students in this virtual queue
         String virtualQueueId = virtualQueueData.getVirtualQueueId();
         List<String> studentIds = queueRedisTemplate.opsForList()
                 .range(virtualQueueId, 0L, -1L)
@@ -163,13 +161,10 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
                 .map(Student::getId)
                 .collect(Collectors.toList());
         for(String id: studentIds) {
-            studentRedisTemplate.opsForHash().delete(STUDENT_CACHE_NAME, studentIds);
+            studentRedisTemplate.opsForHash().delete(STUDENT_CACHE_NAME, id);
         }
 
-        // remove this virtual queue from redis
         queueRedisTemplate.delete(virtualQueueId);
-
-        // remove this role mapping from companyId redis
         companyRedisTemplate.opsForHash().delete(companyId, role);
     }
 
