@@ -12,7 +12,7 @@ public interface WindowQueueWorkflow {
      *
      * @param employeeId id of the employee whose queue the student is to join
      * @param student student requesting to join
-     * @param virtualStudentQueueStatus
+     * @param virtualStudentQueueStatus the current queue status of the student
      * @return QueueStatus
      */
     QueueStatus joinQueue(String employeeId, Student student,
@@ -45,9 +45,10 @@ public interface WindowQueueWorkflow {
     Employee removeQueue(String employeeId, boolean isEmpty);
 
     /**
+     * Returns the size of the given employee's window queue
      *
-     * @param employeeId
-     * @return
+     * @param employeeId id of the employee
+     * @return Long size of the queue
      */
     Long size(String employeeId);
 }

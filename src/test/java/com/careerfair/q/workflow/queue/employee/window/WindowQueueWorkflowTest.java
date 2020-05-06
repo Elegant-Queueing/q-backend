@@ -58,7 +58,7 @@ public class WindowQueueWorkflowTest {
 
         employee = new Employee("e1", "c1", Role.SWE);
         student = new Student("s1", "student1");
-        studentQueueStatus = new StudentQueueStatus("c1", "s1", Role.SWE);
+        studentQueueStatus = new StudentQueueStatus("student1", "c1", "s1", Role.SWE);
 
         when(employeeRedisTemplate.opsForHash()).thenReturn(employeeHashOperations);
         when(studentRedisTemplate.opsForHash()).thenReturn(studentHashOperations);
@@ -68,9 +68,6 @@ public class WindowQueueWorkflowTest {
     @Test
     public void testJoinQueue() {
         employee.setWindowQueueId("wq1");
-
-        Timestamp joinedVirtualQueueAt = Timestamp.now();
-        studentQueueStatus.setJoinedVirtualQueueAt(joinedVirtualQueueAt);
 
         List<Student> students = Lists.newArrayList();
 
@@ -85,7 +82,6 @@ public class WindowQueueWorkflowTest {
         QueueStatus queueStatus = windowQueueWorkflow.joinQueue("e1", student,
                 studentQueueStatus);
 
-        assertEquals(studentQueueStatus.getJoinedVirtualQueueAt(), joinedVirtualQueueAt);
         assertNotNull(studentQueueStatus.getJoinedWindowQueueAt());
 
         assertEquals(queueStatus.getQueueId(), employee.getWindowQueueId());
@@ -137,6 +133,7 @@ public class WindowQueueWorkflowTest {
         doReturn(students).when(queueListOperations).range(anyString(), anyLong(), anyLong());
         doReturn(student).when(queueListOperations).leftPop(anyString());
         doNothing().when(employeeHashOperations).put(anyString(), any(), any());
+        doReturn(true).when(queueRedisTemplate).delete(anyString());
 
         Employee employee = windowQueueWorkflow.removeQueue(this.employee.getId(), false);
 
@@ -155,6 +152,7 @@ public class WindowQueueWorkflowTest {
         doReturn(0L).when(queueListOperations).size(anyString());
         doReturn(students).when(queueListOperations).range(anyString(), anyLong(), anyLong());
         doNothing().when(employeeHashOperations).put(anyString(), any(), any());
+        doReturn(true).when(queueRedisTemplate).delete(anyString());
 
         Employee employee = windowQueueWorkflow.removeQueue(this.employee.getId(), true);
 

@@ -30,8 +30,7 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
                                             StudentQueueStatus studentQueueStatus) {
         String queueId = checkQueueAssociated(employee);
 
-        List<Student> studentsInQueue = queueRedisTemplate.opsForList()
-                .range(queueId, 0L, -1L);
+        List<Student> studentsInQueue = queueRedisTemplate.opsForList().range(queueId, 0L, -1L);
         assert studentsInQueue != null;
 
         if (getStudentPosition(student.getId(), studentsInQueue) != -1) {
@@ -95,23 +94,23 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
      * @param isEmpty flag to assert that queue needs to be empty for successful operation
      */
     protected void removeQueue(Employee employee, boolean isEmpty) {
-        String windowQueueId = checkQueueAssociated(employee);
+        String queueId = checkQueueAssociated(employee);
 
-        Long size = queueRedisTemplate.opsForList().size(windowQueueId);
+        Long size = queueRedisTemplate.opsForList().size(queueId);
         assert size != null;
 
         if (isEmpty && size != 0) {
-            throw new InvalidRequestException("Physical queue with id=" + windowQueueId +
-                    " is not empty");
+            throw new InvalidRequestException("Queue with id=" + queueId + " is not empty");
         }
 
-        List<Student> studentsInWindowQueue = queueRedisTemplate.opsForList()
-                .range(windowQueueId, 0L, -1L);
-        assert studentsInWindowQueue != null;
+        List<Student> studentsInQueue = queueRedisTemplate.opsForList().range(queueId, 0L, -1L);
+        assert studentsInQueue != null;
 
-        for (int i = 0; i < studentsInWindowQueue.size(); i++) {
-            queueRedisTemplate.opsForList().leftPop(windowQueueId);
+        for (Student student : studentsInQueue) {
+            removeStudent(employee.getId(), queueId, student.getId(), true);
         }
+
+        queueRedisTemplate.delete(queueId);
     }
 
     /**
@@ -134,6 +133,7 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
 
     /**
      * Returns the size of the queue associated with the given employee
+     *
      * @param employeeId id of the queue whose queue size is to retrieved
      * @return Long size of the queue
      */

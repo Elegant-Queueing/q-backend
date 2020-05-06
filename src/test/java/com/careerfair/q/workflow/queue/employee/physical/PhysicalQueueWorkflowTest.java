@@ -64,7 +64,7 @@ public class PhysicalQueueWorkflowTest {
 
         employee = new Employee("e1", "c1", Role.SWE);
         student = new Student("s1", "student1");
-        studentQueueStatus = new StudentQueueStatus("c1", "s1", Role.SWE);
+        studentQueueStatus = new StudentQueueStatus("student1", "c1", "s1", Role.SWE);
 
         when(employeeRedisTemplate.opsForHash()).thenReturn(employeeHashOperations);
         when(studentRedisTemplate.opsForHash()).thenReturn(studentHashOperations);
@@ -93,6 +93,7 @@ public class PhysicalQueueWorkflowTest {
 
         assertEquals(studentQueueStatus.getJoinedWindowQueueAt(), joinedWindowQueueAt);
         assertNotNull(studentQueueStatus.getJoinedPhysicalQueueAt());
+        assertEquals(studentQueueStatus.getPositionWhenJoinedPhysicalQueue(), 1L);
 
         assertEquals(queueStatus.getQueueId(), employee.getPhysicalQueueId());
         assertEquals(queueStatus.getQueueType(), QueueType.PHYSICAL);
@@ -143,6 +144,7 @@ public class PhysicalQueueWorkflowTest {
         doReturn(students).when(queueListOperations).range(anyString(), anyLong(), anyLong());
         doReturn(student).when(queueListOperations).leftPop(anyString());
         doNothing().when(employeeHashOperations).put(anyString(), any(), any());
+        doReturn(true).when(queueRedisTemplate).delete(anyString());
 
         Employee employee = physicalQueueWorkflow.removeQueue(this.employee.getId(), false);
 
@@ -161,6 +163,7 @@ public class PhysicalQueueWorkflowTest {
         doReturn(0L).when(queueListOperations).size(anyString());
         doReturn(students).when(queueListOperations).range(anyString(), anyLong(), anyLong());
         doNothing().when(employeeHashOperations).put(anyString(), any(), any());
+        doReturn(true).when(queueRedisTemplate).delete(anyString());
 
         Employee employee = physicalQueueWorkflow.removeQueue(this.employee.getId(), true);
 

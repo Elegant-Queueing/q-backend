@@ -37,7 +37,7 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     @Override
     public StudentQueueStatus leaveQueue(String employeeId, String studentId) {
         Employee employee = getEmployeeWithId(employeeId);
-        return removeStudent(employeeId, employee.getWindowQueueId(), studentId, false);
+        return removeStudent(employeeId, checkQueueAssociated(employee), studentId, false);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
 
         if (employee.getWindowQueueId() != null) {
             throw new InvalidRequestException("Employee with employee id=" + employeeId +
-                    " is associated with physical queue with id=" + employee.getPhysicalQueueId());
+                    " is associated with window queue with id=" + employee.getWindowQueueId());
         }
 
         employee.setWindowQueueId(generateRandomId());
@@ -80,7 +80,7 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
 
     @Override
     protected void updateStudentQueueStatus(StudentQueueStatus studentQueueStatus,
-                                                          Employee employee) {
+                                            Employee employee) {
         studentQueueStatus.setQueueId(employee.getWindowQueueId());
         studentQueueStatus.setQueueType(QueueType.WINDOW);
         studentQueueStatus.setJoinedWindowQueueAt(Timestamp.now());
