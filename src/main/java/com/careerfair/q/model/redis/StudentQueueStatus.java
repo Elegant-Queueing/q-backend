@@ -4,18 +4,24 @@ import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
 import com.google.cloud.Timestamp;
 import lombok.Data;
+import lombok.NonNull;
 
 import java.io.Serializable;
 
 @Data
 public class StudentQueueStatus implements Serializable {
-    private final String studentId;
-    private String companyId;
-    private Role role;
+    // TODO: REMOVE vvvvvvvvvvv
+    @NonNull private final String name;
+    // TODO: REMOVE ^^^^^^^^^^^
+
+    @NonNull private final String companyId;
+    @NonNull private final String studentId;
+    @NonNull
+    private final Role role;
     private String employeeId;
     private String queueId;
     private QueueType queueType;
-    private Timestamp joinedVirtualQueueAt;
+    private long positionWhenJoinedPhysicalQueue;
     private Timestamp joinedWindowQueueAt;
     private Timestamp joinedPhysicalQueueAt;
 }
