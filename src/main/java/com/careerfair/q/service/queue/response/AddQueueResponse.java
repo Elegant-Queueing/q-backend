@@ -8,6 +8,6 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AddQueueResponse {
 
-    @JsonProperty("data")
+    @JsonProperty("queue-data")
     private final EmployeeQueueData employeeQueueData;
 }

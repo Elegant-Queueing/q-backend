@@ -1,6 +1,6 @@
 package com.careerfair.q.service.queue.response;
 
-import com.careerfair.q.model.Student;
+import com.careerfair.q.model.redis.Student;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -14,9 +14,9 @@ public class EmployeeQueueData {
     @JsonProperty("students")
     private final List<Student> students;
 
-    @JsonProperty("num-students")
-    private final int numStudentsTalked;
+    @JsonProperty("num-registered-students")
+    private final int numRegisteredStudents;
 
-    @JsonProperty("average-time")
-    private final int averageTime;
+    @JsonProperty("average-time-per-student")
+    private final double averageTimePerStudent;
 }

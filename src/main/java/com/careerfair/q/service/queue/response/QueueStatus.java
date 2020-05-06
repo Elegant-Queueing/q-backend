@@ -1,11 +1,10 @@
 package com.careerfair.q.service.queue.response;
 
-import com.careerfair.q.enums.QueueType;
-import com.careerfair.q.enums.Role;
-import com.careerfair.q.model.Employee;
+import com.careerfair.q.model.redis.Employee;
+import com.careerfair.q.util.enums.QueueType;
+import com.careerfair.q.util.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.cloud.Timestamp;
 import lombok.Data;
 
 @Data
@@ -27,9 +26,6 @@ public class QueueStatus {
     @JsonProperty("wait-time")
     private final int waitTime;
 
-    @JsonProperty("joined-at")
-    private final Timestamp joinedAt;
-
     @JsonProperty("employee")
-    private final Employee employee;
+    private Employee employee;
 }

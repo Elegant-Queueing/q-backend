@@ -1,5 +1,7 @@
 package com.careerfair.q.service.database.implementation;
 
+import com.careerfair.q.model.redis.Employee;
+import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.service.database.StudentFirebase;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
@@ -20,5 +22,10 @@ public class StudentFirebaseImpl implements StudentFirebase {
         String name = "TEST NAME";  // change this to your name when testing
         map.put("name", name);
         ApiFuture<DocumentReference> collectionsApiFuture = dbFirestore.collection("test").add(map);
+    }
+
+    @Override
+    public boolean registerStudent(String studentId, String employeeId) {
+        return true;
     }
 }
