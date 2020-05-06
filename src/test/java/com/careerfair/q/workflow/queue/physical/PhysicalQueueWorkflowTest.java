@@ -64,7 +64,7 @@ public class PhysicalQueueWorkflowTest {
 
         employee = new Employee("e1", "c1", Role.SWE);
         student = new Student("s1", "student1");
-        studentQueueStatus = new StudentQueueStatus("c1", "s1", Role.SWE, Timestamp.now());
+        studentQueueStatus = new StudentQueueStatus("c1", "s1", Role.SWE);
 
         when(employeeRedisTemplate.opsForHash()).thenReturn(employeeHashOperations);
         when(studentRedisTemplate.opsForHash()).thenReturn(studentQueueHashOperations);
