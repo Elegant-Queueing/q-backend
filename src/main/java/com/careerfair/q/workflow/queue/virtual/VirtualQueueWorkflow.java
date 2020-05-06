@@ -16,6 +16,7 @@ public interface VirtualQueueWorkflow {
      * @param role role whose virtual queue the student will be added to
      * @param studentName name of the student
      * @return StudentQueueStatus current status of the student
+     * @throws InvalidRequestException if no employee is taking students for the given role and company
      */
     StudentQueueStatus joinQueue(String companyId, String studentId, Role role, String studentName);
 
