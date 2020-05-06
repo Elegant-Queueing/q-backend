@@ -21,13 +21,13 @@ public interface VirtualQueueWorkflow {
     StudentQueueStatus joinQueue(String companyId, String studentId, Role role, String studentName);
 
     /**
-     *
-     * @param companyId
-     * @param studentId
-     * @param role
+     * Removes the student from the queue of the given companyId and role
+     * @param companyId id of the company whose virtual queue the student will be removed from
+     * @param studentId id of the student
+     * @param role role whose virtual queue the student will be removed from
      * @return
      */
-    QueueStatus leaveQueue(String companyId, String studentId, Role role);
+    StudentQueueStatus leaveQueue(String companyId, String studentId, Role role);
 
     /**
      * Adds a virtual queue for the given, existing companyId and role, and associates it with the

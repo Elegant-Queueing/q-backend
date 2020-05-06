@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
@@ -59,9 +60,36 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     }
 
     @Override
-    public QueueStatus leaveQueue(String companyId, String studentId, Role role) {
-        // TODO
-        return null;
+    public StudentQueueStatus leaveQueue(String companyId, String studentId, Role role) {
+        StudentQueueStatus studentQueueStatus = getStudentQueueStatus(studentId);
+        if(studentQueueStatus.getQueueType() != QueueType.VIRTUAL) {
+            throw new InvalidRequestException("Student with id: " + studentId + " is not present in any virtual queue");
+        }
+
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
+        // if the virtual queue was stopped, students should have been cleared form the queue
+        if (virtualQueueData == null || virtualQueueData.getEmployeeIds().size() == 0) {
+            throw new InvalidRequestException("No virtual queue present for companyId: " + companyId +
+                    " and role: " + role);
+        }
+
+        String virtualQueueId = studentQueueStatus.getQueueId();
+        assert virtualQueueId.equals(virtualQueueData.getVirtualQueueId());
+
+        List<Student> studentsInQueue = queueRedisTemplate.opsForList().range(virtualQueueId, 0L, -1L);
+        assert studentsInQueue != null;
+
+        Student student = null;
+        for(Student s : studentsInQueue) {
+            if(s.getId().equals(studentId)) {
+                student = s;
+            }
+        }
+        assert student != null;
+        queueRedisTemplate.opsForList().remove(virtualQueueId, 0L, student);
+        studentQueueStatus = new StudentQueueStatus(studentId);
+        studentRedisTemplate.opsForHash().put(STUDENT_CACHE_NAME, studentId, studentQueueStatus);
+        return studentQueueStatus;
     }
 
     @Override
