@@ -7,7 +7,6 @@ import com.careerfair.q.model.redis.VirtualQueueData;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.AbstractQueueWorkflow;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
@@ -20,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STUDENT_CACHE_NAME;
@@ -34,21 +34,25 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Override
-    public StudentQueueStatus joinQueue(String companyId, String studentId, Role role, String studentName) {
+    public StudentQueueStatus joinQueue(String companyId, String studentId, Role role,
+                                        String studentName) {
         // virtual queue should not be responsible for creating student objects
         StudentQueueStatus studentQueueStatus = getStudentQueueStatus(studentId);
         if(studentQueueStatus.getQueueType() != QueueType.NONE) {
-            throw new InvalidRequestException("Student with id: " + studentId + " already in a queue");
+            throw new InvalidRequestException("Student with id=" + studentId
+                    + " already in a queue");
         }
 
-        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
-        if (virtualQueueData == null || virtualQueueData.getEmployeeIds().size() == 0) {
-            throw new InvalidRequestException("No employee with companyId: " + companyId + " is currently " +
-                    "taking students for role: " + role);
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash()
+                .get(companyId, role);
+        if (virtualQueueData == null || virtualQueueData.getEmployeeIds().isEmpty()) {
+            throw new InvalidRequestException("No employee with companyId=" + companyId
+                    + " is currently taking students for role=" + role);
         }
 
         String virtualQueueId = virtualQueueData.getVirtualQueueId();
-        queueRedisTemplate.opsForList().rightPush(virtualQueueId, new Student(studentId, studentName));
+        queueRedisTemplate.opsForList().rightPush(virtualQueueId,
+                new Student(studentId, studentName));
 
         studentQueueStatus.setCompanyId(companyId);
         studentQueueStatus.setRole(role);
@@ -63,32 +67,34 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     public StudentQueueStatus leaveQueue(String companyId, String studentId, Role role) {
         StudentQueueStatus studentQueueStatus = getStudentQueueStatus(studentId);
         if(studentQueueStatus.getQueueType() != QueueType.VIRTUAL) {
-            throw new InvalidRequestException("Student with id: " + studentId + " is not present in any virtual queue");
+            throw new InvalidRequestException("Student with id=" + studentId +
+                    " is not present in any virtual queue");
         }
 
-        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
-        // if the virtual queue was stopped, students should have been cleared form the queue
-        if (virtualQueueData == null || virtualQueueData.getEmployeeIds().size() == 0) {
-            throw new InvalidRequestException("No virtual queue present for companyId: " + companyId +
-                    " and role: " + role);
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash()
+                .get(companyId, role);
+        if (virtualQueueData == null || virtualQueueData.getEmployeeIds().isEmpty()) {
+            throw new InvalidRequestException("No virtual queue present for companyId="
+                    + companyId + " and role= " + role);
         }
 
         String virtualQueueId = studentQueueStatus.getQueueId();
         assert virtualQueueId.equals(virtualQueueData.getVirtualQueueId());
 
-        List<Student> studentsInQueue = queueRedisTemplate.opsForList().range(virtualQueueId, 0L, -1L);
+        List<Student> studentsInQueue = queueRedisTemplate.opsForList()
+                .range(virtualQueueId, 0L, -1L);
         assert studentsInQueue != null;
-
         Student student = null;
         for(Student s : studentsInQueue) {
             if(s.getId().equals(studentId)) {
                 student = s;
+                break;
             }
         }
         assert student != null;
+
         queueRedisTemplate.opsForList().remove(virtualQueueId, 0L, student);
-        studentQueueStatus = new StudentQueueStatus(studentId);
-        studentRedisTemplate.opsForHash().put(STUDENT_CACHE_NAME, studentId, studentQueueStatus);
+        studentRedisTemplate.opsForHash().delete(STUDENT_CACHE_NAME, studentId);
         return studentQueueStatus;
     }
 
@@ -96,34 +102,37 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     public String addQueue(String companyId, String employeeId, Role role) {
         Employee employee = getEmployeeWithId(employeeId);
         if(!isFalsy(employee.getVirtualQueueId())) {
-            throw new InvalidRequestException("Employee with id: " + employeeId + " already has a queue");
+            throw new InvalidRequestException("Employee with id=" + employeeId +
+                    " already has a queue");
         }
 
-        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash()
+                .get(companyId, role);
         if (virtualQueueData == null) {
             virtualQueueData = createRedisVirtualQueue();
         }
         virtualQueueData.getEmployeeIds().add(employeeId);
         companyRedisTemplate.opsForHash().put(companyId, role, virtualQueueData);
 
-        String virtualQueueId = virtualQueueData.getVirtualQueueId();
-        employee.setVirtualQueueId(virtualQueueId);
+        employee.setVirtualQueueId(virtualQueueData.getVirtualQueueId());
         employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
 
-        return virtualQueueId;
+        return virtualQueueData.getVirtualQueueId();
     }
 
     @Override
     public void pauseQueueForEmployee(String employeeId) {
         Employee employee = getEmployeeWithId(employeeId);
         if (isFalsy(employee.getVirtualQueueId())) {
-            throw new InvalidRequestException("Employee with employeeId: " + employeeId + "is not associated" +
+            throw new InvalidRequestException("Employee with employeeId=" + employeeId
+                    + "is not associated" +
                     " with a virtual queue");
         }
         String companyId = employee.getCompanyId();
         Role role = employee.getRole();
 
-        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash().get(companyId, role);
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash()
+                .get(companyId, role);
         Set<String> employees = virtualQueueData.getEmployeeIds();
         employees.remove(employeeId);
 
@@ -135,15 +144,42 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     }
 
     @Override
-    public EmployeeQueueData removeQueue() {
-        // TODO
-        return null;
+    public void removeQueue(String companyId, Role role) {
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash()
+                .get(companyId, role);
+
+        // change the state of all the employees in this virtual queue
+        Set<String> employeeIds = virtualQueueData.getEmployeeIds();
+        for(String id: employeeIds) {
+            Employee employee = (Employee) employeeRedisTemplate.opsForHash()
+                    .get(EMPLOYEE_CACHE_NAME, id);
+            assert employee != null;
+            employee.setVirtualQueueId(null);
+            employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, id, employee);
+        }
+
+        // change the state of all the students in this virtual queue
+        String virtualQueueId = virtualQueueData.getVirtualQueueId();
+        List<String> studentIds = queueRedisTemplate.opsForList()
+                .range(virtualQueueId, 0L, -1L)
+                .stream()
+                .map(Student::getId)
+                .collect(Collectors.toList());
+        for(String id: studentIds) {
+            studentRedisTemplate.opsForHash().delete(STUDENT_CACHE_NAME, studentIds);
+        }
+
+        // remove this virtual queue from redis
+        queueRedisTemplate.delete(virtualQueueId);
+
+        // remove this role mapping from companyId redis
+        companyRedisTemplate.opsForHash().delete(companyId, role);
     }
 
     @Override
     public Long size(String queueId) {
         // TODO: check if this gives a null pointer
-        if (queueRedisTemplate.keys(queueId).size() == 0) {
+        if (queueRedisTemplate.keys(queueId).isEmpty()) {
             return -1L;
         }
 

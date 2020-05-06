@@ -1,9 +1,7 @@
 package com.careerfair.q.workflow.queue.virtual;
 
 import com.careerfair.q.model.redis.StudentQueueStatus;
-import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.exception.InvalidRequestException;
 
 public interface VirtualQueueWorkflow {
@@ -22,6 +20,7 @@ public interface VirtualQueueWorkflow {
 
     /**
      * Removes the student from the queue of the given companyId and role
+     *
      * @param companyId id of the company whose virtual queue the student will be removed from
      * @param studentId id of the student
      * @param role role whose virtual queue the student will be removed from
@@ -51,7 +50,14 @@ public interface VirtualQueueWorkflow {
      */
     void pauseQueueForEmployee(String employeeId);
 
-    EmployeeQueueData removeQueue();
+    /**
+     * Removes the targeted virtual queue, along with all the students in it.
+     * Changes the state of all the employees associated with the targeted virtual queue
+     *
+     * @param companyId id of the company whose virtual queue is to be removed
+     * @param role role whose virtual queue is to be removed
+     */
+    void removeQueue(String companyId, Role role);
 
     /**
      * Returns the size of the virtual queue with the given queueId
