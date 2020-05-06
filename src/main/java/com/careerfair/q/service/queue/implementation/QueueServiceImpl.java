@@ -4,9 +4,9 @@ import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.workflow.queue.physical.PhysicalQueueWorkflow;
+import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
-import com.careerfair.q.workflow.queue.window.WindowQueueWorkflow;
+import com.careerfair.q.workflow.queue.employee.window.WindowQueueWorkflow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,7 +43,8 @@ public class QueueServiceImpl implements QueueService {
     public JoinQueueResponse joinEmployeeQueue(String employeeId, String studentId) {
         Student student = new Student(studentId, "test");
                 // windowQueueWorkflow.removeFromQueue(employeeId, studentId);
-        return new JoinQueueResponse(physicalQueueWorkflow.joinQueue(employeeId, student));
+//        return new JoinQueueResponse(physicalQueueWorkflow.joinQueue(employeeId, student));
+        return null;
     }
 
     @Override

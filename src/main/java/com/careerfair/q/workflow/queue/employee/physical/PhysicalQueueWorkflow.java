@@ -1,8 +1,8 @@
-package com.careerfair.q.workflow.queue.physical;
+package com.careerfair.q.workflow.queue.employee.physical;
 
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
-import com.careerfair.q.util.enums.Role;
+import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
 
@@ -13,9 +13,11 @@ public interface PhysicalQueueWorkflow {
      *
      * @param employeeId id of the employee whose queue to join
      * @param student student requesting to join
+     * @param studentWindowQueueStatus the window queue status of the status
      * @return QueueStatus
      */
-    QueueStatus joinQueue(String employeeId, Student student);
+    QueueStatus joinQueue(String employeeId, Student student,
+                          StudentQueueStatus studentWindowQueueStatus);
 
     /**
      * Removes the given student from the employee's queue
@@ -38,7 +40,7 @@ public interface PhysicalQueueWorkflow {
      *
      * @param employeeId id of the employee whose queue needs to be paused
      * @param isEmpty flag to assert that queue needs to be empty for successful operation
-     * @return EmployeeQueueData
+     * @return Employee
      */
     Employee removeQueue(String employeeId, boolean isEmpty);
 
@@ -58,7 +60,7 @@ public interface PhysicalQueueWorkflow {
      * @param studentId id of the student being removed
      * @return EmployeeQueueData
      */
-    EmployeeQueueData removeStudentFromQueue(String employeeId, String studentId);
+    EmployeeQueueData skipStudent(String employeeId, String studentId);
 
     /**
      * Returns the data for the given employee's queue
