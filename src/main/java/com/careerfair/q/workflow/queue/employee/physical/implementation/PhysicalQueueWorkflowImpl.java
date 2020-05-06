@@ -44,7 +44,8 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         }
 
         Employee employee = getEmployeeWithId(employeeId);
-        StudentQueueStatus studentQueueStatus = joinQueue(employee, student);
+        StudentQueueStatus studentQueueStatus = addStudent(employee, student,
+                studentWindowQueueStatus);
         long currentPosition = size(employee.getId());
         return createQueueStatus(studentQueueStatus, employee, currentPosition);
     }
@@ -95,7 +96,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     }
 
     @Override
-    public EmployeeQueueData removeStudentFromQueue(String employeeId, String studentId) {
+    public EmployeeQueueData skipStudent(String employeeId, String studentId) {
         Employee employee = getEmployeeWithId(employeeId);
         removeStudent(employeeId, employee.getPhysicalQueueId(), studentId, true);
         return getEmployeeQueueData(employeeId);
@@ -113,19 +114,15 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
 
     @Override
     public Long size(String employeeId) {
-        Employee employee = getEmployeeWithId(employeeId);
-        return queueRedisTemplate.opsForList().size(employee.getPhysicalQueueId());
+        return super.size(employeeId);
     }
 
     @Override
-    protected StudentQueueStatus createStudentQueueStatus(String studentId, Employee employee) {
-        StudentQueueStatus studentQueueStatus = new StudentQueueStatus(employee.getCompanyId(),
-                studentId, employee.getRole());
-        studentQueueStatus.setEmployeeId(employee.getId());
+    protected void updateStudentQueueStatus(StudentQueueStatus studentQueueStatus,
+                                                          Employee employee) {
         studentQueueStatus.setQueueId(employee.getPhysicalQueueId());
         studentQueueStatus.setQueueType(QueueType.PHYSICAL);
         studentQueueStatus.setJoinedPhysicalQueueAt(Timestamp.now());
-        return studentQueueStatus;
     }
 
     @Override

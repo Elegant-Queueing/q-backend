@@ -60,7 +60,7 @@ public interface PhysicalQueueWorkflow {
      * @param studentId id of the student being removed
      * @return EmployeeQueueData
      */
-    EmployeeQueueData removeStudentFromQueue(String employeeId, String studentId);
+    EmployeeQueueData skipStudent(String employeeId, String studentId);
 
     /**
      * Returns the data for the given employee's queue

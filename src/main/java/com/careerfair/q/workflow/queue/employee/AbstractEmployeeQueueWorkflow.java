@@ -23,9 +23,11 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
      *
      * @param employee employee to whose queue the student is to be added
      * @param student the student to be added
+     * @param studentQueueStatus the current queue status of the student
      * @return StudentQueueStatus
      */
-    protected StudentQueueStatus joinQueue(Employee employee, Student student) {
+    protected StudentQueueStatus addStudent(Employee employee, Student student,
+                                            StudentQueueStatus studentQueueStatus) {
         String queueId = checkQueueAssociated(employee);
 
         List<Student> studentsInQueue = queueRedisTemplate.opsForList()
@@ -38,7 +40,7 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
                     employee.getId());
         }
 
-        StudentQueueStatus studentQueueStatus = createStudentQueueStatus(student.getId(), employee);
+        updateStudentQueueStatus(studentQueueStatus, employee);
         studentRedisTemplate.opsForHash().put(STUDENT_CACHE_NAME, student.getId(),
                 studentQueueStatus);
         queueRedisTemplate.opsForList().rightPush(queueId, student);
@@ -131,6 +133,16 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
     }
 
     /**
+     * Returns the size of the queue associated with the given employee
+     * @param employeeId id of the queue whose queue size is to retrieved
+     * @return Long size of the queue
+     */
+    protected Long size(String employeeId) {
+        String queueId = checkQueueAssociated(getEmployeeWithId(employeeId));
+        return queueRedisTemplate.opsForList().size(queueId);
+    }
+
+    /**
      * Calculates and returns the average time spent by the employee talking to a student
      *
      * @param employee The employee whose average time is to be calculated
@@ -153,10 +165,9 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
     /**
      * Creates and return the student's queue status based on the given employee
      *
-     * @param studentId id of the student for whom to create the status
+     * @param studentQueueStatus status of the student to update
      * @param employee the employee to update
-     * @return StudentQueueStatus
      */
-    protected abstract StudentQueueStatus createStudentQueueStatus(String studentId,
-                                                                   Employee employee);
+    protected abstract void updateStudentQueueStatus(
+            StudentQueueStatus studentQueueStatus, Employee employee);
 }
