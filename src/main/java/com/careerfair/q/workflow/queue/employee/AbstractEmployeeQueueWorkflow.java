@@ -11,7 +11,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
 
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STUDENT_CACHE_NAME;
 
 public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflow {
@@ -92,7 +91,6 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
      *
      * @param employee employee whose queue needs to be paused
      * @param isEmpty flag to assert that queue needs to be empty for successful operation
-     * @return EmployeeQueueData
      */
     protected void removeQueue(Employee employee, boolean isEmpty) {
         String windowQueueId = checkQueueAssociated(employee);

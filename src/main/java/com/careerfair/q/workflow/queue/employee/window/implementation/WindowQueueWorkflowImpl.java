@@ -22,7 +22,6 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
 
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
-    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Autowired private PhysicalQueueWorkflow physicalQueueWorkflow;
 

@@ -38,7 +38,7 @@ public interface WindowQueueWorkflow {
      *
      * @param employeeId id of the employee whose queue needs to be paused
      * @param isEmpty flag to assert that queue needs to be empty for successful operation
-     * @return EmployeeQueueData
+     * @return Employee
      */
     Employee removeQueue(String employeeId, boolean isEmpty);
 
