@@ -125,8 +125,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         Employee employee = getEmployeeWithId(employeeId);
         if (isFalsy(employee.getVirtualQueueId())) {
             throw new InvalidRequestException("Employee with employeeId=" + employeeId
-                    + "is not associated" +
-                    " with a virtual queue");
+                    + "is not associated with a virtual queue");
         }
         String companyId = employee.getCompanyId();
         Role role = employee.getRole();
