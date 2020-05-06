@@ -1,4 +1,4 @@
-package com.careerfair.q.workflow.queue.physical;
+package com.careerfair.q.workflow.queue.employee.physical;
 
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
@@ -8,7 +8,7 @@ import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.workflow.queue.physical.implementation.PhysicalQueueWorkflowImpl;
+import com.careerfair.q.workflow.queue.employee.physical.implementation.PhysicalQueueWorkflowImpl;
 import com.google.cloud.Timestamp;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,13 +75,14 @@ public class PhysicalQueueWorkflowTest {
     public void testJoinQueue() {
         employee.setPhysicalQueueId("pq1");
         studentQueueStatus.setEmployeeId(employee.getId());
+        studentQueueStatus.setJoinedWindowQueueAt(Timestamp.now());
 
         doReturn(employee).when(employeeHashOperations).get(anyString(), any());
-        doReturn(studentQueueStatus).when(studentQueueHashOperations).get(anyString(), any());
         doReturn(1L).when(queueListOperations).rightPush(anyString(), any());
         doReturn(1L).when(queueListOperations).size(anyString());
 
-        QueueStatus queueStatus = physicalQueueWorkflow.joinQueue("e1", student);
+        QueueStatus queueStatus = physicalQueueWorkflow.joinQueue("e1", student,
+                studentQueueStatus);
 
         assertEquals(queueStatus.getQueueId(), employee.getPhysicalQueueId());
         assertEquals(queueStatus.getQueueType(), QueueType.PHYSICAL);
