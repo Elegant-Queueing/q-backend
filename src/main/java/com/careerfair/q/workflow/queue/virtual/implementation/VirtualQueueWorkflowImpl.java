@@ -4,7 +4,6 @@ import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
-import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.InvalidRequestException;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -195,16 +193,6 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     }
 
     /**
-     * Creates and returns an employee to be stored in Redis
-     *
-     * @param employeeId id of the newly created employee
-     * @return Employee
-     */
-    private Employee createRedisEmployee(String companyId, String employeeId, Role role) {
-        return new Employee(employeeId, companyId, role);
-    }
-
-    /**
      * Creates and returns a representation of a company to be stored in Redis
      *
      * @return Company
@@ -212,14 +200,4 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     private VirtualQueueData createRedisVirtualQueue() {
         return new VirtualQueueData(generateRandomId(), new HashSet<>());
     }
-
-    /**
-     * Creates and returns a snapshot of employee's queue
-     *
-     * @return EmployeeQueueData
-     */
-    private EmployeeQueueData createEmployeeQueueData() {
-        return new EmployeeQueueData(new ArrayList<>(), 0, 0);
-    }
-
 }
