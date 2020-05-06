@@ -9,10 +9,10 @@ import java.io.Serializable;
 
 @Data
 public class StudentQueueStatus implements Serializable {
-    @NonNull private String companyId;
-    @NonNull private String studentId;
-    @NonNull private Role role;
-    @NonNull private Timestamp joinedVirtualQueueAt;
+    @NonNull private final String companyId;
+    @NonNull private final String studentId;
+    @NonNull private final Role role;
+    private Timestamp joinedVirtualQueueAt;
     private String employeeId;
     private String queueId;
     private QueueType queueType;

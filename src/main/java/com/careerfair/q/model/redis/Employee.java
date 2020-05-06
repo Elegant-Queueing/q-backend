@@ -7,9 +7,9 @@ import java.io.Serializable;
 
 @Data
 public class Employee implements Serializable {
-    @NonNull private String id;
-    @NonNull private String companyId;
-    @NonNull private Role role;
+    @NonNull private final String id;
+    @NonNull private final String companyId;
+    @NonNull private final Role role;
     private String virtualQueueId;
     private String windowQueueId;
     private String physicalQueueId;
