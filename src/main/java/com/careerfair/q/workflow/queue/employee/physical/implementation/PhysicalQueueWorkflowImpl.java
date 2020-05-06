@@ -72,24 +72,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     @Override
     public Employee removeQueue(String employeeId, boolean isEmpty) {
         Employee employee = getEmployeeWithId(employeeId);
-        String physicalQueueId = checkQueueAssociated(employee);
-
-        Long size = queueRedisTemplate.opsForList().size(physicalQueueId);
-        assert size != null;
-
-        if (isEmpty && size != 0) {
-            throw new InvalidRequestException("Physical queue with id=" + physicalQueueId +
-                    " is not empty");
-        }
-
-        List<Student> studentsInPhysicalQueue = queueRedisTemplate.opsForList()
-                .range(physicalQueueId, 0L, -1L);
-        assert studentsInPhysicalQueue != null;
-
-        for (int i = 0; i < studentsInPhysicalQueue.size(); i++) {
-            queueRedisTemplate.opsForList().leftPop(physicalQueueId);
-        }
-
+        removeQueue(employee, isEmpty);
         employee.setPhysicalQueueId(null);
         employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
         return employee;

@@ -1,5 +1,6 @@
 package com.careerfair.q.workflow.queue.employee.window;
 
+import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.queue.response.QueueStatus;
@@ -13,7 +14,7 @@ public interface WindowQueueWorkflow {
      * @param student student requesting to join
      * @return QueueStatus
      */
-    QueueStatus addToQueue(String employeeId, Student student);
+    QueueStatus joinQueue(String employeeId, Student student);
 
     /**
      * Removes the given student from the given employee's window queue
@@ -22,7 +23,24 @@ public interface WindowQueueWorkflow {
      * @param studentId id of the student to remove
      * @return StudentQueueStatus
      */
-    StudentQueueStatus removeFromQueue(String employeeId, String studentId);
+    StudentQueueStatus leaveQueue(String employeeId, String studentId);
+
+    /**
+     * Associates a window queue to the given employee
+     *
+     * @param employeeId id of the employee whose queue is to be added
+     * @return Employee
+     */
+    Employee addQueue(String employeeId);
+
+    /**
+     * Removes the given employee's queue
+     *
+     * @param employeeId id of the employee whose queue needs to be paused
+     * @param isEmpty flag to assert that queue needs to be empty for successful operation
+     * @return EmployeeQueueData
+     */
+    Employee removeQueue(String employeeId, boolean isEmpty);
 
     /**
      *

@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
 
+import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STUDENT_CACHE_NAME;
 
 public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflow {
@@ -84,6 +85,33 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
         }
 
         return studentQueueStatus;
+    }
+
+    /**
+     * Removes the given employee's queue
+     *
+     * @param employee employee whose queue needs to be paused
+     * @param isEmpty flag to assert that queue needs to be empty for successful operation
+     * @return EmployeeQueueData
+     */
+    protected void removeQueue(Employee employee, boolean isEmpty) {
+        String windowQueueId = checkQueueAssociated(employee);
+
+        Long size = queueRedisTemplate.opsForList().size(windowQueueId);
+        assert size != null;
+
+        if (isEmpty && size != 0) {
+            throw new InvalidRequestException("Physical queue with id=" + windowQueueId +
+                    " is not empty");
+        }
+
+        List<Student> studentsInWindowQueue = queueRedisTemplate.opsForList()
+                .range(windowQueueId, 0L, -1L);
+        assert studentsInWindowQueue != null;
+
+        for (int i = 0; i < studentsInWindowQueue.size(); i++) {
+            queueRedisTemplate.opsForList().leftPop(windowQueueId);
+        }
     }
 
     /**

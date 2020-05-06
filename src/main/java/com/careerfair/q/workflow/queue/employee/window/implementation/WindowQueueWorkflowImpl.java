@@ -14,17 +14,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
+
 @Component
 public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         implements WindowQueueWorkflow {
 
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+    @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Autowired private PhysicalQueueWorkflow physicalQueueWorkflow;
 
     @Override
-    public QueueStatus addToQueue(String employeeId, Student student) {
+    public QueueStatus joinQueue(String employeeId, Student student) {
         Employee employee = getEmployeeWithId(employeeId);
         StudentQueueStatus studentQueueStatus = joinQueue(employee, student);
         long currentPosition = size(employee.getId()) +
@@ -33,9 +36,32 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     }
 
     @Override
-    public StudentQueueStatus removeFromQueue(String employeeId, String studentId) {
+    public StudentQueueStatus leaveQueue(String employeeId, String studentId) {
         Employee employee = getEmployeeWithId(employeeId);
         return removeStudent(employeeId, employee.getWindowQueueId(), studentId, false);
+    }
+
+    @Override
+    public Employee addQueue(String employeeId) {
+        Employee employee = getEmployeeWithId(employeeId);
+
+        if (employee.getWindowQueueId() != null) {
+            throw new InvalidRequestException("Employee with employee id=" + employeeId +
+                    " is associated with physical queue with id=" + employee.getPhysicalQueueId());
+        }
+
+        employee.setWindowQueueId(generateRandomId());
+        employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
+        return employee;
+    }
+
+    @Override
+    public Employee removeQueue(String employeeId, boolean isEmpty) {
+        Employee employee = getEmployeeWithId(employeeId);
+        removeQueue(employee, isEmpty);
+        employee.setWindowQueueId(null);
+        employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
+        return employee;
     }
 
     @Override
