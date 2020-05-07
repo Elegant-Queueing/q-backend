@@ -25,7 +25,7 @@ public class StudentFirebaseImpl implements StudentFirebase {
     }
 
     @Override
-    public boolean registerStudent(Student student, Employee employee) {
+    public boolean registerStudent(String studentId, String employeeId) {
         return true;
     }
 }
