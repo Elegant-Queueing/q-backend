@@ -160,6 +160,13 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         return queueRedisTemplate.opsForList().size(virtualQueueData.getVirtualQueueId());
     }
 
+    @Override
+    public QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus) {
+        VirtualQueueData virtualQueueData = getVirtualQueueData(studentQueueStatus.getCompanyId(),
+                studentQueueStatus.getRole());
+        return createQueueStatus(studentQueueStatus, virtualQueueData);
+    }
+
     /**
      * Gets the virtual queue data of the given companyId and role
      *

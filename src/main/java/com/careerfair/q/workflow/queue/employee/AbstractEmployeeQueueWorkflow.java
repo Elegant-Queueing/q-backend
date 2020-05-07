@@ -4,6 +4,7 @@ import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.queue.response.QueueStatus;
+import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.AbstractQueueWorkflow;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,6 +141,22 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
     protected Long size(String employeeId) {
         String queueId = checkQueueAssociated(getEmployeeWithId(employeeId));
         return queueRedisTemplate.opsForList().size(queueId);
+    }
+
+    /**
+     * Returns the current status of the student in the queue
+     *
+     * @param studentQueueStatus current status of the student
+     * @return QueueStatus
+     */
+    protected QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus) {
+        Employee employee = getEmployeeWithId(studentQueueStatus.getEmployeeId());
+        List<Student> studentsInQueue = queueRedisTemplate.opsForList()
+                .range(studentQueueStatus.getQueueId(), 0L, -1L);
+        assert studentsInQueue != null;
+
+        int position = getStudentPosition(studentQueueStatus.getStudentId(), studentsInQueue);
+        return createQueueStatus(studentQueueStatus, employee, position);
     }
 
     /**

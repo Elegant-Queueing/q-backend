@@ -77,4 +77,12 @@ public interface PhysicalQueueWorkflow {
      * @return Long size of employee's queue
      */
     Long size(String employeeId);
+
+    /**
+     * Returns the current status of the student in the queue
+     *
+     * @param studentQueueStatus current status of the student
+     * @return QueueStatus
+     */
+    QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus);
 }

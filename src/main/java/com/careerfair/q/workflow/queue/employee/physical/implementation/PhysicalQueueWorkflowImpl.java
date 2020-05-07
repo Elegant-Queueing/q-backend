@@ -120,6 +120,15 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     }
 
     @Override
+    public QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus) {
+        if (studentQueueStatus.getQueueType() != QueueType.PHYSICAL) {
+            throw new InvalidRequestException("QueueType in studentQueueStatus != PHYSICAL");
+        }
+
+        return super.getQueueStatus(studentQueueStatus);
+    }
+
+    @Override
     protected void updateStudentQueueStatus(StudentQueueStatus studentQueueStatus,
                                             Employee employee) {
         studentQueueStatus.setQueueId(employee.getPhysicalQueueId());

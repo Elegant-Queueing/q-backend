@@ -2,6 +2,7 @@ package com.careerfair.q.workflow.queue.virtual;
 
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
+import com.careerfair.q.service.queue.response.GetQueueStatusResponse;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.InvalidRequestException;
@@ -68,4 +69,12 @@ public interface VirtualQueueWorkflow {
      * @return size of the virtual queue for the given companyId and role
      */
     Long size(String companyId, Role role);
+
+    /**
+     * Returns the current status of the student in the queue
+     *
+     * @param studentQueueStatus current status of the student
+     * @return QueueStatus
+     */
+    QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus);
 }

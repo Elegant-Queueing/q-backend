@@ -93,21 +93,27 @@ public class QueueServiceImpl implements QueueService {
     public GetQueueStatusResponse getQueueStatus(String studentId) {
         StudentQueueStatus studentQueueStatus= getStudentQueueStatus(studentId);
         QueueType queueType = studentQueueStatus.getQueueType();
+        QueueStatus queueStatus;
 
         switch (queueType) {
 
             case VIRTUAL:
-                return virtualQueueWorkflow.getQueueStatus(studentQueueStatus);
+                queueStatus = virtualQueueWorkflow.getQueueStatus(studentQueueStatus);
+                break;
 
             case WINDOW:
-                return windowQueueWorkflow.getQueueStatus(studentQueueStatus);
+                queueStatus = windowQueueWorkflow.getQueueStatus(studentQueueStatus);
+                break;
 
             case PHYSICAL:
-                return physicalQueueWorkflow.getQueueStatus(studentQueueStatus);
+                queueStatus = physicalQueueWorkflow.getQueueStatus(studentQueueStatus);
+                break;
 
             default:
                 throw new InvalidRequestException("No such QueueType exists");
         }
+
+        return new GetQueueStatusResponse(queueStatus);
     }
 
     @Override

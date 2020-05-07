@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
 
 @Component
@@ -66,6 +68,15 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     @Override
     public Long size(String employeeId) {
         return super.size(employeeId);
+    }
+
+    @Override
+    public QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus) {
+        if (studentQueueStatus.getQueueType() != QueueType.WINDOW) {
+            throw new InvalidRequestException("QueueType in studentQueueStatus != WINDOW");
+        }
+
+        return super.getQueueStatus(studentQueueStatus);
     }
 
     @Override
