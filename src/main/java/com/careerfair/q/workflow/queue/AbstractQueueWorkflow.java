@@ -79,4 +79,14 @@ public abstract class AbstractQueueWorkflow {
     protected String generateRandomId() {
         return UUID.randomUUID().toString();
     }
+
+    /**
+     * Calculates and returns the average time spent by the employee talking to a student
+     *
+     * @param employee The employee whose average time is to be calculated
+     * @return double Average time spent by the employee talking to a student
+     */
+    protected double calcEmployeeAverageTime(Employee employee) {
+        return employee.getTotalTimeSpent() * 1. / Math.max(employee.getNumRegisteredStudents(), 1);
+    }
 }
