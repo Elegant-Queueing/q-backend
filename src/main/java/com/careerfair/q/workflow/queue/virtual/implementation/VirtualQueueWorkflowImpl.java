@@ -4,6 +4,7 @@ import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
+import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.InvalidRequestException;
@@ -30,12 +31,10 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Override
-    public StudentQueueStatus joinQueue(String companyId, Role role,
-                                        Student student) {
-        // TODO: return QueueStatus, and for that implement getWaitTime and pos
+    public QueueStatus joinQueue(String companyId, Role role, Student student) {
         String studentId = student.getId();
-        StudentQueueStatus studentQueueStatus =
-                new StudentQueueStatus(student.getName(), companyId, studentId, role);
+        StudentQueueStatus studentQueueStatus = new StudentQueueStatus(student.getName(), companyId,
+                studentId, role);
 
         VirtualQueueData virtualQueueData = getVirtualQueueData(companyId, role);
         if (virtualQueueData.getEmployeeIds().isEmpty()) {
@@ -46,10 +45,11 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         String virtualQueueId = virtualQueueData.getVirtualQueueId();
         queueRedisTemplate.opsForList().rightPush(virtualQueueId, student);
 
+
         studentQueueStatus.setQueueId(virtualQueueId);
         studentQueueStatus.setQueueType(QueueType.VIRTUAL);
         studentRedisTemplate.opsForHash().put(STUDENT_CACHE_NAME, studentId, studentQueueStatus);
-        return studentQueueStatus;
+        return createQueueStatus(studentQueueStatus, virtualQueueData);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
 
         String virtualQueueId = studentQueueStatus.getQueueId();
         if (!virtualQueueId.equals(virtualQueueData.getVirtualQueueId())) {
-            throw new InvalidRequestException("Student virtualQueueId and (Company, Role) mismatch");
+            throw new InvalidRequestException("Student virtualQueueId and (Company,Role) mismatch");
         }
 
         List<Student> studentsInQueue = queueRedisTemplate.opsForList()
@@ -144,8 +144,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         }
 
         String virtualQueueId = virtualQueueData.getVirtualQueueId();
-        List<Student> students = queueRedisTemplate.opsForList()
-                .range(virtualQueueId, 0L, -1L);
+        List<Student> students = queueRedisTemplate.opsForList().range(virtualQueueId, 0L, -1L);
         assert students != null;
         for(Student student: students) {
             studentRedisTemplate.opsForHash().delete(STUDENT_CACHE_NAME, student.getId());
@@ -160,7 +159,6 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         VirtualQueueData virtualQueueData = getVirtualQueueData(companyId, role);
         return queueRedisTemplate.opsForList().size(virtualQueueData.getVirtualQueueId());
     }
-
 
     /**
      * Gets the virtual queue data of the given companyId and role
@@ -186,5 +184,30 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
      */
     private VirtualQueueData createRedisVirtualQueue() {
         return new VirtualQueueData(generateRandomId(), new HashSet<>());
+    }
+
+    /**
+     * Creates and returns QueueStatus based on the given studentQueueStatus and virtualQueueData
+     *
+     * @param studentQueueStatus current status of the student
+     * @param virtualQueueData current data of the virtual queue that the student is in
+     * @return QueueStatus
+     */
+    private QueueStatus createQueueStatus(StudentQueueStatus studentQueueStatus,
+                                          VirtualQueueData virtualQueueData) {
+        String companyId = studentQueueStatus.getCompanyId();
+        Role role = studentQueueStatus.getRole();
+        long currentPosition = size(companyId, role);
+
+        double sum = 0;
+        Set<String> employeeIds = virtualQueueData.getEmployeeIds();
+        for(String id: employeeIds) {
+            Employee employee = getEmployeeWithId(id);
+            sum += calcEmployeeAverageTime(employee);
+        }
+        double waitTime = sum / employeeIds.size();
+
+        return new QueueStatus(studentQueueStatus.getQueueId(), studentQueueStatus.getQueueType(),
+                studentQueueStatus.getRole(), (int) currentPosition, (int) waitTime);
     }
 }

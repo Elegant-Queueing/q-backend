@@ -2,6 +2,7 @@ package com.careerfair.q.workflow.queue.virtual;
 
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
+import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.InvalidRequestException;
 
@@ -13,10 +14,10 @@ public interface VirtualQueueWorkflow {
      * @param companyId id of the company whose virtual queue the student will be added to
      * @param role role whose virtual queue the student will be added to
      * @param student student to be added to the queue
-     * @return StudentQueueStatus current status of the student
+     * @return QueueStatus current queue status of the student
      * @throws InvalidRequestException if no employee is taking students for the given role and company
      */
-    StudentQueueStatus joinQueue(String companyId, Role role, Student student);
+    QueueStatus joinQueue(String companyId, Role role, Student student);
 
     /**
      * Removes the student from the queue of the given companyId and role
@@ -24,7 +25,7 @@ public interface VirtualQueueWorkflow {
      * @param companyId id of the company whose virtual queue the student will be removed from
      * @param studentId id of the student
      * @param role role whose virtual queue the student will be removed from
-     * @return
+     * @return StudentQueueStatus current status of the student in the queue
      */
     StudentQueueStatus leaveQueue(String companyId, String studentId, Role role);
 
