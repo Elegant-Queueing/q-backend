@@ -16,8 +16,7 @@ public class StudentQueueStatus implements Serializable {
 
     @NonNull private final String companyId;
     @NonNull private final String studentId;
-    @NonNull
-    private final Role role;
+    @NonNull private final Role role;
     private String employeeId;
     private String queueId;
     private QueueType queueType;

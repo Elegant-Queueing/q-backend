@@ -1,5 +1,6 @@
 package com.careerfair.q.workflow.queue.virtual;
 
+import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.InvalidRequestException;
@@ -10,13 +11,12 @@ public interface VirtualQueueWorkflow {
      * Adds the student with the given studentId to the virtual queue of the given company and role
      *
      * @param companyId id of the company whose virtual queue the student will be added to
-     * @param studentId id of the student
      * @param role role whose virtual queue the student will be added to
-     * @param studentName name of the student
+     * @param student student to be added to the queue
      * @return StudentQueueStatus current status of the student
      * @throws InvalidRequestException if no employee is taking students for the given role and company
      */
-    StudentQueueStatus joinQueue(String companyId, String studentId, Role role, String studentName);
+    StudentQueueStatus joinQueue(String companyId, Role role, Student student);
 
     /**
      * Removes the student from the queue of the given companyId and role
@@ -62,8 +62,9 @@ public interface VirtualQueueWorkflow {
     /**
      * Returns the size of the virtual queue with the given queueId
      *
-     * @param queueId
-     * @return size of the queue or -1 if no queue with the given queueId exists
+     * @param companyId id of the company whose virtual queue's size is to be returned
+     * @param role role whose virtual queue's size is to be returned
+     * @return size of the virtual queue for the given companyId and role
      */
-    Long size(String queueId);
+    Long size(String companyId, Role role);
 }
