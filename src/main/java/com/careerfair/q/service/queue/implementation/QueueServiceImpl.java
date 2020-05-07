@@ -31,9 +31,7 @@ public class QueueServiceImpl implements QueueService {
     @Autowired private WindowQueueWorkflow windowQueueWorkflow;
     @Autowired private PhysicalQueueWorkflow physicalQueueWorkflow;
 
-//    @Autowired private RedisTemplate<String, Role> companyRedisTemplate;
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
-//    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Override
@@ -74,6 +72,7 @@ public class QueueServiceImpl implements QueueService {
     public void leaveQueue(String companyId, String studentId, Role role) {
         StudentQueueStatus studentQueueStatus= getStudentQueueStatus(studentId);
         QueueType queueType = studentQueueStatus.getQueueType();
+        String employeeId = studentQueueStatus.getEmployeeId();
 
         switch (queueType) {
 
@@ -82,21 +81,21 @@ public class QueueServiceImpl implements QueueService {
                 break;
 
             case WINDOW:
-                windowQueueWorkflow.leaveQueue(studentQueueStatus.getEmployeeId(), studentId);
-                // TODO: transfer the top student in virtual queue associated with this company,
-                // role to window queue
-                //
-                // if there is a student in the virtual queue, transfer that to window queue of
-                // this employee
+                windowQueueWorkflow.leaveQueue(employeeId, studentId);
+
+                Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
+                if (studentAtHead != null) {
+                    shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
+                }
                 break;
 
             case PHYSICAL:
                 physicalQueueWorkflow.leaveQueue(studentQueueStatus.getEmployeeId(), studentId);
-                // TODO: transfer the top student in virtual queue associated with this company,
-                // role to window queue
-                //
-                // if there is a student in the virtual queue, transfer that to window queue of
-                // this employee
+
+                studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
+                if (studentAtHead != null) {
+                    shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
+                }
                 break;
 
             default:
@@ -148,8 +147,14 @@ public class QueueServiceImpl implements QueueService {
             physicalQueueWorkflow.addQueue(employeeId);
         }
 
-        // TODO: start moving students to window queue from virtual if possible
-        // transfer as many students as possible from virtual queue to window queue of THIS employee
+        int space = (int) getEmployeeQueueSpace(employeeId);
+        for (int i = 0; i < space ; i++) {
+            Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
+            if (studentAtHead == null) {
+                break;
+            }
+            shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
+        }
 
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.getEmployeeQueueData(
                 employeeId);
@@ -175,9 +180,15 @@ public class QueueServiceImpl implements QueueService {
     public RemoveStudentResponse registerStudent(String employeeId, String studentId) {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.registerStudent(employeeId,
                 studentId);
-        // TODO: move a student to window queue from virtual queue
-        // // if there is a student in the virtual queue, transfer that to window queue of
-        //                // this employee
+
+        Employee employee = getEmployeeWithId(employeeId);
+        String companyId = employee.getCompanyId();
+        Role role = employee.getRole();
+
+        Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
+        if (studentAtHead != null) {
+            shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
+        }
         return new RemoveStudentResponse(employeeQueueData);
     }
 
@@ -185,9 +196,15 @@ public class QueueServiceImpl implements QueueService {
     public RemoveStudentResponse skipStudent(String employeeId, String studentId) {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.skipStudent(employeeId,
                 studentId);
-        // TODO: move a student to window queue from virtual queue
-        // // if there is a student in the virtual queue, transfer that to window queue of
-        //                // this employee
+
+        Employee employee = getEmployeeWithId(employeeId);
+        String companyId = employee.getCompanyId();
+        Role role = employee.getRole();
+
+        Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
+        if (studentAtHead != null) {
+            shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
+        }
         return new RemoveStudentResponse(employeeQueueData);
     }
 
@@ -211,9 +228,7 @@ public class QueueServiceImpl implements QueueService {
     }
 
     /**
-     * Returns the employee with the most queue space available. Employee's current queue size is
-     * equal to the sum of the employee's window and physical queue and must not exceed by
-     * MAX_EMPLOYEE_QUEUE_SIZE
+     * Returns the employee with the most queue space available.
      *
      * @param companyId id of the company the employee is associated with
      * @param role role the employee is associated with
@@ -228,8 +243,7 @@ public class QueueServiceImpl implements QueueService {
         long maxSpaceAvailable = 0;
 
         for (String employeeId: employeeIds) {
-            long spaceAvailable = MAX_EMPLOYEE_QUEUE_SIZE - physicalQueueWorkflow.size(employeeId)
-                    - windowQueueWorkflow.size(employeeId);
+            long spaceAvailable = getEmployeeQueueSpace(employeeId);
 
             if (spaceAvailable > maxSpaceAvailable) {
                 maxSpaceAvailable = spaceAvailable;
@@ -241,17 +255,48 @@ public class QueueServiceImpl implements QueueService {
     }
 
     /**
+     * Returns the available space in employee's window and physical queue combined
      *
-     * @param companyId
-     * @param employeeId
-     * @param role
-     * @param student
-     * @return
+     * @param employeeId id of the employee
+     * @return available space in employee's window and physical queue combined
+     */
+    private long getEmployeeQueueSpace(String employeeId) {
+        return MAX_EMPLOYEE_QUEUE_SIZE - physicalQueueWorkflow.size(employeeId)
+                - windowQueueWorkflow.size(employeeId);
+    }
+
+    /**
+     * Shifts the given student from the virtual queue to the window queue of the employee
+     * associated with the given company and role
+     *
+     * @param companyId id of the company
+     * @param employeeId id of the employee
+     * @param role role the student opted for
+     * @param student student to be shifted to the window queue
+     * @return QueueStatus current status of the student in a queue
      */
     private QueueStatus shiftStudentToWindow(String companyId, String employeeId, Role role,
                                              Student student) {
         StudentQueueStatus studentQueueStatus = virtualQueueWorkflow.leaveQueue(companyId,
                 student.getId(), role);
         return windowQueueWorkflow.joinQueue(employeeId, student, studentQueueStatus);
+    }
+
+    /**
+     * Checks and returns whether the employee is present at the career fair
+     *
+     * @param employeeId id of the employee to check for
+     * @return Employee
+     * @throws InvalidRequestException throws the exception if the employee is not present at the
+     *      career fair
+     */
+    protected Employee getEmployeeWithId(String employeeId) throws InvalidRequestException {
+        Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
+                employeeId);
+        if (employee == null) {
+            throw new InvalidRequestException("No such employee with employee id=" + employeeId +
+                    " exists");
+        }
+        return employee;
     }
 }

@@ -86,4 +86,13 @@ public interface VirtualQueueWorkflow {
      * @return VirtualQueueData of the given companyId and role
      */
     VirtualQueueData getVirtualQueueData(String companyId, Role role);
+
+    /**
+     * Returns the student at the head of the virtual queue associated with the given
+     * companyId and role
+     * @param companyId id of the company whose head student is to be returned
+     * @param role      role whose head student is to be returned
+     * @return Student at the head of the virtual queue or null if the virtual queue is empty
+     */
+    Student getStudentAtHead(String companyId, Role role);
 }

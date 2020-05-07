@@ -178,6 +178,18 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         return virtualQueueData;
     }
 
+    @Override
+    public Student getStudentAtHead(String companyId, Role role) {
+        String virtualQueueId = getVirtualQueueData(companyId, role).getVirtualQueueId();
+
+        Long size = queueRedisTemplate.opsForList().size(virtualQueueId);
+        if (size == null || size == 0L) {
+            return null;
+        }
+
+        return queueRedisTemplate.opsForList().index(virtualQueueId, 0L);
+    }
+
     /**
      * Creates and returns a representation of a company to be stored in Redis
      *
@@ -211,4 +223,5 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         return new QueueStatus(studentQueueStatus.getQueueId(), studentQueueStatus.getQueueType(),
                 studentQueueStatus.getRole(), (int) currentPosition, (int) waitTime);
     }
+
 }
