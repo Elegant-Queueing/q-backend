@@ -36,7 +36,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
             throw new InvalidRequestException("Mismatch between employee id=" + employeeId +
                     " and assigned employee id=" + studentWindowQueueStatus.getEmployeeId());
         }
-        if (studentWindowQueueStatus.getJoinedWindowQueueAt().getSeconds() + WINDOW <
+        if (studentWindowQueueStatus.getJoinedWindowQueueAt().getSeconds() + WINDOW + BUFFER <
                 Timestamp.now().getSeconds()) {
             throw new InvalidRequestException("Student with student id=" + student.getId() +
                     " did not scan the code od employee with employee id=" + employeeId +

@@ -3,6 +3,7 @@ package com.careerfair.q.service.queue.implementation;
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
+import com.careerfair.q.model.redis.VirtualQueueData;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.util.enums.QueueType;
@@ -15,12 +16,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 public class QueueServiceImpl implements QueueService {
 
     public static final String EMPLOYEE_CACHE_NAME = "employees";
     public static final String STUDENT_CACHE_NAME = "students";
+    public static final int BUFFER = 10;  // in seconds
     public static final int WINDOW = 300;  // in seconds
+    public static final long MAX_EMPLOYEE_QUEUE_SIZE = 5;
 
     @Autowired private VirtualQueueWorkflow virtualQueueWorkflow;
     @Autowired private WindowQueueWorkflow windowQueueWorkflow;
@@ -45,9 +50,13 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public JoinQueueResponse joinVirtualQueue(String companyId, Role role, Student student) {
-
         QueueStatus status = virtualQueueWorkflow.joinQueue(companyId, role, student);
-        // TODO: what if window and physical queue are empty for an employee?
+
+        String employeeId = getEmployeeWithMostQueueSpace(companyId, role);
+        if (employeeId != null) {
+            status = shiftStudentToWindow(companyId, employeeId, role, student);
+        }
+
         return new JoinQueueResponse(status);
     }
 
@@ -76,12 +85,18 @@ public class QueueServiceImpl implements QueueService {
                 windowQueueWorkflow.leaveQueue(studentQueueStatus.getEmployeeId(), studentId);
                 // TODO: transfer the top student in virtual queue associated with this company,
                 // role to window queue
+                //
+                // if there is a student in the virtual queue, transfer that to window queue of
+                // this employee
                 break;
 
             case PHYSICAL:
                 physicalQueueWorkflow.leaveQueue(studentQueueStatus.getEmployeeId(), studentId);
                 // TODO: transfer the top student in virtual queue associated with this company,
                 // role to window queue
+                //
+                // if there is a student in the virtual queue, transfer that to window queue of
+                // this employee
                 break;
 
             default:
@@ -134,6 +149,7 @@ public class QueueServiceImpl implements QueueService {
         }
 
         // TODO: start moving students to window queue from virtual if possible
+        // transfer as many students as possible from virtual queue to window queue of THIS employee
 
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.getEmployeeQueueData(
                 employeeId);
@@ -160,6 +176,8 @@ public class QueueServiceImpl implements QueueService {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.registerStudent(employeeId,
                 studentId);
         // TODO: move a student to window queue from virtual queue
+        // // if there is a student in the virtual queue, transfer that to window queue of
+        //                // this employee
         return new RemoveStudentResponse(employeeQueueData);
     }
 
@@ -168,13 +186,17 @@ public class QueueServiceImpl implements QueueService {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.skipStudent(employeeId,
                 studentId);
         // TODO: move a student to window queue from virtual queue
+        // // if there is a student in the virtual queue, transfer that to window queue of
+        //                // this employee
         return new RemoveStudentResponse(employeeQueueData);
     }
 
     /**
-     * TODO
-     * @param studentId
-     * @return
+     * Get the status of the student in a queue
+     *
+     * @param studentId id of the student
+     * @return StudentQueueStatus
+     * @throws InvalidRequestException if student is not present in any queue
      */
     private StudentQueueStatus getStudentQueueStatus(String studentId) {
         StudentQueueStatus studentQueueStatus = (StudentQueueStatus) studentRedisTemplate
@@ -186,5 +208,50 @@ public class QueueServiceImpl implements QueueService {
         }
 
         return studentQueueStatus;
+    }
+
+    /**
+     * Returns the employee with the most queue space available. Employee's current queue size is
+     * equal to the sum of the employee's window and physical queue and must not exceed by
+     * MAX_EMPLOYEE_QUEUE_SIZE
+     *
+     * @param companyId id of the company the employee is associated with
+     * @param role role the employee is associated with
+     * @return id of the employee with the most queue space available or null if no employee has
+     *         queue space available
+     */
+    private String getEmployeeWithMostQueueSpace(String companyId, Role role) {
+        VirtualQueueData virtualQueueData = virtualQueueWorkflow.getVirtualQueueData(companyId,
+                role);
+        Set<String> employeeIds = virtualQueueData.getEmployeeIds();
+        String employeeWithMostSpaceId = null;
+        long maxSpaceAvailable = 0;
+
+        for (String employeeId: employeeIds) {
+            long spaceAvailable = MAX_EMPLOYEE_QUEUE_SIZE - physicalQueueWorkflow.size(employeeId)
+                    - windowQueueWorkflow.size(employeeId);
+
+            if (spaceAvailable > maxSpaceAvailable) {
+                maxSpaceAvailable = spaceAvailable;
+                employeeWithMostSpaceId = employeeId;
+            }
+        }
+
+        return employeeWithMostSpaceId;
+    }
+
+    /**
+     *
+     * @param companyId
+     * @param employeeId
+     * @param role
+     * @param student
+     * @return
+     */
+    private QueueStatus shiftStudentToWindow(String companyId, String employeeId, Role role,
+                                             Student student) {
+        StudentQueueStatus studentQueueStatus = virtualQueueWorkflow.leaveQueue(companyId,
+                student.getId(), role);
+        return windowQueueWorkflow.joinQueue(employeeId, student, studentQueueStatus);
     }
 }
