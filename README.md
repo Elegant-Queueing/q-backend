@@ -11,7 +11,7 @@
 Assuming you've already cloned the repo:
 - Go to Q's Firebase console -> project settings, and download your service account key. This will be a .json file
 - Rename this file to service_account_key.json
-- CAUTIOS! Move this json file at the same directory level as src/. This file is NOT to be pushed to Github. .gitignore has it mentioned in it, so it's imperitive that you get the directory level right and double check using git status before you push.
+- CAUTIOUS! Move this json file at the same directory level as src/. This file is NOT to be pushed to Github. .gitignore has it mentioned in it, so it's imperitive that you get the directory level right and double check using git status before you push.
 - Open StudentFirebaseImpl.java (it's in service/database/implementation)
 - We will now try to add an object (or in Firebase's lingo, a document) with an attribute 'name' to the 'test' collection in Firebase.
 - Open Firebase console and make sure there's a test collection.
