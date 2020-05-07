@@ -15,7 +15,7 @@ public class QueueServiceImpl implements QueueService {
 
     public static final String EMPLOYEE_CACHE_NAME = "employees";
     public static final String STUDENT_CACHE_NAME = "students";
-    public static final int WINDOW = 300;  // in seconds
+    public static final int WINDOW = 300;   // in seconds
 
     @Autowired private VirtualQueueWorkflow virtualQueueWorkflow;
     @Autowired private WindowQueueWorkflow windowQueueWorkflow;
