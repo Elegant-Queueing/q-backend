@@ -86,6 +86,6 @@ public class QueueControllerImpl implements QueueController {
     @Override
     public RemoveStudentResponse removeStudent(@PathVariable("employee-id") String employeeId,
                                                @PathVariable("student-id") String studentId) {
-        return queueService.removeStudent(employeeId, studentId);
+        return queueService.skipStudent(employeeId, studentId);
     }
 }
