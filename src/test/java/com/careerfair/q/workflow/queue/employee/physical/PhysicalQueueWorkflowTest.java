@@ -175,6 +175,7 @@ public class PhysicalQueueWorkflowTest {
     public void testRegisterStudent() throws InterruptedException {
         employee.setPhysicalQueueId("pq1");
         studentQueueStatus.setJoinedPhysicalQueueAt(Timestamp.now());
+        studentQueueStatus.setPositionWhenJoinedPhysicalQueue(1);
 
         Student newStudent = new Student("s2", "student2");
         List<Student> students = Lists.newArrayList(student, newStudent);
