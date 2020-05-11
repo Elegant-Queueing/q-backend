@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
 
 @Component
@@ -21,7 +23,6 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         implements WindowQueueWorkflow {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
-    @Autowired private PhysicalQueueWorkflow physicalQueueWorkflow;
 
     @Override
     public QueueStatus joinQueue(String employeeId, Student student,
@@ -29,8 +30,7 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         Employee employee = getEmployeeWithId(employeeId);
         StudentQueueStatus studentQueueStatus = addStudent(employee, student,
                 virtualStudentQueueStatus);
-        long currentPosition = size(employee.getId()) +
-                physicalQueueWorkflow.size(employee.getId());
+        long currentPosition = size(employee.getId());
         return createQueueStatus(studentQueueStatus, employee, currentPosition);
     }
 
@@ -69,6 +69,15 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     }
 
     @Override
+    public QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus) {
+        if (studentQueueStatus.getQueueType() != QueueType.WINDOW) {
+            throw new InvalidRequestException("QueueType in studentQueueStatus != WINDOW");
+        }
+
+        return super.getQueueStatus(studentQueueStatus);
+    }
+
+    @Override
     protected String checkQueueAssociated(Employee employee) {
         String windowQueueId = employee.getWindowQueueId();
         if (windowQueueId == null) {
@@ -81,6 +90,7 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     @Override
     protected void updateStudentQueueStatus(StudentQueueStatus studentQueueStatus,
                                             Employee employee) {
+        studentQueueStatus.setEmployeeId(employee.getId());
         studentQueueStatus.setQueueId(employee.getWindowQueueId());
         studentQueueStatus.setQueueType(QueueType.WINDOW);
         studentQueueStatus.setJoinedWindowQueueAt(Timestamp.now());

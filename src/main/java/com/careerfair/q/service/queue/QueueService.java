@@ -1,5 +1,6 @@
 package com.careerfair.q.service.queue;
 
+import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.response.*;
 
@@ -23,11 +24,11 @@ public interface QueueService {
     /**
      *
      * @param companyId
-     * @param studentId
      * @param role
+     * @param student
      * @return
      */
-    JoinQueueResponse joinVirtualQueue(String companyId, String studentId, Role role);
+    JoinQueueResponse joinVirtualQueue(String companyId, Role role, Student student);
 
     /**
      * Adds the given student to the given employee's queue
@@ -94,6 +95,5 @@ public interface QueueService {
      * @param studentId id of the student being removed
      * @return RemoveStudentResponse
      */
-    RemoveStudentResponse removeStudent(String employeeId, String studentId);
-
+    RemoveStudentResponse skipStudent(String employeeId, String studentId);
 }

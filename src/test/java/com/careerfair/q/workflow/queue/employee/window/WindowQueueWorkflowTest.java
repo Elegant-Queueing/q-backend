@@ -8,7 +8,6 @@ import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.implementation.WindowQueueWorkflowImpl;
-import com.google.cloud.Timestamp;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,17 +76,17 @@ public class WindowQueueWorkflowTest {
         doNothing().when(studentHashOperations).put(anyString(), any(), any());
         doReturn(1L).when(queueListOperations).rightPush(anyString(), any());
         doReturn(1L).when(queueListOperations).size(anyString());
-        doReturn(2L).when(physicalQueueWorkflow).size(anyString());
 
         QueueStatus queueStatus = windowQueueWorkflow.joinQueue("e1", student,
                 studentQueueStatus);
 
         assertNotNull(studentQueueStatus.getJoinedWindowQueueAt());
+        assertEquals(studentQueueStatus.getEmployeeId(), employee.getId());
 
         assertEquals(queueStatus.getQueueId(), employee.getWindowQueueId());
         assertEquals(queueStatus.getQueueType(), QueueType.WINDOW);
         assertEquals(queueStatus.getRole(), Role.SWE);
-        assertEquals(queueStatus.getPosition(), 3);
+        assertEquals(queueStatus.getPosition(), 1);
         assertEquals(queueStatus.getEmployee(), employee);
     }
 
@@ -143,7 +142,7 @@ public class WindowQueueWorkflowTest {
 
     @Test
     public void testRemoveQueueEmpty() {
-        employee.setWindowQueueId("pq1");
+        employee.setWindowQueueId("wq1");
         studentQueueStatus.setEmployeeId("e1");
 
         List<Student> students = Lists.newArrayList();
@@ -162,7 +161,7 @@ public class WindowQueueWorkflowTest {
 
     @Test
     public void testSize() {
-        employee.setWindowQueueId("pq1");
+        employee.setWindowQueueId("wq1");
 
         doReturn(employee).when(employeeHashOperations).get(anyString(), any());
         doReturn(1L).when(queueListOperations).size(anyString());
@@ -170,6 +169,24 @@ public class WindowQueueWorkflowTest {
         Long size = windowQueueWorkflow.size("e1");
 
         assertEquals(size, 1L);
+    }
+
+    @Test
+    public void testGetQueueStatus() {
+        employee.setWindowQueueId("wq1");
+
+        studentQueueStatus.setEmployeeId("e1");
+        studentQueueStatus.setQueueType(QueueType.WINDOW);
+        studentQueueStatus.setQueueId("wq1");
+
+        List<Student> students = Lists.newArrayList(student);
+
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn(students).when(queueListOperations).range(anyString(), anyLong(), anyLong());
+
+        QueueStatus queueStatus = windowQueueWorkflow.getQueueStatus(studentQueueStatus);
+
+        assertEquals(queueStatus.getPosition(), 1);
     }
 
     private Answer addStudentAnswer(List<Student> students) {

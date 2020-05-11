@@ -256,6 +256,24 @@ public class PhysicalQueueWorkflowTest {
         assertEquals(size, 1L);
     }
 
+    @Test
+    public void testGetQueueStatus() {
+        employee.setWindowQueueId("pq1");
+
+        studentQueueStatus.setEmployeeId("e1");
+        studentQueueStatus.setQueueType(QueueType.PHYSICAL);
+        studentQueueStatus.setQueueId("pq1");
+
+        List<Student> students = Lists.newArrayList(student);
+
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn(students).when(queueListOperations).range(anyString(), anyLong(), anyLong());
+
+        QueueStatus queueStatus = physicalQueueWorkflow.getQueueStatus(studentQueueStatus);
+
+        assertEquals(queueStatus.getPosition(), 1);
+    }
+
     private Answer addStudentAnswer(List<Student> students) {
         return invocationOnMock -> {
             List<Student> temp = Lists.newArrayList(students);

@@ -1,5 +1,6 @@
 package com.careerfair.q.controller.queue;
 
+import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.response.*;
 
@@ -27,7 +28,7 @@ public interface QueueController {
      * @param role
      * @return
      */
-    JoinQueueResponse joinQueue(String companyId, String studentId, Role role);
+    JoinQueueResponse joinQueue(String companyId, String studentId, Role role, String name);
 
     /**
      * Adds the given student to the given employee's queue

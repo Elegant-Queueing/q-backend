@@ -26,6 +26,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Autowired private StudentFirebase studentFirebase;
 
@@ -36,7 +37,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
             throw new InvalidRequestException("Mismatch between employee id=" + employeeId +
                     " and assigned employee id=" + studentWindowQueueStatus.getEmployeeId());
         }
-        if (studentWindowQueueStatus.getJoinedWindowQueueAt().getSeconds() + WINDOW <
+        if (studentWindowQueueStatus.getJoinedWindowQueueAt().getSeconds() + WINDOW + BUFFER <
                 Timestamp.now().getSeconds()) {
             throw new InvalidRequestException("Student with student id=" + student.getId() +
                     " did not scan the code od employee with employee id=" + employeeId +
@@ -49,6 +50,8 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
 
         long currentPosition = size(employeeId);
         studentQueueStatus.setPositionWhenJoinedPhysicalQueue(currentPosition);
+        studentRedisTemplate.opsForHash().put(STUDENT_CACHE_NAME, student.getId(),
+                studentQueueStatus);
         return createQueueStatus(studentQueueStatus, employee, currentPosition);
     }
 
@@ -117,6 +120,15 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     @Override
     public Long size(String employeeId) {
         return super.size(employeeId);
+    }
+
+    @Override
+    public QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus) {
+        if (studentQueueStatus.getQueueType() != QueueType.PHYSICAL) {
+            throw new InvalidRequestException("QueueType in studentQueueStatus != PHYSICAL");
+        }
+
+        return super.getQueueStatus(studentQueueStatus);
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.careerfair.q.util.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NonNull;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,7 +22,8 @@ public class QueueStatus {
     private final Role role;
 
     @JsonProperty("position")
-    private final int position;
+    @NonNull
+    private int position;
 
     @JsonProperty("wait-time")
     private final int waitTime;
