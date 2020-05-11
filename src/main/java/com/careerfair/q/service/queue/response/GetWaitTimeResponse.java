@@ -14,5 +14,5 @@ public class GetWaitTimeResponse {
     private final List<String> companies;
 
     @JsonProperty("wait-times")
-    private final List<Integer> waitTimes;
+    private final List<Integer> waitTimes;  // in seconds
 }

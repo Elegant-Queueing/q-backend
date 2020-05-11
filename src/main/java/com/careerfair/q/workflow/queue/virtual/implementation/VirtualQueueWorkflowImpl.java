@@ -220,17 +220,10 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         String companyId = studentQueueStatus.getCompanyId();
         Role role = studentQueueStatus.getRole();
         long currentPosition = size(companyId, role);
-
-        double sum = 0;
-        Set<String> employeeIds = virtualQueueData.getEmployeeIds();
-        for(String id: employeeIds) {
-            Employee employee = getEmployeeWithId(id);
-            sum += calcEmployeeAverageTime(employee);
-        }
-        double waitTime = sum / employeeIds.size();
-
-        return new QueueStatus(studentQueueStatus.getQueueId(), studentQueueStatus.getQueueType(),
-                studentQueueStatus.getRole(), (int) currentPosition, (int) waitTime);
+        QueueStatus queueStatus = new QueueStatus(companyId, studentQueueStatus.getQueueId(),
+                studentQueueStatus.getQueueType(), studentQueueStatus.getRole());
+        queueStatus.setPosition((int) currentPosition);
+        return queueStatus;
     }
 
 }
