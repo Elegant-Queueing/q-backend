@@ -4,7 +4,11 @@ import com.careerfair.q.service.database.EmployeeFirebase;
 import com.careerfair.q.service.employee.EmployeeService;
 import com.careerfair.q.service.employee.request.AddEmployeeRequest;
 import com.careerfair.q.service.employee.request.UpdateEmployeeRequest;
-import com.careerfair.q.service.employee.response.*;
+import com.careerfair.q.service.employee.response.AddEmployeeResponse;
+import com.careerfair.q.service.employee.response.DeleteEmployeeResponse;
+import com.careerfair.q.service.employee.response.GetEmployeeResponse;
+import com.careerfair.q.service.employee.response.UpdateEmployeeResponse;
+import com.careerfair.q.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +20,21 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Autowired EmployeeFirebase employeeFirebase;
 
     @Override
-    public GetEmployeeResponse getEmployee(String id) throws InterruptedException,
-            ExecutionException, ClassNotFoundException {
-        return new GetEmployeeResponse(employeeFirebase.getEmployee(id));
+    public GetEmployeeResponse getEmployeeWithId(String employeeId) {
+        try {
+            return new GetEmployeeResponse(employeeFirebase.getEmployee(employeeId));
+        } catch (ExecutionException | InterruptedException | ClassNotFoundException ex) {
+            throw new InvalidRequestException(ex.getMessage());
+        }
     }
 
     @Override
-    public GetEmployeeResponse getEmployeeByEmail(String email) throws ExecutionException,
-            InterruptedException {
-        return new GetEmployeeResponse(employeeFirebase.getEmployeeByEmail(email));
+    public GetEmployeeResponse getEmployeeWithEmail(String email) {
+        try {
+            return new GetEmployeeResponse(employeeFirebase.getEmployeeByEmail(email));
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new InvalidRequestException(ex.getMessage());
+        }
     }
 
     @Override
@@ -44,10 +54,5 @@ public class EmployeeServiceImpl implements EmployeeService {
     public AddEmployeeResponse addEmployee(AddEmployeeRequest addEmployeeRequest) {
         // TODO
         return null;
-    }
-
-    @Override
-    public GetAllFairsResponse getAllFairs() throws ExecutionException, InterruptedException {
-        return new GetAllFairsResponse(employeeFirebase.getAllFairs());
     }
 }

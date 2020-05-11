@@ -1,7 +1,6 @@
 package com.careerfair.q.service.database.implementation;
 
 import com.careerfair.q.model.db.Employee;
-import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.service.database.EmployeeFirebase;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.google.cloud.firestore.DocumentReference;
@@ -10,16 +9,13 @@ import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import static com.careerfair.q.util.contant.Fair.EMPLOYEE_COLLECTION;
 
 @Service
 public class EmployeeFirebaseImpl implements EmployeeFirebase {
-
-    private static final String EMPLOYEE_COLLECTION = "employees";
-    private static final String FAIR_COLLECTION = "fairs";
 
     @Override
     public Employee getEmployee(String id) throws ExecutionException, InterruptedException, ClassNotFoundException {
@@ -62,25 +58,5 @@ public class EmployeeFirebaseImpl implements EmployeeFirebase {
         }
 
         throw new InvalidRequestException("No employee with the given email=" + email);
-    }
-
-    @Override
-    public List<Fair> getAllFairs() throws ExecutionException, InterruptedException {
-        Firestore dbFirestore = FirestoreClient.getFirestore();
-        List<Fair> result = new ArrayList<>();
-        Iterator<DocumentReference> iterator = dbFirestore
-                .collection(FAIR_COLLECTION)
-                .listDocuments()
-                .iterator();
-
-        while (iterator.hasNext()) {
-            Fair fair = iterator
-                    .next()
-                    .get()
-                    .get()
-                    .toObject(Fair.class);
-            result.add(fair);
-        }
-        return result;
     }
 }

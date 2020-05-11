@@ -1,4 +1,4 @@
-package com.careerfair.q.service.employee.response;
+package com.careerfair.q.service.fair.response;
 
 import com.careerfair.q.model.db.Fair;
 import lombok.Data;
