@@ -6,9 +6,7 @@ import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.implementation.WindowQueueWorkflowImpl;
-import com.google.cloud.Timestamp;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,8 +44,6 @@ public class WindowQueueWorkflowTest {
     private Student student;
     @Mock
     private StudentQueueStatus studentQueueStatus;
-    @Mock
-    private PhysicalQueueWorkflow physicalQueueWorkflow;
 
     @InjectMocks
     private WindowQueueWorkflow windowQueueWorkflow = new WindowQueueWorkflowImpl();
@@ -77,7 +73,6 @@ public class WindowQueueWorkflowTest {
         doNothing().when(studentHashOperations).put(anyString(), any(), any());
         doReturn(1L).when(queueListOperations).rightPush(anyString(), any());
         doReturn(1L).when(queueListOperations).size(anyString());
-        doReturn(2L).when(physicalQueueWorkflow).size(anyString());
 
         QueueStatus queueStatus = windowQueueWorkflow.joinQueue("e1", student,
                 studentQueueStatus);
@@ -88,7 +83,7 @@ public class WindowQueueWorkflowTest {
         assertEquals(queueStatus.getQueueId(), employee.getWindowQueueId());
         assertEquals(queueStatus.getQueueType(), QueueType.WINDOW);
         assertEquals(queueStatus.getRole(), Role.SWE);
-        assertEquals(queueStatus.getPosition(), 3);
+        assertEquals(queueStatus.getPosition(), 1);
         assertEquals(queueStatus.getEmployee(), employee);
     }
 

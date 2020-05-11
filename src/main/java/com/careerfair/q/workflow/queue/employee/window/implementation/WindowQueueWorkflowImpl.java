@@ -23,7 +23,6 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         implements WindowQueueWorkflow {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
-    @Autowired private PhysicalQueueWorkflow physicalQueueWorkflow;
 
     @Override
     public QueueStatus joinQueue(String employeeId, Student student,
@@ -31,8 +30,7 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         Employee employee = getEmployeeWithId(employeeId);
         StudentQueueStatus studentQueueStatus = addStudent(employee, student,
                 virtualStudentQueueStatus);
-        long currentPosition = size(employee.getId()) +
-                physicalQueueWorkflow.size(employee.getId());
+        long currentPosition = size(employee.getId());
         return createQueueStatus(studentQueueStatus, employee, currentPosition);
     }
 

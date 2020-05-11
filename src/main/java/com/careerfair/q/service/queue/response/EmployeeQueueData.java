@@ -18,5 +18,5 @@ public class EmployeeQueueData {
     private final int numRegisteredStudents;
 
     @JsonProperty("average-time-per-student")
-    private final double averageTimePerStudent;
+    private final double averageTimePerStudent;  // in seconds
 }

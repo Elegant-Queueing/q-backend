@@ -26,6 +26,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Autowired private StudentFirebase studentFirebase;
 
@@ -49,6 +50,8 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
 
         long currentPosition = size(employeeId);
         studentQueueStatus.setPositionWhenJoinedPhysicalQueue(currentPosition);
+        studentRedisTemplate.opsForHash().put(STUDENT_CACHE_NAME, student.getId(),
+                studentQueueStatus);
         return createQueueStatus(studentQueueStatus, employee, currentPosition);
     }
 
