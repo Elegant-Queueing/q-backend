@@ -123,11 +123,10 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
      */
     protected QueueStatus createQueueStatus(StudentQueueStatus studentQueueStatus,
                                             Employee employee, long currentPosition) {
-        int waitTime = (int) (calcEmployeeAverageTime(employee) * currentPosition);
-
-        QueueStatus queueStatus = new QueueStatus(studentQueueStatus.getQueueId(),
-                studentQueueStatus.getQueueType(), studentQueueStatus.getRole(),
-                (int) currentPosition, waitTime);
+        QueueStatus queueStatus = new QueueStatus(studentQueueStatus.getCompanyId(),
+                studentQueueStatus.getQueueId(), studentQueueStatus.getQueueType(),
+                studentQueueStatus.getRole());
+        queueStatus.setPosition((int) currentPosition);
         queueStatus.setEmployee(employee);
         return queueStatus;
     }

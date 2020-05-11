@@ -92,4 +92,14 @@ public class QueueControllerImpl implements QueueController {
                                                @PathVariable("student-id") String studentId) {
         return queueService.skipStudent(employeeId, studentId);
     }
+
+//    @DeleteMapping("/clearAll")
+//    public void clearAll() {
+//        queueService.clearAll();
+//    }
+//
+//    @GetMapping("/getAll")
+//    public void getAll() {
+//        queueService.getAll();
+//    }
 }

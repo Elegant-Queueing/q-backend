@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -33,6 +36,8 @@ public class QueueServiceImpl implements QueueService {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
+    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+
 
     @Override
     public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
@@ -49,13 +54,11 @@ public class QueueServiceImpl implements QueueService {
     @Override
     public JoinQueueResponse joinVirtualQueue(String companyId, Role role, Student student) {
         QueueStatus status = virtualQueueWorkflow.joinQueue(companyId, role, student);
-        status.setPosition(status.getPosition() + MAX_EMPLOYEE_QUEUE_SIZE);
-
         String employeeId = getEmployeeWithMostQueueSpace(companyId, role);
         if (employeeId != null) {
             status = shiftStudentToWindow(companyId, employeeId, role, student);
         }
-
+        setOverallPositionAndWaitTime(status);
         return new JoinQueueResponse(status);
     }
 
@@ -66,6 +69,7 @@ public class QueueServiceImpl implements QueueService {
         Student student = new Student(studentId, studentQueueStatus.getName());
         QueueStatus queueStatus = physicalQueueWorkflow.joinQueue(employeeId, student,
                 studentQueueStatus);
+        setOverallPositionAndWaitTime(queueStatus);
         return new JoinQueueResponse(queueStatus);
     }
 
@@ -114,13 +118,10 @@ public class QueueServiceImpl implements QueueService {
 
             case VIRTUAL:
                 queueStatus = virtualQueueWorkflow.getQueueStatus(studentQueueStatus);
-                queueStatus.setPosition(queueStatus.getPosition() + MAX_EMPLOYEE_QUEUE_SIZE);
                 break;
 
             case WINDOW:
                 queueStatus = windowQueueWorkflow.getQueueStatus(studentQueueStatus);
-                queueStatus.setPosition(queueStatus.getPosition() +
-                        physicalQueueWorkflow.size(studentQueueStatus.getEmployeeId()).intValue());
                 break;
 
             case PHYSICAL:
@@ -131,6 +132,7 @@ public class QueueServiceImpl implements QueueService {
                 throw new InvalidRequestException("No such QueueType exists");
         }
 
+        setOverallPositionAndWaitTime(queueStatus);
         return new GetQueueStatusResponse(queueStatus);
     }
 
@@ -214,6 +216,42 @@ public class QueueServiceImpl implements QueueService {
         return new RemoveStudentResponse(employeeQueueData);
     }
 
+    @Override
+    public void clearAll() {
+        Collection<String> keys = studentRedisTemplate.keys("*");  // redis magic
+        if (keys != null) {
+            studentRedisTemplate.delete(keys);
+        }
+    }
+
+    @Override
+    public void getAll() {
+        Collection<String> keys = studentRedisTemplate.keys("*");
+        System.out.println("\n\n");
+        System.out.println("*****************************");
+        System.out.println("All keys: " + keys);
+        if (keys != null) {
+            for (String key: keys) {
+                System.out.println(key + ": ");
+                try {
+                    List<Student> list = queueRedisTemplate.opsForList().range(key, 0L, -1L);
+                    System.out.println("\t" + list);
+                } catch(Exception e) {
+                    // redis magic
+                    Map<Object, Object> map = studentRedisTemplate.opsForHash().entries(key);
+                    for(Object mapKey: map.keySet()) {
+                        System.out.println("\t" + mapKey + ":" + map.get(mapKey));
+                    }
+                }
+                System.out.println("--------");
+
+            }
+        }
+
+        System.out.println("*****************************");
+
+    }
+
     /**
      * Get the status of the student in a queue
      *
@@ -285,11 +323,7 @@ public class QueueServiceImpl implements QueueService {
                                              Student student) {
         StudentQueueStatus studentQueueStatus = virtualQueueWorkflow.leaveQueue(companyId,
                 student.getId(), role);
-        QueueStatus queueStatus =  windowQueueWorkflow.joinQueue(employeeId, student,
-                studentQueueStatus);
-        queueStatus.setPosition(queueStatus.getPosition() +
-                physicalQueueWorkflow.size(employeeId).intValue());
-        return queueStatus;
+        return windowQueueWorkflow.joinQueue(employeeId, student, studentQueueStatus);
     }
 
     /**
@@ -308,5 +342,70 @@ public class QueueServiceImpl implements QueueService {
                     " exists");
         }
         return employee;
+    }
+
+    /**
+     * Sets the position and wait time based on the combined structure of multiple queues
+     *
+     * @param queueStatus current status of the student in the queue
+     */
+    private void setOverallPositionAndWaitTime(QueueStatus queueStatus) {
+        QueueType queueType = queueStatus.getQueueType();
+
+        switch (queueType) {
+
+            case VIRTUAL:
+                queueStatus.setPosition(queueStatus.getPosition() + MAX_EMPLOYEE_QUEUE_SIZE);
+                queueStatus.setWaitTime(getOverallWaitTime(queueStatus.getCompanyId(),
+                        queueStatus.getRole(), queueStatus.getPosition()));
+                break;
+
+            case WINDOW:
+                Employee employee = queueStatus.getEmployee();
+                int position = queueStatus.getPosition() + physicalQueueWorkflow
+                        .size(employee.getId()).intValue();
+                queueStatus.setPosition(position);
+                queueStatus.setWaitTime((int) ((position - 1) * calcEmployeeAverageTime(employee)));
+                break;
+
+            case PHYSICAL:
+                queueStatus.setWaitTime((int) ((queueStatus.getPosition() - 1) *
+                        calcEmployeeAverageTime(queueStatus.getEmployee())));
+                break;
+
+            default:
+                throw new InvalidRequestException("QueueType mismatch");
+        }
+    }
+
+    /**
+     * Calculates and returns the average time spent by the employee talking to a student
+     *
+     * @param employee The employee whose average time is to be calculated
+     * @return double Average time spent by the employee talking to a student
+     */
+    private double calcEmployeeAverageTime(Employee employee) {
+        return employee.getTotalTimeSpent() * 1. / Math.max(employee.getNumRegisteredStudents(), 1);
+    }
+
+    /**
+     * Returns the wait time for the student in the virtual queue of a given company and role
+     *
+     * @param companyId id of the company whose queue the student is a part of
+     * @param role role associated with the queue the student is a part of
+     * @param position current position of the student
+     * @return wait time in seconds
+     */
+    private int getOverallWaitTime(String companyId, Role role, int position) {
+        double sum = 0;
+        Set<String> employeeIds = virtualQueueWorkflow.getVirtualQueueData(companyId, role)
+                .getEmployeeIds();
+
+        for (String id: employeeIds) {
+            Employee employee = getEmployeeWithId(id);
+            sum += calcEmployeeAverageTime(employee);
+        }
+        double waitTime = (position - 1) * sum / employeeIds.size();
+        return (int) waitTime;
     }
 }

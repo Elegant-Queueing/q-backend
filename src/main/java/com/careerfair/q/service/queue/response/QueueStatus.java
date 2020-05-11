@@ -12,6 +12,9 @@ import lombok.NonNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class QueueStatus {
 
+    @JsonProperty("company-id")
+    private final String companyId;
+
     @JsonProperty("queue-id")
     private final String queueId;
 
@@ -22,11 +25,10 @@ public class QueueStatus {
     private final Role role;
 
     @JsonProperty("position")
-    @NonNull
     private int position;
 
     @JsonProperty("wait-time")
-    private final int waitTime;
+    private int waitTime;  // in seconds
 
     @JsonProperty("employee")
     private Employee employee;

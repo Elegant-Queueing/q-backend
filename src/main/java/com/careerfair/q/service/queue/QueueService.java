@@ -96,4 +96,14 @@ public interface QueueService {
      * @return RemoveStudentResponse
      */
     RemoveStudentResponse skipStudent(String employeeId, String studentId);
+
+    /**
+     * Clears all data in Redis. USED FOR TESTING ONLY
+     */
+    void clearAll();
+
+    /**
+     * Gets all data in Redis. USED FOR TESTING ONLY
+     */
+    void getAll();
 }
