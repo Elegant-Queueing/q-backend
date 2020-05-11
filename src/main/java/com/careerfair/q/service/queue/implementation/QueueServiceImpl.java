@@ -28,7 +28,7 @@ public class QueueServiceImpl implements QueueService {
     public static final String STUDENT_CACHE_NAME = "students";
     public static final int BUFFER = 10;   // in seconds
     public static final int WINDOW = 300;  // in seconds
-    public static final long MAX_EMPLOYEE_QUEUE_SIZE = 5;
+    public static final int MAX_EMPLOYEE_QUEUE_SIZE = 5;
 
     @Autowired private VirtualQueueWorkflow virtualQueueWorkflow;
     @Autowired private WindowQueueWorkflow windowQueueWorkflow;
@@ -56,13 +56,11 @@ public class QueueServiceImpl implements QueueService {
     @Override
     public JoinQueueResponse joinVirtualQueue(String companyId, Role role, Student student) {
         QueueStatus status = virtualQueueWorkflow.joinQueue(companyId, role, student);
-        status.setPosition(status.getPosition() + (int) MAX_EMPLOYEE_QUEUE_SIZE);
+        status.setPosition(status.getPosition() + MAX_EMPLOYEE_QUEUE_SIZE);
 
         String employeeId = getEmployeeWithMostQueueSpace(companyId, role);
         if (employeeId != null) {
             status = shiftStudentToWindow(companyId, employeeId, role, student);
-            status.setPosition(status.getPosition()
-                    + physicalQueueWorkflow.size(employeeId).intValue());
         }
 
         return new JoinQueueResponse(status);
@@ -123,10 +121,13 @@ public class QueueServiceImpl implements QueueService {
 
             case VIRTUAL:
                 queueStatus = virtualQueueWorkflow.getQueueStatus(studentQueueStatus);
+                queueStatus.setPosition(queueStatus.getPosition() + MAX_EMPLOYEE_QUEUE_SIZE);
                 break;
 
             case WINDOW:
                 queueStatus = windowQueueWorkflow.getQueueStatus(studentQueueStatus);
+                queueStatus.setPosition(queueStatus.getPosition() +
+                        physicalQueueWorkflow.size(studentQueueStatus.getEmployeeId()).intValue());
                 break;
 
             case PHYSICAL:
@@ -342,7 +343,11 @@ public class QueueServiceImpl implements QueueService {
                                              Student student) {
         StudentQueueStatus studentQueueStatus = virtualQueueWorkflow.leaveQueue(companyId,
                 student.getId(), role);
-        return windowQueueWorkflow.joinQueue(employeeId, student, studentQueueStatus);
+        QueueStatus queueStatus =  windowQueueWorkflow.joinQueue(employeeId, student,
+                studentQueueStatus);
+        queueStatus.setPosition(queueStatus.getPosition() +
+                physicalQueueWorkflow.size(employeeId).intValue());
+        return queueStatus;
     }
 
     /**

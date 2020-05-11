@@ -155,7 +155,7 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
                 .range(studentQueueStatus.getQueueId(), 0L, -1L);
         assert studentsInQueue != null;
 
-        int position = getStudentPosition(studentQueueStatus.getStudentId(), studentsInQueue);
+        int position = getStudentPosition(studentQueueStatus.getStudentId(), studentsInQueue) + 1;
         return createQueueStatus(studentQueueStatus, employee, position);
     }
 
