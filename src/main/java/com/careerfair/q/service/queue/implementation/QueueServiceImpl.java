@@ -56,10 +56,13 @@ public class QueueServiceImpl implements QueueService {
     @Override
     public JoinQueueResponse joinVirtualQueue(String companyId, Role role, Student student) {
         QueueStatus status = virtualQueueWorkflow.joinQueue(companyId, role, student);
+        status.setPosition(status.getPosition() + (int) MAX_EMPLOYEE_QUEUE_SIZE);
 
         String employeeId = getEmployeeWithMostQueueSpace(companyId, role);
         if (employeeId != null) {
             status = shiftStudentToWindow(companyId, employeeId, role, student);
+            status.setPosition(status.getPosition()
+                    + physicalQueueWorkflow.size(employeeId).intValue());
         }
 
         return new JoinQueueResponse(status);
