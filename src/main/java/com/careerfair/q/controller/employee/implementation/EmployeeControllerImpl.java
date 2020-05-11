@@ -26,7 +26,7 @@ public class EmployeeControllerImpl implements EmployeeController {
     @GetMapping("/get/email/{email}")
     @Override
     public GetEmployeeResponse getEmployeeWithEmail(@PathVariable("email") String email) {
-        return employeeService.getEmployeeWithId(email);
+        return employeeService.getEmployeeWithEmail(email);
     }
 
     @PutMapping("/update/{id}")

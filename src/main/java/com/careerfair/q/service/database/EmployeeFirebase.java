@@ -9,17 +9,16 @@ public interface EmployeeFirebase {
     /**
      * Gets the employee profile from firebase
      *
-     * @param id employee's id
+     * @param employeeId id of the employee whose data is to retrieved
      * @return Employee
      */
-    Employee getEmployee(String id) throws ExecutionException, InterruptedException,
-            ClassNotFoundException;
+    Employee getEmployeeWithId(String employeeId) throws ExecutionException, InterruptedException;
 
     /**
      * Gets the employee profile from firebase
      *
-     * @param email employee's email
+     * @param email email of the employee whose data is to retrieved
      * @return Employee
      */
-    Employee getEmployeeByEmail(String email) throws ExecutionException, InterruptedException;
+    Employee getEmployeeWithEmail(String email) throws ExecutionException, InterruptedException;
 }

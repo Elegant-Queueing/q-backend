@@ -22,8 +22,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public GetEmployeeResponse getEmployeeWithId(String employeeId) {
         try {
-            return new GetEmployeeResponse(employeeFirebase.getEmployee(employeeId));
-        } catch (ExecutionException | InterruptedException | ClassNotFoundException ex) {
+            return new GetEmployeeResponse(employeeFirebase.getEmployeeWithId(employeeId));
+        } catch (ExecutionException | InterruptedException ex) {
             throw new InvalidRequestException(ex.getMessage());
         }
     }
@@ -31,8 +31,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public GetEmployeeResponse getEmployeeWithEmail(String email) {
         try {
-            return new GetEmployeeResponse(employeeFirebase.getEmployeeByEmail(email));
+            System.out.println(email);
+            return new GetEmployeeResponse(employeeFirebase.getEmployeeWithEmail(email));
         } catch (ExecutionException | InterruptedException ex) {
+            System.out.println("here");
             throw new InvalidRequestException(ex.getMessage());
         }
     }
