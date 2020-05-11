@@ -6,6 +6,7 @@ import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
+import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.implementation.WindowQueueWorkflowImpl;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +45,8 @@ public class WindowQueueWorkflowTest {
     private Student student;
     @Mock
     private StudentQueueStatus studentQueueStatus;
+    @Mock
+    private PhysicalQueueWorkflow physicalQueueWorkflow;
 
     @InjectMocks
     private WindowQueueWorkflow windowQueueWorkflow = new WindowQueueWorkflowImpl();
@@ -139,7 +142,7 @@ public class WindowQueueWorkflowTest {
 
     @Test
     public void testRemoveQueueEmpty() {
-        employee.setWindowQueueId("pq1");
+        employee.setWindowQueueId("wq1");
         studentQueueStatus.setEmployeeId("e1");
 
         List<Student> students = Lists.newArrayList();
@@ -158,7 +161,7 @@ public class WindowQueueWorkflowTest {
 
     @Test
     public void testSize() {
-        employee.setWindowQueueId("pq1");
+        employee.setWindowQueueId("wq1");
 
         doReturn(employee).when(employeeHashOperations).get(anyString(), any());
         doReturn(1L).when(queueListOperations).size(anyString());
@@ -166,6 +169,24 @@ public class WindowQueueWorkflowTest {
         Long size = windowQueueWorkflow.size("e1");
 
         assertEquals(size, 1L);
+    }
+
+    @Test
+    public void testGetQueueStatus() {
+        employee.setWindowQueueId("wq1");
+
+        studentQueueStatus.setEmployeeId("e1");
+        studentQueueStatus.setQueueType(QueueType.WINDOW);
+        studentQueueStatus.setQueueId("wq1");
+
+        List<Student> students = Lists.newArrayList(student);
+
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn(students).when(queueListOperations).range(anyString(), anyLong(), anyLong());
+
+        QueueStatus queueStatus = windowQueueWorkflow.getQueueStatus(studentQueueStatus);
+
+        assertEquals(queueStatus.getPosition(), 1);
     }
 
     private Answer addStudentAnswer(List<Student> students) {
