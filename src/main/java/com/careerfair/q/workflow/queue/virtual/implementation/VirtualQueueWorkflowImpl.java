@@ -52,7 +52,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         studentQueueStatus.setQueueId(virtualQueueId);
         studentQueueStatus.setQueueType(QueueType.VIRTUAL);
         studentRedisTemplate.opsForHash().put(STUDENT_CACHE_NAME, studentId, studentQueueStatus);
-        return createQueueStatus(studentQueueStatus, virtualQueueData);
+        return createQueueStatus(studentQueueStatus);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         VirtualQueueData virtualQueueData = getVirtualQueueData(companyId, role);
         if (virtualQueueData.getEmployeeIds().isEmpty()) {
             throw new InvalidRequestException("No employee associated with virtual " +
-                    "queue for companyId=" + companyId + " and role= " + role);
+                    "queue for companyId=" + companyId + " and role=" + role);
         }
 
         String virtualQueueId = studentQueueStatus.getQueueId();
@@ -122,7 +122,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         Employee employee = getEmployeeWithId(employeeId);
         if (employee.getVirtualQueueId() == null) {
             throw new InvalidRequestException("Employee with employeeId=" + employeeId
-                    + "is not associated with a virtual queue");
+                    + " is not associated with a virtual queue");
         }
         String companyId = employee.getCompanyId();
         Role role = employee.getRole();
@@ -171,9 +171,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
 
     @Override
     public QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus) {
-        VirtualQueueData virtualQueueData = getVirtualQueueData(studentQueueStatus.getCompanyId(),
-                studentQueueStatus.getRole());
-        return createQueueStatus(studentQueueStatus, virtualQueueData);
+        return createQueueStatus(studentQueueStatus);
     }
 
     @Override
@@ -182,7 +180,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
                 .get(companyId, role);
         if (virtualQueueData == null) {
             throw new InvalidRequestException("No virtual queue present for companyId="
-                    + companyId + " and role= " + role);
+                    + companyId + " and role=" + role);
         }
         return virtualQueueData;
     }
@@ -212,11 +210,9 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
      * Creates and returns QueueStatus based on the given studentQueueStatus and virtualQueueData
      *
      * @param studentQueueStatus current status of the student
-     * @param virtualQueueData current data of the virtual queue that the student is in
      * @return QueueStatus
      */
-    private QueueStatus createQueueStatus(StudentQueueStatus studentQueueStatus,
-                                          VirtualQueueData virtualQueueData) {
+    private QueueStatus createQueueStatus(StudentQueueStatus studentQueueStatus) {
         String companyId = studentQueueStatus.getCompanyId();
         Role role = studentQueueStatus.getRole();
         long currentPosition = size(companyId, role);
