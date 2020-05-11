@@ -2,18 +2,27 @@ package com.careerfair.q.service.employee;
 
 import com.careerfair.q.service.employee.request.AddEmployeeRequest;
 import com.careerfair.q.service.employee.request.UpdateEmployeeRequest;
-import com.careerfair.q.service.employee.response.AddEmployeeResponse;
-import com.careerfair.q.service.employee.response.DeleteEmployeeResponse;
-import com.careerfair.q.service.employee.response.GetEmployeeResponse;
-import com.careerfair.q.service.employee.response.UpdateEmployeeResponse;
+import com.careerfair.q.service.employee.response.*;
+
+import java.util.concurrent.ExecutionException;
 
 public interface EmployeeService {
+
     /**
+     * Gets the employee profile
      *
-     * @param id
+     * @param id employee's id
+     * @return GetEmployeeResponse
+     */
+    GetEmployeeResponse getEmployee(String id) throws InterruptedException, ExecutionException, ClassNotFoundException;
+
+    /**
+     * Gets the employee profile by their email
+     *
+     * @param email employee's email
      * @return
      */
-    GetEmployeeResponse getEmployee(String id);
+    GetEmployeeResponse getEmployeeByEmail(String email) throws ExecutionException, InterruptedException;
 
     /**
      *
@@ -36,4 +45,11 @@ public interface EmployeeService {
      * @return
      */
     AddEmployeeResponse addEmployee(AddEmployeeRequest addEmployeeRequest);
+
+    /**
+     * Gets all the fairs
+     *
+     * @return GetAllFairsResponse
+     */
+    GetAllFairsResponse getAllFairs() throws ExecutionException, InterruptedException;
 }
