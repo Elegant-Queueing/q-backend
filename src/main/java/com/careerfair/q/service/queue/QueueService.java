@@ -97,4 +97,7 @@ public interface QueueService {
      */
     RemoveStudentResponse skipStudent(String employeeId, String studentId);
 
+    void clearAll();
+
+    void getAll();
 }

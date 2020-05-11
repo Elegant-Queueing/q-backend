@@ -92,6 +92,7 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     @Override
     protected void updateStudentQueueStatus(StudentQueueStatus studentQueueStatus,
                                             Employee employee) {
+        studentQueueStatus.setEmployeeId(employee.getId());
         studentQueueStatus.setQueueId(employee.getWindowQueueId());
         studentQueueStatus.setQueueType(QueueType.WINDOW);
         studentQueueStatus.setJoinedWindowQueueAt(Timestamp.now());

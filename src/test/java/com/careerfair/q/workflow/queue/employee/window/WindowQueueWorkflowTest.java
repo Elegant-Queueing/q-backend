@@ -83,6 +83,7 @@ public class WindowQueueWorkflowTest {
                 studentQueueStatus);
 
         assertNotNull(studentQueueStatus.getJoinedWindowQueueAt());
+        assertEquals(studentQueueStatus.getEmployeeId(), employee.getId());
 
         assertEquals(queueStatus.getQueueId(), employee.getWindowQueueId());
         assertEquals(queueStatus.getQueueType(), QueueType.WINDOW);

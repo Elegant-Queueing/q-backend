@@ -1,6 +1,7 @@
 package com.careerfair.q.controller.queue.implementation;
 
 import com.careerfair.q.controller.queue.QueueController;
+import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.response.*;
@@ -26,12 +27,15 @@ public class QueueControllerImpl implements QueueController {
         return queueService.getAllCompaniesWaitTime(role);
     }
 
-    @PostMapping("/join/company-id/{company-id}/student-id/{student-id}/role/{role}")
+    @PostMapping("/join/company-id/{company-id}/student-id/{student-id}/role/{role}/name/{name}")
     @Override
     public JoinQueueResponse joinQueue(@PathVariable("company-id") String companyId,
                                        @PathVariable("student-id") String studentId,
-                                       @PathVariable("role") Role role) {
-        return queueService.joinVirtualQueue(companyId, studentId, role);
+                                       @PathVariable("role") Role role,
+                                       @PathVariable("name") String name) {
+        // TODO: remove this vvvvv and accept a student object. Also change post mapping
+        Student student = new Student(studentId, name);
+        return queueService.joinVirtualQueue(companyId, role, student);
     }
 
     @PostMapping("/join/employee-id/{employee-id}/student-id/{student-id}")
@@ -44,8 +48,8 @@ public class QueueControllerImpl implements QueueController {
     @DeleteMapping("/leave/company-id/{company-id}/student-id/{student-id}/role/{role}")
     @Override
     public void leaveQueue(@PathVariable("company-id") String companyId,
-                                         @PathVariable("student-id") String studentId,
-                                         @PathVariable("role") Role role) {
+                           @PathVariable("student-id") String studentId,
+                           @PathVariable("role") Role role) {
         queueService.leaveQueue(companyId, studentId, role);
     }
 
@@ -87,5 +91,15 @@ public class QueueControllerImpl implements QueueController {
     public RemoveStudentResponse removeStudent(@PathVariable("employee-id") String employeeId,
                                                @PathVariable("student-id") String studentId) {
         return queueService.skipStudent(employeeId, studentId);
+    }
+
+    @DeleteMapping("/clearAll")
+    public void clearAll() {
+        queueService.clearAll();
+    }
+
+    @GetMapping("/getAll")
+    public void getAll() {
+        queueService.getAll();
     }
 }

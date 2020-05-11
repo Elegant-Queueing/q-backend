@@ -94,6 +94,7 @@ public class PhysicalQueueWorkflowTest {
         assertEquals(studentQueueStatus.getJoinedWindowQueueAt(), joinedWindowQueueAt);
         assertNotNull(studentQueueStatus.getJoinedPhysicalQueueAt());
         assertEquals(studentQueueStatus.getPositionWhenJoinedPhysicalQueue(), 1L);
+        assertEquals(studentQueueStatus.getEmployeeId(), employee.getId());
 
         assertEquals(queueStatus.getQueueId(), employee.getPhysicalQueueId());
         assertEquals(queueStatus.getQueueType(), QueueType.PHYSICAL);
