@@ -16,9 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -36,10 +33,6 @@ public class QueueServiceImpl implements QueueService {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
-
-    // TODO: vvvv DELETE THESE vvvv ONLY FOR TESTING
-    @Autowired private RedisTemplate<String, Role> companyRedisTemplate;
-    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
 
     @Override
     public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
@@ -219,57 +212,6 @@ public class QueueServiceImpl implements QueueService {
             shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
         }
         return new RemoveStudentResponse(employeeQueueData);
-    }
-
-    @Override
-    public void clearAll() {
-        Collection<String> keys = queueRedisTemplate.keys("*");
-        if (keys != null) {
-            queueRedisTemplate.delete(keys);
-        }
-
-        keys = employeeRedisTemplate.keys("*");
-        if (keys != null) {
-            employeeRedisTemplate.delete(keys);
-        }
-
-        keys = studentRedisTemplate.keys("*");
-        if (keys != null) {
-            studentRedisTemplate.delete(keys);
-        }
-
-        keys = companyRedisTemplate.keys("*");
-        if (keys != null) {
-            companyRedisTemplate.delete(keys);
-        }
-
-    }
-
-    @Override
-    public void getAll() {
-        Collection<String> keys = queueRedisTemplate.keys("*");
-        System.out.println("\n\n");
-        System.out.println("*****************************");
-        System.out.println("All keys: " + keys);
-        if (keys != null) {
-            for (String key: keys) {
-                System.out.println(key + ": ");
-                try {
-                    List<Student> list = queueRedisTemplate.opsForList().range(key, 0L, -1L);
-                    System.out.println("\t" + list);
-                } catch(Exception e) {
-                    Map<Object, Object> map = companyRedisTemplate.opsForHash().entries(key);
-                    for(Object mapKey: map.keySet()) {
-                        System.out.println("\t" + mapKey + ":" + map.get(mapKey));
-                    }
-                }
-                System.out.println("--------");
-
-            }
-        }
-
-        System.out.println("*****************************");
-
     }
 
     /**
