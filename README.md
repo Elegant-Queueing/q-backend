@@ -1,5 +1,8 @@
 # q-backend
 
+## Javadocs
+- Javadocs available here: elegant-queueing.github.io
+
 ## Setting up Redis
 
 - Download and install Redis: https://redis.io/download
