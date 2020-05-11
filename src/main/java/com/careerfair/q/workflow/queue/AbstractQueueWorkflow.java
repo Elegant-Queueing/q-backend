@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STUDENT_CACHE_NAME;
+import static com.careerfair.q.util.constant.Queue.EMPLOYEE_CACHE_NAME;
+import static com.careerfair.q.util.constant.Queue.STUDENT_CACHE_NAME;
 
 public abstract class AbstractQueueWorkflow {
 
