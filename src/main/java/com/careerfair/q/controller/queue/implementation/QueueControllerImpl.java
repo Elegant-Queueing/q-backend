@@ -73,6 +73,11 @@ public class QueueControllerImpl implements QueueController {
         return queueService.getEmployeeQueueData(employeeId);
     }
 
+    @GetMapping("/data/is-open/employee-id/{employee-id}")
+    public boolean getIsEmployeeQueueOpen(@PathVariable("employee-id") String employeeId) {
+        return queueService.isEmployeeQueueOpen(employeeId);
+    }
+
     @PutMapping("/status/employee-id/{employee-id}")
     @Override
     public PauseQueueResponse pauseQueue(@PathVariable("employee-id") String employeeId) {

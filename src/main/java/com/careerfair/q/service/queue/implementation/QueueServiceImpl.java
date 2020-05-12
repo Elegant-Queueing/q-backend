@@ -220,6 +220,13 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
+    public boolean isEmployeeQueueOpen(String employeeId) {
+        Employee employee = (Employee) employeeRedisTemplate.opsForHash()
+                .get(EMPLOYEE_CACHE_NAME, employeeId);
+        return employee != null;
+    }
+
+    @Override
     public void clearAll() {
         Collection<String> keys = studentRedisTemplate.keys("*");  // redis magic
         if (keys != null) {

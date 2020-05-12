@@ -2,6 +2,7 @@ package com.careerfair.q.controller.queue;
 
 import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.util.enums.Role;
+import org.springframework.web.bind.annotation.PathVariable;
 
 public interface QueueController {
 
@@ -95,4 +96,12 @@ public interface QueueController {
      * @return RemoveStudentResponse
      */
     RemoveStudentResponse removeStudent(String employeeId, String studentId);
+
+    /**
+     * Returns whether the given employee has an open queue or not
+     *
+     * @param employeeId employee's id
+     * @return true if the employee has an open queue, false otherwise
+     */
+    boolean getIsEmployeeQueueOpen(String employeeId);
 }
