@@ -24,6 +24,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
 
+import static com.careerfair.q.util.constant.Queue.INITIAL_TIME_SPENT;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -130,6 +131,7 @@ public class PhysicalQueueWorkflowTest {
         Employee employee = physicalQueueWorkflow.addQueue(this.employee.getId());
 
         assertNotNull(employee.getPhysicalQueueId());
+        assertEquals(employee.getTotalTimeSpent(), INITIAL_TIME_SPENT);
     }
 
     @Test

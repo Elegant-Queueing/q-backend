@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.*;
+import static com.careerfair.q.util.constant.Queue.*;
 
 @Component
 public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
@@ -71,6 +72,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         }
 
         employee.setPhysicalQueueId(generateRandomId());
+        employee.setTotalTimeSpent(INITIAL_TIME_SPENT);
         employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
         return employee;
     }
