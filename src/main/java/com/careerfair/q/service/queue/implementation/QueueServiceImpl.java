@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -217,41 +219,51 @@ public class QueueServiceImpl implements QueueService {
         return removeStudentFromQueue(employeeId, employeeQueueData);
     }
 
-//    @Override
-//    public void clearAll() {
-//        Collection<String> keys = studentRedisTemplate.keys("*");  // redis magic
-//        if (keys != null) {
-//            studentRedisTemplate.delete(keys);
-//        }
-//    }
-//
-//    @Override
-//    public void getAll() {
-//        Collection<String> keys = studentRedisTemplate.keys("*");
+    @Override
+    public void clearAll() {
+        Collection<String> keys = studentRedisTemplate.keys("*");  // redis magic
+        if (keys != null) {
+            studentRedisTemplate.delete(keys);
+        }
+    }
+
+    @Override
+    public String getAll() {
+        Collection<String> keys = studentRedisTemplate.keys("*");
+        StringBuilder stringBuilder = new StringBuilder();
 //        System.out.println("\n\n");
+        stringBuilder.append("\n\n\n");
 //        System.out.println("*****************************");
+        stringBuilder.append("*****************************\n");
 //        System.out.println("All keys: " + keys);
-//        if (keys != null) {
-//            for (String key: keys) {
+        stringBuilder.append("All keys:" + keys + "\n");
+        if (keys != null) {
+            for (String key: keys) {
 //                System.out.println(key + ": ");
-//                try {
-//                    List<Student> list = queueRedisTemplate.opsForList().range(key, 0L, -1L);
+                stringBuilder.append(key + ":\n");
+                try {
+                    List<Student> list = queueRedisTemplate.opsForList().range(key, 0L, -1L);
 //                    System.out.println("\t" + list);
-//                } catch(Exception e) {
-//                    // redis magic
-//                    Map<Object, Object> map = studentRedisTemplate.opsForHash().entries(key);
-//                    for(Object mapKey: map.keySet()) {
+                    stringBuilder.append("\t" + list + "\n");
+                } catch(Exception e) {
+                    // redis magic
+                    Map<Object, Object> map = studentRedisTemplate.opsForHash().entries(key);
+                    for(Object mapKey: map.keySet()) {
 //                        System.out.println("\t" + mapKey + ":" + map.get(mapKey));
-//                    }
-//                }
+                        stringBuilder.append("\t" + mapKey + ":" + map.get(mapKey) + "\n");
+                    }
+                }
 //                System.out.println("--------");
-//
-//            }
-//        }
-//
+                stringBuilder.append("--------\n");
+
+            }
+        }
+
 //        System.out.println("*****************************");
-//
-//    }
+        stringBuilder.append("*****************************\n");
+        return stringBuilder.toString();
+
+    }
 
     /**
      * Removes the student from the given employee's queue
