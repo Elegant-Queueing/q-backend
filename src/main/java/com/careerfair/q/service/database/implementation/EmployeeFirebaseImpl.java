@@ -2,7 +2,7 @@ package com.careerfair.q.service.database.implementation;
 
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.service.database.EmployeeFirebase;
-import com.careerfair.q.util.exception.InvalidRequestException;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -27,7 +27,7 @@ public class EmployeeFirebaseImpl implements EmployeeFirebase {
                 .toObject(Employee.class);
 
         if (employee == null) {
-            throw new InvalidRequestException("No employee with id=" + employeeId);
+            throw new FirebaseException("No employee with id=" + employeeId);
         }
 
         employee.setEmployeeId(employeeId);
@@ -53,6 +53,6 @@ public class EmployeeFirebaseImpl implements EmployeeFirebase {
             }
         }
 
-        throw new InvalidRequestException("No employee with the given email=" + email);
+        throw new FirebaseException("No employee with the given email=" + email);
     }
 }

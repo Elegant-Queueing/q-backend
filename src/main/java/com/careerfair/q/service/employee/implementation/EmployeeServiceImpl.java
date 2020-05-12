@@ -8,6 +8,7 @@ import com.careerfair.q.service.employee.response.AddEmployeeResponse;
 import com.careerfair.q.service.employee.response.DeleteEmployeeResponse;
 import com.careerfair.q.service.employee.response.GetEmployeeResponse;
 import com.careerfair.q.service.employee.response.UpdateEmployeeResponse;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public GetEmployeeResponse getEmployeeWithId(String employeeId) {
         try {
             return new GetEmployeeResponse(employeeFirebase.getEmployeeWithId(employeeId));
-        } catch (ExecutionException | InterruptedException ex) {
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
             throw new InvalidRequestException(ex.getMessage());
         }
     }
@@ -32,8 +33,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public GetEmployeeResponse getEmployeeWithEmail(String email) {
         try {
             return new GetEmployeeResponse(employeeFirebase.getEmployeeWithEmail(email));
-        } catch (ExecutionException | InterruptedException ex) {
-            System.out.println("here");
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
             throw new InvalidRequestException(ex.getMessage());
         }
     }

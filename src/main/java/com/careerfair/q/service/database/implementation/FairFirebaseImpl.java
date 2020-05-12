@@ -3,7 +3,7 @@ package com.careerfair.q.service.database.implementation;
 import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.service.database.FairFirebase;
-import com.careerfair.q.util.exception.InvalidRequestException;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -49,7 +49,7 @@ public class FairFirebaseImpl implements FairFirebase {
                 .toObject(Fair.class);
 
         if (fair == null) {
-            throw new InvalidRequestException("No fair exists with id=" + fairId);
+            throw new FirebaseException("No fair exists with id=" + fairId);
         }
 
         fair.setFairId(fairId);
@@ -62,7 +62,7 @@ public class FairFirebaseImpl implements FairFirebase {
         Fair fair = getFair(fairId);
 
         if (!fair.getCompanies().contains(companyId)) {
-            throw new InvalidRequestException("The company with company id=" + companyId +
+            throw new FirebaseException("The company with company id=" + companyId +
                     " is not present in the fair with fair id=" + fairId);
         }
 
@@ -73,7 +73,7 @@ public class FairFirebaseImpl implements FairFirebase {
                 .toObject(Company.class);
 
         if (company == null) {
-            throw new InvalidRequestException("No company exists with id=" + companyId);
+            throw new FirebaseException("No company exists with id=" + companyId);
         }
 
         return company;
