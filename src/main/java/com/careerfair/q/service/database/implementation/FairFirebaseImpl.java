@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import static com.careerfair.q.util.contant.Fair.COMPANY_COLLECTION;
-import static com.careerfair.q.util.contant.Fair.FAIR_COLLECTION;
+import static com.careerfair.q.util.contant.Firebase.COMPANY_COLLECTION;
+import static com.careerfair.q.util.contant.Firebase.FAIR_COLLECTION;
 
 @Component
 public class FairFirebaseImpl implements FairFirebase {

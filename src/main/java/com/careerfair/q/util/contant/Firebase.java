@@ -1,6 +1,6 @@
 package com.careerfair.q.util.contant;
 
-public class Fair {
+public class Firebase {
 
     /**
      * Name of collection that stores the employees
