@@ -27,7 +27,7 @@ public class EmployeeFirebaseImpl implements EmployeeFirebase {
                 .toObject(Employee.class);
 
         if (employee == null) {
-            throw new FirebaseException("No employee with id=" + employeeId);
+            throw new FirebaseException("No employee with employee id=" + employeeId);
         }
 
         employee.setEmployeeId(employeeId);
@@ -53,6 +53,6 @@ public class EmployeeFirebaseImpl implements EmployeeFirebase {
             }
         }
 
-        throw new FirebaseException("No employee with the given email=" + email);
+        throw new FirebaseException("No employee with email=" + email);
     }
 }

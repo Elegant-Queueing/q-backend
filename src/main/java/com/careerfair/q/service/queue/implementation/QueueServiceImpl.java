@@ -4,10 +4,14 @@ import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
+import com.careerfair.q.service.database.EmployeeFirebase;
+import com.careerfair.q.service.database.FairFirebase;
+import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.WindowQueueWorkflow;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import static com.careerfair.q.util.constant.Queue.*;
 
@@ -31,7 +36,11 @@ public class QueueServiceImpl implements QueueService {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
-    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+//    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+
+    @Autowired private StudentFirebase studentFirebase;
+    @Autowired private EmployeeFirebase employeeFirebase;
+    @Autowired private FairFirebase fairFirebase;
 
     @Override
     public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
@@ -72,6 +81,12 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public JoinQueueResponse joinVirtualQueue(String companyId, Role role, Student student) {
+        try {
+            studentFirebase.getStudentWithId(student.getId());
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
+            throw new FirebaseException(ex.getMessage());
+        }
+
         QueueStatus status = virtualQueueWorkflow.joinQueue(companyId, role, student);
         String employeeId = getEmployeeWithMostQueueSpace(companyId, role);
         if (employeeId != null) {
@@ -157,6 +172,23 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public AddQueueResponse addQueue(String companyId, String employeeId, Role role) {
+        try {
+            com.careerfair.q.model.db.Employee employee = employeeFirebase.getEmployeeWithId(
+                    employeeId);
+
+            if (!companyId.equals(employee.getCompanyId())) {
+                throw new InvalidRequestException("Employee with employee id=" + employeeId +
+                        " is not associated with company with company id=" + companyId);
+            } else if (employee.getRole() != role) {
+                throw new InvalidRequestException("Employee with employee id=" + employeeId +
+                        " is not associated with the role=" + role);
+            }
+
+            fairFirebase.getCompanyWithId("1tgJU9lL0kdzrElX7C3Y", companyId);
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
+            throw new InvalidRequestException(ex.getMessage());
+        }
+
         Employee employee = (Employee) employeeRedisTemplate.opsForHash()
                 .get(EMPLOYEE_CACHE_NAME, employeeId);
         if (employee == null) {
@@ -207,6 +239,13 @@ public class QueueServiceImpl implements QueueService {
     public RemoveStudentResponse registerStudent(String employeeId, String studentId) {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.registerStudent(employeeId,
                 studentId);
+
+        try {
+            studentFirebase.registerStudent(studentId, employeeId);
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
+            throw new InvalidRequestException(ex.getMessage());
+        }
+
         return removeStudentFromQueue(employeeId, employeeQueueData);
     }
 

@@ -3,7 +3,6 @@ package com.careerfair.q.workflow.queue.employee.physical;
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
-import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
@@ -48,9 +47,6 @@ public class PhysicalQueueWorkflowTest {
     private ListOperations<String, Student> queueListOperations;
 
     @Mock
-    private StudentFirebase studentFirebase;
-
-    @Mock
     private Employee employee;
     @Mock
     private Student student;
@@ -58,7 +54,7 @@ public class PhysicalQueueWorkflowTest {
     private StudentQueueStatus studentQueueStatus;
 
     @InjectMocks
-    private PhysicalQueueWorkflow physicalQueueWorkflow = new PhysicalQueueWorkflowImpl();
+    private final PhysicalQueueWorkflow physicalQueueWorkflow = new PhysicalQueueWorkflowImpl();
 
     @BeforeEach
     public void setupMock() {
@@ -189,7 +185,6 @@ public class PhysicalQueueWorkflowTest {
         doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
         doReturn(1L).when(studentHashOperations).delete(anyString(), any());
         doReturn(student).when(queueListOperations).leftPop(anyString());
-        doReturn(true).when(studentFirebase).registerStudent(any(), any());
 
         Thread.sleep(1000);
 
