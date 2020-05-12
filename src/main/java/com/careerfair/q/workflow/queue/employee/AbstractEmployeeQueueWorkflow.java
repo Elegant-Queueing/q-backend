@@ -4,7 +4,6 @@ import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.queue.response.QueueStatus;
-import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.AbstractQueueWorkflow;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
 
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STUDENT_CACHE_NAME;
+import static com.careerfair.q.util.constant.Queue.STUDENT_CACHE_NAME;
 
 public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflow {
 
@@ -156,16 +155,6 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
 
         int position = getStudentPosition(studentQueueStatus.getStudentId(), studentsInQueue) + 1;
         return createQueueStatus(studentQueueStatus, employee, position);
-    }
-
-    /**
-     * Calculates and returns the average time spent by the employee talking to a student
-     *
-     * @param employee The employee whose average time is to be calculated
-     * @return double Average time spent by the employee talking to a student
-     */
-    protected double calcEmployeeAverageTime(Employee employee) {
-        return employee.getTotalTimeSpent() * 1. / Math.max(employee.getNumRegisteredStudents(), 1);
     }
 
     /**

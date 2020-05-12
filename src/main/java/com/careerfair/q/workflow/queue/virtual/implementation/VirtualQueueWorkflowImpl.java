@@ -18,8 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.STUDENT_CACHE_NAME;
+import static com.careerfair.q.util.constant.Queue.EMPLOYEE_CACHE_NAME;
+import static com.careerfair.q.util.constant.Queue.STUDENT_CACHE_NAME;
 
 @Component
 public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow

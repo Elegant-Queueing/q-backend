@@ -20,14 +20,10 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.Set;
 
+import static com.careerfair.q.util.constant.Queue.*;
+
 @Service
 public class QueueServiceImpl implements QueueService {
-
-    public static final String EMPLOYEE_CACHE_NAME = "employees";
-    public static final String STUDENT_CACHE_NAME = "students";
-    public static final int BUFFER = 10;   // in seconds
-    public static final int WINDOW = 300;  // in seconds
-    public static final int MAX_EMPLOYEE_QUEUE_SIZE = 5;
 
     @Autowired private VirtualQueueWorkflow virtualQueueWorkflow;
     @Autowired private WindowQueueWorkflow windowQueueWorkflow;
@@ -35,8 +31,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
-//    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
-
+    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
 
     @Override
     public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
@@ -222,26 +217,6 @@ public class QueueServiceImpl implements QueueService {
         return removeStudentFromQueue(employeeId, employeeQueueData);
     }
 
-    /**
-     * Removes the student from the given employee's queue
-     *
-     * @param employeeId id of the employee
-     * @param employeeQueueData data of the queue for the employee
-     * @return RemoveStudentResponse
-     */
-    private RemoveStudentResponse removeStudentFromQueue(String employeeId,
-                                                         EmployeeQueueData employeeQueueData) {
-        Employee employee = getEmployeeWithId(employeeId);
-        String companyId = employee.getCompanyId();
-        Role role = employee.getRole();
-
-        Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
-        if (studentAtHead != null) {
-            shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
-        }
-        return new RemoveStudentResponse(employeeQueueData);
-    }
-
 //    @Override
 //    public void clearAll() {
 //        Collection<String> keys = studentRedisTemplate.keys("*");  // redis magic
@@ -249,7 +224,7 @@ public class QueueServiceImpl implements QueueService {
 //            studentRedisTemplate.delete(keys);
 //        }
 //    }
-
+//
 //    @Override
 //    public void getAll() {
 //        Collection<String> keys = studentRedisTemplate.keys("*");
@@ -277,6 +252,26 @@ public class QueueServiceImpl implements QueueService {
 //        System.out.println("*****************************");
 //
 //    }
+
+    /**
+     * Removes the student from the given employee's queue
+     *
+     * @param employeeId id of the employee
+     * @param employeeQueueData data of the queue for the employee
+     * @return RemoveStudentResponse
+     */
+    private RemoveStudentResponse removeStudentFromQueue(String employeeId,
+                                                         EmployeeQueueData employeeQueueData) {
+        Employee employee = getEmployeeWithId(employeeId);
+        String companyId = employee.getCompanyId();
+        Role role = employee.getRole();
+
+        Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
+        if (studentAtHead != null) {
+            shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
+        }
+        return new RemoveStudentResponse(employeeQueueData);
+    }
 
     /**
      * Get the status of the student in a queue

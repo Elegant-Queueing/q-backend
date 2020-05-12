@@ -7,16 +7,13 @@ import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.employee.AbstractEmployeeQueueWorkflow;
-import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.WindowQueueWorkflow;
 import com.google.cloud.Timestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.EMPLOYEE_CACHE_NAME;
+import static com.careerfair.q.util.constant.Queue.EMPLOYEE_CACHE_NAME;
 
 @Component
 public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow

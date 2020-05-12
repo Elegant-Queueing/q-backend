@@ -1,8 +1,10 @@
 package com.careerfair.q.service.database.implementation;
 
+import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Student;
 import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.util.exception.FirebaseException;
+import com.google.api.client.util.Lists;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
+import static com.careerfair.q.util.constant.Firebase.EMPLOYEE_COLLECTION;
 import static com.careerfair.q.util.constant.Firebase.STUDENT_COLLECTION;
 
 @Service
@@ -30,7 +33,42 @@ public class StudentFirebaseImpl implements StudentFirebase {
     }
 
     @Override
-    public boolean registerStudent(String studentId, String employeeId) {
+    public boolean registerStudent(String studentId, String employeeId) throws ExecutionException,
+            InterruptedException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        Student student = firestore.collection(STUDENT_COLLECTION)
+                .document(studentId)
+                .get().get()
+                .toObject(Student.class);
+
+        if (student == null) {
+            throw new FirebaseException("No student found with student id=" + studentId);
+        }
+
+        Employee employee = firestore.collection(EMPLOYEE_COLLECTION)
+                .document(employeeId)
+                .get().get()
+                .toObject(Employee.class);
+
+        if (employee == null) {
+            throw new FirebaseException("No student found with employee id=" + employeeId);
+        }
+
+        if (student.getEmployees() == null) {
+            student.setEmployees(Lists.newArrayList());
+        }
+        if (employee.getStudents() == null) {
+            employee.setStudents(Lists.newArrayList());
+        }
+
+        student.getEmployees().add(employeeId);
+        employee.getStudents().add(studentId);
+
+        firestore.collection(STUDENT_COLLECTION).document(studentId).update("employees",
+                student.getEmployees());
+        firestore.collection(EMPLOYEE_COLLECTION).document(employeeId).update("students",
+                employee.getStudents());
+
         return true;
     }
 

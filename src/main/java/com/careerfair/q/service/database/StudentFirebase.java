@@ -10,7 +10,7 @@ public interface StudentFirebase {
      */
     void test();
 
-    boolean registerStudent(String studentId, String employeeId);
+    boolean registerStudent(String studentId, String employeeId) throws ExecutionException, InterruptedException;
 
     /**
      * Returns the data of the student associated with the given id
