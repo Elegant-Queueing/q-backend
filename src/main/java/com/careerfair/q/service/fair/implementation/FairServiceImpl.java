@@ -4,6 +4,7 @@ import com.careerfair.q.service.database.FairFirebase;
 import com.careerfair.q.service.fair.FairService;
 import com.careerfair.q.service.fair.response.GetAllFairsResponse;
 import com.careerfair.q.service.fair.response.GetCompanyResponse;
+import com.careerfair.q.service.fair.response.GetFairResponse;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,15 @@ public class FairServiceImpl implements FairService {
     public GetAllFairsResponse getAllFairs() {
         try {
             return new GetAllFairsResponse(fairFirebase.getAllFairs());
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new InvalidRequestException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public GetFairResponse getFairWithId(String fairId) {
+        try {
+            return new GetFairResponse(fairFirebase.getFair(fairId));
         } catch (ExecutionException | InterruptedException ex) {
             throw new InvalidRequestException(ex.getMessage());
         }

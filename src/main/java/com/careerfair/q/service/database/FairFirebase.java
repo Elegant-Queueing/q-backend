@@ -16,6 +16,14 @@ public interface FairFirebase {
     List<Fair> getAllFairs() throws ExecutionException, InterruptedException;
 
     /**
+     * Gets the fair associated with the given id
+     *
+     * @param fairId id of the fair
+     * @return Fair
+     */
+    Fair getFair(String fairId) throws ExecutionException, InterruptedException;
+
+    /**
      * Gets the data of the company with the given id
      *
      * @param companyId id of the company to retrieve

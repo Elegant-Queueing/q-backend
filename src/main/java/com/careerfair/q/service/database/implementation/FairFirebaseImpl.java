@@ -34,6 +34,21 @@ public class FairFirebaseImpl implements FairFirebase {
     }
 
     @Override
+    public Fair getFair(String fairId) throws ExecutionException, InterruptedException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        Fair fair = firestore.collection(FAIR_COLLECTION)
+                .document(fairId)
+                .get().get()
+                .toObject(Fair.class);
+
+        if (fair == null) {
+            throw new InvalidRequestException("No fair exists with id=" + fairId);
+        }
+
+        return fair;
+    }
+
+    @Override
     public Company getCompanyWithId(String companyId) throws ExecutionException, InterruptedException {
         Firestore firestore = FirestoreClient.getFirestore();
         Company company = firestore.collection(COMPANY_COLLECTION)
