@@ -1,6 +1,5 @@
 package com.careerfair.q.service.student.implementation;
 
-import com.careerfair.q.model.db.Student;
 import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.service.student.StudentService;
 import com.careerfair.q.service.student.request.AddStudentRequest;
@@ -9,6 +8,7 @@ import com.careerfair.q.service.student.response.AddStudentResponse;
 import com.careerfair.q.service.student.response.DeleteStudentResponse;
 import com.careerfair.q.service.student.response.GetStudentResponse;
 import com.careerfair.q.service.student.response.UpdateStudentResponse;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,13 +23,8 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public GetStudentResponse getStudentWithId(String studentId) {
         try {
-            Student student = studentFirebase.getStudentWithId(studentId);
-            if (student == null) {
-                throw new InvalidRequestException("No student with student id=" + studentId +
-                        " exists");
-            }
-            return new GetStudentResponse(student);
-        } catch (ExecutionException | InterruptedException ex) {
+            return new GetStudentResponse(studentFirebase.getStudentWithId(studentId));
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
             throw new InvalidRequestException(ex.getMessage());
         }
     }
@@ -37,12 +32,8 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public GetStudentResponse getStudentWithEmail(String email) {
         try {
-            Student student = studentFirebase.getStudentWithEmail(email);
-            if (student == null) {
-                throw new InvalidRequestException("No student with email=" + email + " exists");
-            }
-            return new GetStudentResponse(student);
-        } catch (ExecutionException | InterruptedException ex) {
+            return new GetStudentResponse(studentFirebase.getStudentWithEmail(email));
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
             throw new InvalidRequestException(ex.getMessage());
         }
     }

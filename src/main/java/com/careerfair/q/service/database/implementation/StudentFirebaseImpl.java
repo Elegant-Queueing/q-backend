@@ -2,6 +2,7 @@ package com.careerfair.q.service.database.implementation;
 
 import com.careerfair.q.model.db.Student;
 import com.careerfair.q.service.database.StudentFirebase;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
@@ -43,7 +44,7 @@ public class StudentFirebaseImpl implements StudentFirebase {
         Student student = documentSnapshot.toObject(Student.class);
 
         if (student == null) {
-            return null;
+            throw new FirebaseException("No student with student id=" + studentId + " exists");
         }
 
         student.setStudentId(documentSnapshot.getId());
@@ -69,6 +70,6 @@ public class StudentFirebaseImpl implements StudentFirebase {
             }
         }
 
-        return null;
+        throw new FirebaseException("No student with email=" + email + " exists");
     }
 }
