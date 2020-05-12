@@ -1,15 +1,20 @@
 package com.careerfair.q.service.database.implementation;
 
-import com.careerfair.q.model.redis.Employee;
-import com.careerfair.q.model.redis.Student;
+import com.careerfair.q.model.db.Student;
 import com.careerfair.q.service.database.StudentFirebase;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+
+import static com.careerfair.q.util.constant.Firebase.STUDENT_COLLECTION;
 
 @Service
 public class StudentFirebaseImpl implements StudentFirebase {
@@ -27,5 +32,44 @@ public class StudentFirebaseImpl implements StudentFirebase {
     @Override
     public boolean registerStudent(String studentId, String employeeId) {
         return true;
+    }
+
+    @Override
+    public Student getStudentWithId(String studentId) throws ExecutionException,
+            InterruptedException {
+        Firestore firestore = FirestoreClient.getFirestore();
+
+        DocumentSnapshot documentSnapshot = firestore.collection(STUDENT_COLLECTION)
+                .document(studentId).get().get();
+        Student student = documentSnapshot.toObject(Student.class);
+
+        if (student == null) {
+            throw new FirebaseException("No student with student id=" + studentId + " exists");
+        }
+
+        student.setStudentId(documentSnapshot.getId());
+        return student;
+    }
+
+    @Override
+    public Student getStudentWithEmail(String email) throws ExecutionException,
+            InterruptedException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        CollectionReference collectionReference = firestore.collection(STUDENT_COLLECTION);
+
+        for (DocumentReference documentReference : collectionReference.listDocuments()) {
+            DocumentSnapshot documentSnapshot = documentReference.get().get();
+            String documentEmail = (String) documentSnapshot.get("email");
+
+            if (email.equals(documentEmail)) {
+                Student student = documentSnapshot.toObject(Student.class);
+                assert student != null;
+
+                student.setStudentId(documentSnapshot.getId());
+                return student;
+            }
+        }
+
+        throw new FirebaseException("No student with email=" + email + " exists");
     }
 }
