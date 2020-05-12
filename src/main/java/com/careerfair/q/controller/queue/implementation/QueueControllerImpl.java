@@ -99,7 +99,7 @@ public class QueueControllerImpl implements QueueController {
     }
 
     @GetMapping("/getAll")
-    public void getAll() {
-        queueService.getAll();
+    public String getAll() {
+        return queueService.getAll();
     }
 }
