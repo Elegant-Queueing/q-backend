@@ -386,11 +386,12 @@ public class QueueServiceImpl implements QueueService {
                 int position = queueStatus.getPosition() + physicalQueueWorkflow
                         .size(employee.getId()).intValue();
                 queueStatus.setPosition(position);
-                queueStatus.setWaitTime((int) ((position - 1) * calcEmployeeAverageTime(employee)));
+                queueStatus.setWaitTime((int) (getZeroBasedPosition(position) *
+                        calcEmployeeAverageTime(employee)));
                 break;
 
             case PHYSICAL:
-                queueStatus.setWaitTime((int) ((queueStatus.getPosition() - 1) *
+                queueStatus.setWaitTime((int) (getZeroBasedPosition(queueStatus.getPosition()) *
                         calcEmployeeAverageTime(queueStatus.getEmployee())));
                 break;
 
@@ -426,7 +427,18 @@ public class QueueServiceImpl implements QueueService {
             Employee employee = getEmployeeWithId(id);
             sum += calcEmployeeAverageTime(employee);
         }
-        double waitTime = (position - 1) * sum / employeeIds.size();
+
+        double waitTime = getZeroBasedPosition(position) * sum / employeeIds.size();
         return (int) waitTime;
+    }
+
+    /**
+     * Returns a zero based position
+     *
+     * @param position one based position
+     * @return int zero based position
+     */
+    private int getZeroBasedPosition(int position) {
+        return Math.max(position - 1, 0);
     }
 }
