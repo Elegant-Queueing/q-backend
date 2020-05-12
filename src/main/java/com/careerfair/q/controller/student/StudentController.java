@@ -10,11 +10,20 @@ import com.careerfair.q.service.student.response.UpdateStudentResponse;
 public interface StudentController {
 
     /**
+     * Gets the student with the given id
      *
-     * @param id
-     * @return
+     * @param studentId id of the student to retrieve
+     * @return GetStudentResponse
      */
-    GetStudentResponse getStudent(String id);
+    GetStudentResponse getStudentWithId(String studentId);
+
+    /**
+     * Gets the student with the given email
+     *
+     * @param email email of the student to retrieve
+     * @return GetStudentResponse
+     */
+    GetStudentResponse getStudentWithEmail(String email);
 
     /**
      *
