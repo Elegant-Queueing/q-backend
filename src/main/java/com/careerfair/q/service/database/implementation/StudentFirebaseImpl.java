@@ -3,6 +3,7 @@ package com.careerfair.q.service.database.implementation;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Student;
 import com.careerfair.q.service.database.StudentFirebase;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.google.api.client.util.Lists;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;
@@ -39,7 +40,7 @@ public class StudentFirebaseImpl implements StudentFirebase {
                 .toObject(Student.class);
 
         if (student == null) {
-            return false;
+            throw new FirebaseException("No student found with student id=" + studentId);
         }
 
         Employee employee = firestore.collection(EMPLOYEE_COLLECTION)
@@ -48,7 +49,7 @@ public class StudentFirebaseImpl implements StudentFirebase {
                 .toObject(Employee.class);
 
         if (employee == null) {
-            return false;
+            throw new FirebaseException("No student found with employee id=" + employeeId);
         }
 
         if (student.getEmployees() == null) {

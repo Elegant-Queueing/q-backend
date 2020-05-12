@@ -92,11 +92,9 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
                 checkQueueAssociated(employee), studentId, true);
 
         try {
-            if (!studentFirebase.registerStudent(studentId, employeeId)) {
-                throw new InvalidRequestException("Invalid request to firebase");
-            }
-        } catch (ExecutionException | InterruptedException ex) {
-            throw new FirebaseException("Unexpected error in firebase. Student failed to register");
+            studentFirebase.registerStudent(studentId, employeeId);
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
+            throw new InvalidRequestException(ex.getMessage());
         }
 
         updateRedisEmployee(employee, studentQueueStatus);
