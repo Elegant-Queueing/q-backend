@@ -31,7 +31,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public GetEmployeeResponse getEmployeeWithEmail(String email) {
         try {
-            System.out.println(email);
             return new GetEmployeeResponse(employeeFirebase.getEmployeeWithEmail(email));
         } catch (ExecutionException | InterruptedException ex) {
             System.out.println("here");

@@ -30,7 +30,7 @@ public class EmployeeFirebaseImpl implements EmployeeFirebase {
             throw new InvalidRequestException("No employee with id=" + employeeId);
         }
 
-        employee.setEmployee_id(employeeId);
+        employee.setEmployeeId(employeeId);
         return employee;
     }
 
@@ -47,7 +47,8 @@ public class EmployeeFirebaseImpl implements EmployeeFirebase {
             if (email.equals(documentEmail)) {
                 Employee employee = documentSnapshot.toObject(Employee.class);
                 assert employee != null;
-                employee.setEmployee_id(documentSnapshot.getId());
+
+                employee.setEmployeeId(documentSnapshot.getId());
                 return employee;
             }
         }

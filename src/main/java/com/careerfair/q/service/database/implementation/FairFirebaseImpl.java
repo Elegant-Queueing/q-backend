@@ -52,6 +52,7 @@ public class FairFirebaseImpl implements FairFirebase {
             throw new InvalidRequestException("No fair exists with id=" + fairId);
         }
 
+        fair.setFairId(fairId);
         return fair;
     }
 
