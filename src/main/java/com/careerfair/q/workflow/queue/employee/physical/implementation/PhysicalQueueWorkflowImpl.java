@@ -17,6 +17,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.*;
 import static com.careerfair.q.util.constant.Queue.*;
@@ -92,8 +93,10 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         StudentQueueStatus studentQueueStatus = removeStudent(employeeId,
                 checkQueueAssociated(employee), studentId, true);
 
-        if (!studentFirebase.registerStudent(studentId, employeeId)) {
-            throw new FirebaseException("Unexpected error in firebase. Student failed to register");
+        try {
+            studentFirebase.registerStudent(studentId, employeeId);
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
+            throw new InvalidRequestException(ex.getMessage());
         }
 
         updateRedisEmployee(employee, studentQueueStatus);

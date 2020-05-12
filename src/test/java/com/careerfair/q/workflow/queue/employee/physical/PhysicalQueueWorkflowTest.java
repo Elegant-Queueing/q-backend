@@ -23,6 +23,7 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static com.careerfair.q.util.constant.Queue.INITIAL_TIME_SPENT;
 import static org.junit.jupiter.api.Assertions.*;
@@ -174,7 +175,7 @@ public class PhysicalQueueWorkflowTest {
     }
 
     @Test
-    public void testRegisterStudent() throws InterruptedException {
+    public void testRegisterStudent() throws InterruptedException, ExecutionException {
         employee.setPhysicalQueueId("pq1");
         studentQueueStatus.setJoinedPhysicalQueueAt(Timestamp.now());
         studentQueueStatus.setPositionWhenJoinedPhysicalQueue(1);

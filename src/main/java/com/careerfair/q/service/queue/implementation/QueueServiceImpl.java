@@ -31,7 +31,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
-//    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
 
     @Override
     public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
@@ -224,7 +224,7 @@ public class QueueServiceImpl implements QueueService {
 //            studentRedisTemplate.delete(keys);
 //        }
 //    }
-
+//
 //    @Override
 //    public void getAll() {
 //        Collection<String> keys = studentRedisTemplate.keys("*");
