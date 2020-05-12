@@ -35,9 +35,9 @@ public class FairServiceImpl implements FairService {
     }
 
     @Override
-    public GetCompanyResponse getCompanyWithId(String companyId) {
+    public GetCompanyResponse getCompanyWithId(String fairId, String companyId) {
         try {
-            return new GetCompanyResponse(fairFirebase.getCompanyWithId(companyId));
+            return new GetCompanyResponse(fairFirebase.getCompanyWithId(fairId, companyId));
         } catch (ExecutionException | InterruptedException ex) {
             throw new InvalidRequestException(ex.getMessage());
         }

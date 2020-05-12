@@ -22,10 +22,11 @@ public interface FairController {
     GetFairResponse getFairWithId(String fairId);
 
     /**
-     * Gets the company with the given id
+     * Gets the company with the given id present in the given fair
      *
+     * @param fairId id of the fair the company is present in
      * @param companyId id of the company to retrieve
      * @return GetCompanyResponse
      */
-    GetCompanyResponse getCompanyWithId(String companyId);
+    GetCompanyResponse getCompanyWithId(String fairId, String companyId);
 }

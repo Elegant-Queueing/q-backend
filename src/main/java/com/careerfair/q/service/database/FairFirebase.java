@@ -26,8 +26,10 @@ public interface FairFirebase {
     /**
      * Gets the data of the company with the given id
      *
+     * @param fairId id of the fair the company is present in
      * @param companyId id of the company to retrieve
      * @return Company
      */
-    Company getCompanyWithId(String companyId) throws ExecutionException, InterruptedException;
+    Company getCompanyWithId(String fairId, String companyId) throws ExecutionException,
+            InterruptedException;
 }

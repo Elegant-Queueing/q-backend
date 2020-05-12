@@ -29,9 +29,10 @@ public class FairControllerImpl implements FairController {
         return fairService.getFairWithId(fairId);
     }
 
-    @GetMapping("/get/company-id/{company-id}")
+    @GetMapping("/get/fair-id/{fair-id}/company-id/{company-id}")
     @Override
-    public GetCompanyResponse getCompanyWithId(@PathVariable("company-id") String companyId) {
-        return fairService.getCompanyWithId(companyId);
+    public GetCompanyResponse getCompanyWithId(@PathVariable("fair-id") String fairId,
+                                               @PathVariable("company-id") String companyId) {
+        return fairService.getCompanyWithId(fairId, companyId);
     }
 }

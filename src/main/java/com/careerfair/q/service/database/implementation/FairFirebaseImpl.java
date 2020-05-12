@@ -49,7 +49,15 @@ public class FairFirebaseImpl implements FairFirebase {
     }
 
     @Override
-    public Company getCompanyWithId(String companyId) throws ExecutionException, InterruptedException {
+    public Company getCompanyWithId(String fairId, String companyId) throws ExecutionException,
+            InterruptedException {
+        Fair fair = getFair(fairId);
+
+        if (!fair.getCompanies().contains(companyId)) {
+            throw new InvalidRequestException("The company with company id=" + companyId +
+                    " is not present in the fair with fair id=" + fairId);
+        }
+
         Firestore firestore = FirestoreClient.getFirestore();
         Company company = firestore.collection(COMPANY_COLLECTION)
                 .document(companyId)
