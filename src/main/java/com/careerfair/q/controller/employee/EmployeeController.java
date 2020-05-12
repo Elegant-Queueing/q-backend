@@ -8,12 +8,23 @@ import com.careerfair.q.service.employee.response.GetEmployeeResponse;
 import com.careerfair.q.service.employee.response.UpdateEmployeeResponse;
 
 public interface EmployeeController {
+
     /**
+     * Gets the employee's profile from the database
      *
-     * @param id
-     * @return
+     * @param employeeId id of the employee whose data is to retrieved
+     * @return GetEmployeeResponse
      */
-    GetEmployeeResponse getEmployee(String id);
+    GetEmployeeResponse getEmployeeWithId(String employeeId);
+
+
+    /**
+     * Gets the employee's profile from the database
+     *
+     * @param email email of the employee whose data is to retrieved
+     * @return GetEmployeeResponse
+     */
+    GetEmployeeResponse getEmployeeWithEmail(String email);
 
     /**
      *

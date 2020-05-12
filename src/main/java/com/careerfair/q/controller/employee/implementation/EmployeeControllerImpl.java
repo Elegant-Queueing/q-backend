@@ -17,10 +17,16 @@ public class EmployeeControllerImpl implements EmployeeController {
 
     @Autowired private EmployeeService employeeService;
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/get/employee-id/{employee-id}")
     @Override
-    public GetEmployeeResponse getEmployee(@PathVariable("id") String id) {
-        return employeeService.getEmployee(id);
+    public GetEmployeeResponse getEmployeeWithId(@PathVariable("employee-id") String employeeId) {
+        return employeeService.getEmployeeWithId(employeeId);
+    }
+
+    @GetMapping("/get/email/{email}")
+    @Override
+    public GetEmployeeResponse getEmployeeWithEmail(@PathVariable("email") String email) {
+        return employeeService.getEmployeeWithEmail(email);
     }
 
     @PutMapping("/update/{id}")

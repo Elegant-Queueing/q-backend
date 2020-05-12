@@ -5,14 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import java.util.List;
 
-@NoArgsConstructor
 @Data
-public class Employee {
-    @NonNull private String employee_id;
-    @NonNull private Role role;
+@NoArgsConstructor
+public class Company {
     @NonNull private String name;
-    @NonNull private String company_id;
+    @NonNull private List<Role> roles;
+    @NonNull private List<String> employees;
     @NonNull private String bio;
-    @NonNull private String email;
+    @NonNull private String website;
 }

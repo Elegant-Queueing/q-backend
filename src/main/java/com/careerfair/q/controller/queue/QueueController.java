@@ -1,8 +1,7 @@
 package com.careerfair.q.controller.queue;
 
-import com.careerfair.q.model.redis.Student;
-import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.response.*;
+import com.careerfair.q.util.enums.Role;
 
 public interface QueueController {
 
