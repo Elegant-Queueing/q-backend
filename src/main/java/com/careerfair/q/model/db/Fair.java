@@ -11,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Fair {
 
+    @NonNull private String fairId;
     @NonNull private List<String> companies;
     @NonNull private String desc;
     @NonNull private Timestamp end_time;

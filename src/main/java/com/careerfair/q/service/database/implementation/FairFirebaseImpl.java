@@ -6,6 +6,7 @@ import com.careerfair.q.service.database.FairFirebase;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Component;
@@ -26,10 +27,16 @@ public class FairFirebaseImpl implements FairFirebase {
         List<Fair> result = new ArrayList<>();
 
         CollectionReference collectionReference = dbFirestore.collection(FAIR_COLLECTION);
+
         for (DocumentReference documentReference : collectionReference.listDocuments()) {
-            Fair fair = documentReference.get().get().toObject(Fair.class);
+            DocumentSnapshot documentSnapshot = documentReference.get().get();
+            Fair fair = documentSnapshot.toObject(Fair.class);
+            assert fair != null;
+
+            fair.setFairId(documentSnapshot.getId());
             result.add(fair);
         }
+
         return result;
     }
 
