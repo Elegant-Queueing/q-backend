@@ -104,6 +104,14 @@ public interface QueueService {
     RemoveStudentResponse skipStudent(String employeeId, String studentId);
 
     /**
+     * Returns whether the given employee has an open queue or not
+     *
+     * @param employeeId employee's id
+     * @return true if the employee has an open queue, false otherwise
+     */
+    boolean isEmployeeQueueOpen(String employeeId);
+
+    /**
      * Clears all data in Redis. USED FOR TESTING ONLY
      */
     void clearAll();
