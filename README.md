@@ -23,7 +23,11 @@ You may set up the environment required to run this spring boot app in 2 ways:
 - Follow the instructions to SSH into that instance.
 - Once you're on the instance, clone the repo using: ```git clone https://github.com/Elegant-Queueing/q-backend.git```
 - Checkout the branch cross-origin using: ```git checkout cross-origin```
-- Get the service account key and add it here (See instructions on getting the service account key)
+- First we need to get the service account key
+- First you'll need access to our database on the cloud. Ask one of the team members for access. Unfortunately, we can't given public access to our database because of various obvious reasons.
+- Once you have access, you'll download an account key. To get that, open google.firebase.com, then go to Q's Firebase console -> project settings, and download your service account key. This will be a .json file
+- Rename this file to service_account_key.json
+- WORD OF CAUTION, DEVELOPERS! Move this json file at the same directory level as src/. This file is NOT to be pushed to Github. .gitignore has it mentioned in it, so it's imperitive that you get the directory level right and double check using git status before you push.
 - Go inside the project repo folder, and run: ```mvn install```
 - Now run ```mvn spring-boot:run```
 - Maven will run all the tests and you will see a message saying that the spring boot application has started on port 8080.
