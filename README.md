@@ -70,8 +70,8 @@ NOTE: master does NOT have code for beta release. The code for beta releas is on
 - Maven will run all the tests and you will see a message saying that the spring boot application has started on port 8080.
 - You should have a springboot app working on port 8080 now!
 
-### Testing
-
+## Testing
+Assuming that the springboot application is running, and that redis is running...
 - Open Postman. We will now test the Firebase connection.
 - Make an GET API call to the student/ endpoint using the following URI:
 If local: ```localhost:8080/queue/student```
