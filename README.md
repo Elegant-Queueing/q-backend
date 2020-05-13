@@ -1,7 +1,7 @@
 # q-backend
 
 ## Javadocs
-- Javadocs available here: https://elegant-queueing.github.io/q-docs
+- Javadocs available here: https://elegant-queueing.github.io/q-docs (only the code for beta release has been documented)
 
 # Set up
 
