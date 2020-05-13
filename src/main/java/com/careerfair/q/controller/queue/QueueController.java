@@ -103,5 +103,5 @@ public interface QueueController {
      * @param employeeId employee's id
      * @return true if the employee has an open queue, false otherwise
      */
-    boolean getIsEmployeeQueueOpen(String employeeId);
+    GetOpenQueuesResponse getEmployeeOpenQueues(String employeeId);
 }

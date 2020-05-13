@@ -74,8 +74,8 @@ public class QueueControllerImpl implements QueueController {
     }
 
     @GetMapping("/data/is-open/employee-id/{employee-id}")
-    public boolean getIsEmployeeQueueOpen(@PathVariable("employee-id") String employeeId) {
-        return queueService.isEmployeeQueueOpen(employeeId);
+    public GetOpenQueuesResponse getEmployeeOpenQueues(@PathVariable("employee-id") String employeeId) {
+        return queueService.getEmployeeOpenQueues(employeeId);
     }
 
     @PutMapping("/status/employee-id/{employee-id}")

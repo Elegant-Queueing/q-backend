@@ -109,7 +109,7 @@ public interface QueueService {
      * @param employeeId employee's id
      * @return true if the employee has an open queue, false otherwise
      */
-    boolean isEmployeeQueueOpen(String employeeId);
+    GetOpenQueuesResponse getEmployeeOpenQueues(String employeeId);
 
     /**
      * Clears all data in Redis. USED FOR TESTING ONLY

@@ -220,10 +220,20 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
-    public boolean isEmployeeQueueOpen(String employeeId) {
+    public GetOpenQueuesResponse getEmployeeOpenQueues(String employeeId) {
         Employee employee = (Employee) employeeRedisTemplate.opsForHash()
                 .get(EMPLOYEE_CACHE_NAME, employeeId);
-        return employee != null;
+        GetOpenQueuesResponse response = new GetOpenQueuesResponse();
+        if (employee == null) {
+            response.setPresent(false);
+            return response;
+        }
+
+        response.setPresent(true);
+        response.setPaused(employee.getVirtualQueueId() == null);
+        response.setHasStudentsInWindow(windowQueueWorkflow.size(employeeId) != 0);
+        response.setHasStudentsInPhysical(physicalQueueWorkflow.size(employeeId) != 0);
+        return response;
     }
 
     @Override
