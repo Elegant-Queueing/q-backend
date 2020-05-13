@@ -93,7 +93,6 @@ public class QueueControllerImpl implements QueueController {
 
     @DeleteMapping("/remove-student/employee-id/{employee-id}/student-id/{student-id}")
     @Override
-    @CrossOrigin
     public RemoveStudentResponse removeStudent(@PathVariable("employee-id") String employeeId,
                                                @PathVariable("student-id") String studentId) {
         return queueService.skipStudent(employeeId, studentId);
