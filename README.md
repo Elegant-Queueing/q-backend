@@ -70,7 +70,7 @@ NOTE: master does NOT have code for beta release. The code for beta releas is on
 - Rename this file to service_account_key.json
 - WORD OF CAUTION, DEVELOPERS! Move this json file at the same directory level as src/. This file is NOT to be pushed to Github. .gitignore has it mentioned in it, so it's imperitive that you get the directory level right and double check using git status before you push.
 - Open terminal, go to the project repository you cloned and run: ```mvn install```
-- Then, run: ```spring-boot:run```
+- Then, run: ```mvn spring-boot:run```
 - Maven will run all the tests and you will see a message saying that the spring boot application has started on port 8080.
 - You should have a springboot app working on port 8080 now!
 
