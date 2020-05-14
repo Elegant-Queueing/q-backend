@@ -79,8 +79,8 @@ NOTE: master does NOT have code for beta release. The code for beta releas is on
 Assuming that the springboot application is running, and that redis is running...
 - Open Postman. We will now test the Firebase connection.
 - Make an GET API call to the student/ endpoint using the following URI:
-If local: ```localhost:8080/queue/student```
-If on AWS: ```ec2-x-x-x-x.us-west-2.compute.amazonaws.com:8080/queue/student``` (replacing the x's of course)
+If local: ```localhost:8080/student```
+If on AWS: ```ec2-x-x-x-x.us-west-2.compute.amazonaws.com:8080/student``` (replacing the x's of course)
 It should return 'Pong'. If you receive this, then that means that the Spring setup is fine and you're calling the right endpoint to test the connection.
 - Now, enter the following URI and make a GET API call: 
 If local: ```localhost:8080/employee/get/employee-id/bfkE7Q0k9obASshNApN3```
