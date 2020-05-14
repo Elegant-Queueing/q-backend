@@ -44,6 +44,7 @@ DISCLAIMER: This^ exposes the instance to the public. We still need to work on s
 - Select the instance, and you should see the Public DNS (IPv4). It will be something like, ec2-x-x-x-x.us-west-2.compute.amazonaws.com (where x is a number with up to 3 or 4 digits).
 - Any API calls made on ec2-x-x-x-x.us-west-2.compute.amazonaws.com:8080 will be accepted.
 - Go to the Testing section to test and you should be good to go!
+- Once you're done, don't forget to stop/terminate the instance! You can do so by going to the instances web page, selecting the running instance, and stopping it.
 
 ## Setting up locally
 
