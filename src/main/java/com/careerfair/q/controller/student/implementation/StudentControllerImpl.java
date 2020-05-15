@@ -17,10 +17,16 @@ public class StudentControllerImpl implements StudentController {
 
     @Autowired private StudentService studentService;
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/get/student-id/{student-id}")
     @Override
-    public GetStudentResponse getStudent(@PathVariable("id") String id) {
-        return studentService.getStudent(id);
+    public GetStudentResponse getStudentWithId(@PathVariable("student-id") String studentId) {
+        return studentService.getStudentWithId(studentId);
+    }
+
+    @GetMapping("/get/email/{email}")
+    @Override
+    public GetStudentResponse getStudentWithEmail(@PathVariable("email") String email) {
+        return studentService.getStudentWithEmail(email);
     }
 
     @PutMapping("/update/{id}")

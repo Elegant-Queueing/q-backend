@@ -30,8 +30,6 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
-    @Autowired private StudentFirebase studentFirebase;
-
     @Override
     public QueueStatus joinQueue(String employeeId, Student student,
                                  StudentQueueStatus studentWindowQueueStatus) {
@@ -92,12 +90,6 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         Employee employee = getEmployeeWithId(employeeId);
         StudentQueueStatus studentQueueStatus = removeStudent(employeeId,
                 checkQueueAssociated(employee), studentId, true);
-
-        try {
-            studentFirebase.registerStudent(studentId, employeeId);
-        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
-            throw new InvalidRequestException(ex.getMessage());
-        }
 
         updateRedisEmployee(employee, studentQueueStatus);
         employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);

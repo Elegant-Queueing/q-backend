@@ -4,10 +4,13 @@ import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
+import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.response.*;
+import com.careerfair.q.service.validation.ValidationService;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
+import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.WindowQueueWorkflow;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 import static com.careerfair.q.util.constant.Queue.*;
 
@@ -31,7 +35,10 @@ public class QueueServiceImpl implements QueueService {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
-    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+//    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+
+    @Autowired private StudentFirebase studentFirebase;
+    @Autowired private ValidationService validationService;
 
     @Override
     public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
@@ -72,12 +79,16 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public JoinQueueResponse joinVirtualQueue(String companyId, Role role, Student student) {
+        validationService.checkValidCompanyId(companyId);
+        validationService.checkValidStudentId(student.getId());
+
         QueueStatus status = virtualQueueWorkflow.joinQueue(companyId, role, student);
         String employeeId = getEmployeeWithMostQueueSpace(companyId, role);
         if (employeeId != null) {
             status = shiftStudentToWindow(companyId, employeeId, role, student);
         }
         setOverallPositionAndWaitTime(status);
+
         return new JoinQueueResponse(status);
     }
 
@@ -157,6 +168,10 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public AddQueueResponse addQueue(String companyId, String employeeId, Role role) {
+        validationService.checkValidCompanyId(companyId);
+        validationService.checkValidEmployeeId(employeeId);
+        validationService.checkEmployeeAssociations(companyId, employeeId, role);
+
         Employee employee = (Employee) employeeRedisTemplate.opsForHash()
                 .get(EMPLOYEE_CACHE_NAME, employeeId);
         if (employee == null) {
@@ -207,6 +222,13 @@ public class QueueServiceImpl implements QueueService {
     public RemoveStudentResponse registerStudent(String employeeId, String studentId) {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.registerStudent(employeeId,
                 studentId);
+
+        try {
+            studentFirebase.registerStudent(studentId, employeeId);
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
+            throw new InvalidRequestException(ex.getMessage());
+        }
+
         return removeStudentFromQueue(employeeId, employeeQueueData);
     }
 
@@ -386,27 +408,17 @@ public class QueueServiceImpl implements QueueService {
                 int position = queueStatus.getPosition() + physicalQueueWorkflow
                         .size(employee.getId()).intValue();
                 queueStatus.setPosition(position);
-                queueStatus.setWaitTime((int) ((position - 1) * calcEmployeeAverageTime(employee)));
+                queueStatus.setWaitTime(getEmployeeQueueWaitTime(employee, position));
                 break;
 
             case PHYSICAL:
-                queueStatus.setWaitTime((int) ((queueStatus.getPosition() - 1) *
-                        calcEmployeeAverageTime(queueStatus.getEmployee())));
+                queueStatus.setWaitTime(getEmployeeQueueWaitTime(queueStatus.getEmployee(),
+                        queueStatus.getPosition()));
                 break;
 
             default:
                 throw new InvalidRequestException("QueueType mismatch");
         }
-    }
-
-    /**
-     * Calculates and returns the average time spent by the employee talking to a student
-     *
-     * @param employee The employee whose average time is to be calculated
-     * @return double Average time spent by the employee talking to a student
-     */
-    private double calcEmployeeAverageTime(Employee employee) {
-        return employee.getTotalTimeSpent() * 1. / Math.max(employee.getNumRegisteredStudents(), 1);
     }
 
     /**
@@ -426,7 +438,39 @@ public class QueueServiceImpl implements QueueService {
             Employee employee = getEmployeeWithId(id);
             sum += calcEmployeeAverageTime(employee);
         }
-        double waitTime = (position - 1) * sum / employeeIds.size();
+
+        double waitTime = getIndexFromPosition(position) * sum / employeeIds.size();
         return (int) waitTime;
+    }
+
+    /**
+     * Calculates and returns the wait time for the employee's queue
+     *
+     * @param employee employee whose queue's wait time is to be calculated
+     * @param position position of the student
+     * @return int representing the wait time in seconds
+     */
+    private int getEmployeeQueueWaitTime(Employee employee, int position) {
+        return (int) (getIndexFromPosition(position) * calcEmployeeAverageTime(employee));
+    }
+
+    /**
+     * Calculates and returns the average time spent by the employee talking to a student
+     *
+     * @param employee The employee whose average time is to be calculated
+     * @return double Average time spent by the employee talking to a student
+     */
+    private double calcEmployeeAverageTime(Employee employee) {
+        return employee.getTotalTimeSpent() * 1. / Math.max(employee.getNumRegisteredStudents(), 1);
+    }
+
+    /**
+     * Returns a zero based position
+     *
+     * @param position one based position
+     * @return int zero based position
+     */
+    private int getIndexFromPosition(int position) {
+        return Math.max(position - 1, 0);
     }
 }

@@ -1,26 +1,63 @@
 package com.careerfair.q.model.db;
 
 import com.careerfair.q.util.enums.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.Timestamp;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import com.google.cloud.firestore.annotation.PropertyName;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 public class Student {
 
-    @NonNull private String first_name;
-    @NonNull private String last_name;
-    @NonNull private String university_id;
-    @NonNull private String major;
-    @NonNull private Role role;
-    @NonNull private String bio;
-    @NonNull private String email;
-    @NonNull private double gpa;
-    @NonNull private Timestamp grad_date;
-    @NonNull private boolean international;
-    @NonNull private List<String> employees;
+    @PropertyName("student_id")
+    @JsonProperty("student_id")
+    public String studentId;
+
+    @PropertyName("first_name")
+    @JsonProperty("first_name")
+    public String firstName;
+
+    @PropertyName("last_name")
+    @JsonProperty("last_name")
+    public String lastName;
+
+    @PropertyName("university_id")
+    @JsonProperty("university_id")
+    public String universityId;
+
+    @PropertyName("major")
+    @JsonProperty("major")
+    public String major;
+
+    @PropertyName("role")
+    @JsonProperty("role")
+    public Role role;
+
+    @PropertyName("bio")
+    @JsonProperty("bio")
+    public String bio;
+
+    @PropertyName("email")
+    @JsonProperty("email")
+    public String email;
+
+    @PropertyName("gpa")
+    @JsonProperty("gpa")
+    public double gpa;
+
+    @PropertyName("grad_date")
+    @JsonProperty("grad_date")
+    public Timestamp graduationDate;
+
+    @PropertyName("international")
+    @JsonProperty("international")
+    public boolean international;
+
+    @PropertyName("employees")
+    @JsonProperty("employees")
+    public List<String> employees;
 }

@@ -8,8 +8,12 @@ import com.careerfair.q.service.student.response.AddStudentResponse;
 import com.careerfair.q.service.student.response.DeleteStudentResponse;
 import com.careerfair.q.service.student.response.GetStudentResponse;
 import com.careerfair.q.service.student.response.UpdateStudentResponse;
+import com.careerfair.q.util.exception.FirebaseException;
+import com.careerfair.q.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -17,9 +21,21 @@ public class StudentServiceImpl implements StudentService {
     @Autowired private StudentFirebase studentFirebase;
 
     @Override
-    public GetStudentResponse getStudent(String id) {
-        // TODO
-        return null;
+    public GetStudentResponse getStudentWithId(String studentId) {
+        try {
+            return new GetStudentResponse(studentFirebase.getStudentWithId(studentId));
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
+            throw new InvalidRequestException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public GetStudentResponse getStudentWithEmail(String email) {
+        try {
+            return new GetStudentResponse(studentFirebase.getStudentWithEmail(email));
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
+            throw new InvalidRequestException(ex.getMessage());
+        }
     }
 
     @Override
