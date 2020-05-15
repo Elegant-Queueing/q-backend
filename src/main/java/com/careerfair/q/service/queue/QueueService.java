@@ -111,5 +111,5 @@ public interface QueueService {
 //    /**
 //     * Gets all data in Redis. USED FOR TESTING ONLY
 //     */
-//    void getAll();
+//    String getAll();
 }
