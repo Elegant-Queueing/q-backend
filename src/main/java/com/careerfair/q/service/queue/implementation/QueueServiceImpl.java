@@ -248,30 +248,32 @@ public class QueueServiceImpl implements QueueService {
 //    }
 //
 //    @Override
-//    public void getAll() {
+//    public String getAll() {
 //        Collection<String> keys = studentRedisTemplate.keys("*");
-//        System.out.println("\n\n");
-//        System.out.println("*****************************");
-//        System.out.println("All keys: " + keys);
+//        StringBuilder stringBuilder = new StringBuilder();
+//        stringBuilder.append("\n\n\n");
+//        stringBuilder.append("*****************************\n");
+//        stringBuilder.append("All keys:" + keys + "\n");
 //        if (keys != null) {
 //            for (String key: keys) {
-//                System.out.println(key + ": ");
+//                stringBuilder.append(key + ":\n");
 //                try {
 //                    List<Student> list = queueRedisTemplate.opsForList().range(key, 0L, -1L);
-//                    System.out.println("\t" + list);
+//                    stringBuilder.append("\t" + list + "\n");
 //                } catch(Exception e) {
 //                    // redis magic
 //                    Map<Object, Object> map = studentRedisTemplate.opsForHash().entries(key);
 //                    for(Object mapKey: map.keySet()) {
-//                        System.out.println("\t" + mapKey + ":" + map.get(mapKey));
+//                        stringBuilder.append("\t" + mapKey + ":" + map.get(mapKey) + "\n");
 //                    }
 //                }
-//                System.out.println("--------");
+//                stringBuilder.append("--------\n");
 //
 //            }
 //        }
 //
-//        System.out.println("*****************************");
+//        stringBuilder.append("*****************************\n");
+//        return stringBuilder.toString();
 //
 //    }
 
