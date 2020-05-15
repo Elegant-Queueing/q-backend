@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutionException;
 
-import static com.careerfair.q.util.contant.Firebase.EMPLOYEE_COLLECTION;
+import static com.careerfair.q.util.constant.Firebase.EMPLOYEE_COLLECTION;
 
 @Service
 public class EmployeeFirebaseImpl implements EmployeeFirebase {

@@ -85,7 +85,7 @@ public class StudentFirebaseImpl implements StudentFirebase {
             throw new FirebaseException("No student with student id=" + studentId + " exists");
         }
 
-        student.setStudentId(documentSnapshot.getId());
+        student.setStudentId(studentId);
         return student;
     }
 
