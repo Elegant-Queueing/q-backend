@@ -2,10 +2,15 @@ package com.careerfair.q.controller.student;
 
 import com.careerfair.q.service.student.request.AddStudentRequest;
 import com.careerfair.q.service.student.request.UpdateStudentRequest;
-import com.careerfair.q.service.student.response.AddStudentResponse;
-import com.careerfair.q.service.student.response.DeleteStudentResponse;
-import com.careerfair.q.service.student.response.GetStudentResponse;
-import com.careerfair.q.service.student.response.UpdateStudentResponse;
+import com.careerfair.q.service.student.response.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
+import org.springframework.util.MultiValueMap;
+
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 public interface StudentController {
 
@@ -28,10 +33,13 @@ public interface StudentController {
     /**
      *
      * @param id
-     * @param updateStudentRequest
+     * @param updatedValues
      * @return
      */
-    UpdateStudentResponse updateStudent(String id, UpdateStudentRequest updateStudentRequest);
+    UpdateStudentResponse updateStudent(String id, Map<String, Object> updatedValues);
+
+    //UpdateStudentResponse updateStudent(String id, JsonPatch patch) throws JsonPatchException, JsonProcessingException;
+
 
     /**
      *

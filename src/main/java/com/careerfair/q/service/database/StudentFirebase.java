@@ -1,7 +1,14 @@
 package com.careerfair.q.service.database;
 
 import com.careerfair.q.model.db.Student;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
+import org.springframework.util.MultiValueMap;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public interface StudentFirebase {
@@ -27,4 +34,16 @@ public interface StudentFirebase {
      * @return Student
      */
     Student getStudentWithEmail(String email) throws ExecutionException, InterruptedException;
+
+
+    /**
+     * Updates all the fields that the user changes
+     *
+     * @param studentIds
+     * @param updatedValues
+     * @return Student
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    Student updateStudent(String studentId, Map<String, Object> updatedValues) throws ExecutionException, InterruptedException;
 }

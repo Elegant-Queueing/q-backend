@@ -4,12 +4,20 @@ import com.careerfair.q.controller.student.StudentController;
 import com.careerfair.q.service.student.StudentService;
 import com.careerfair.q.service.student.request.AddStudentRequest;
 import com.careerfair.q.service.student.request.UpdateStudentRequest;
-import com.careerfair.q.service.student.response.AddStudentResponse;
-import com.careerfair.q.service.student.response.DeleteStudentResponse;
-import com.careerfair.q.service.student.response.GetStudentResponse;
-import com.careerfair.q.service.student.response.UpdateStudentResponse;
+import com.careerfair.q.service.student.response.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.fge.jsonpatch.JsonPatch;
+import com.github.fge.jsonpatch.JsonPatchException;
+import com.google.api.services.storage.Storage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("student")
@@ -29,12 +37,12 @@ public class StudentControllerImpl implements StudentController {
         return studentService.getStudentWithEmail(email);
     }
 
-    @PutMapping("/update/{id}")
-    @Override
-    public UpdateStudentResponse updateStudent(@PathVariable("id") String id,
-                                               @RequestBody UpdateStudentRequest updateStudentRequest) {
-        return studentService.updateStudent(id, updateStudentRequest);
-    }
+//    @PutMapping("/update/{id}")
+//    @Override
+//    public UpdateStudentResponse updateStudent(@PathVariable("id") String id,
+//                                               @RequestBody UpdateStudentRequest updateStudentRequest) {
+//        return studentService.updateStudent(id, updateStudentRequest);
+//    }
 
     @DeleteMapping("/delete/{id}")
     @Override
@@ -48,7 +56,7 @@ public class StudentControllerImpl implements StudentController {
         return studentService.addStudent(addStudentRequest);
     }
 
-    @PutMapping("/upload-resume/{id}")
+    @PutMapping("/upload-resume/{id}/{email}")
     @Override
     public UpdateStudentResponse uploadStudentResume(@PathVariable("id") String id,
                                                      @RequestBody UpdateStudentRequest uploadStudentResume) {
@@ -61,4 +69,18 @@ public class StudentControllerImpl implements StudentController {
         studentService.testDatabaseConnection();
         return "Pong";
     }
+
+    @PatchMapping(value = "/update-student/{id}")
+    @Override
+    public UpdateStudentResponse updateStudent(@PathVariable("id") String id,
+                                               @RequestBody Map<String, Object> updatedValues) {
+        return studentService.updateStudent(id, updatedValues);
+    }
+
+//    @PatchMapping(value = "/update-student/{id}", consumes = "application/json-patch+json")
+//    @Override
+//    public UpdateStudentResponse updateStudent(@PathVariable("id") String id,
+//                                               @RequestBody JsonPatch patch) throws JsonPatchException, JsonProcessingException {
+//        return studentService.updateStudent(id, patch);
+//    }
 }
