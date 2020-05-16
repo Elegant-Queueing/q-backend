@@ -1,46 +1,66 @@
 package com.careerfair.q.service.fair.implementation;
 
-import com.careerfair.q.service.database.FairFirebase;
+import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.fair.FairService;
 import com.careerfair.q.service.fair.response.GetAllFairsResponse;
 import com.careerfair.q.service.fair.response.GetCompanyResponse;
 import com.careerfair.q.service.fair.response.GetFairResponse;
-import com.careerfair.q.util.exception.FirebaseException;
-import com.careerfair.q.util.exception.InvalidRequestException;
+import com.careerfair.q.service.fair.response.GetWaitTimeResponse;
+import com.careerfair.q.service.queue.QueueService;
+import com.careerfair.q.util.enums.Role;
+import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
 @Service
 public class FairServiceImpl implements FairService {
 
-    @Autowired private FairFirebase fairFirebase;
+    private final FirebaseService firebaseService;
+    private final QueueService queueService;
+
+    public FairServiceImpl(@Autowired FirebaseService firebaseService,
+                           @Autowired QueueService queueService) {
+        this.firebaseService = firebaseService;
+        this.queueService = queueService;
+    }
 
     @Override
     public GetAllFairsResponse getAllFairs() {
-        try {
-            return new GetAllFairsResponse(fairFirebase.getAllFairs());
-        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
-            throw new InvalidRequestException(ex.getMessage());
-        }
+        return new GetAllFairsResponse(firebaseService.getAllFairs());
     }
 
     @Override
     public GetFairResponse getFairWithId(String fairId) {
-        try {
-            return new GetFairResponse(fairFirebase.getFair(fairId));
-        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
-            throw new InvalidRequestException(ex.getMessage());
-        }
+        return new GetFairResponse(firebaseService.getFairWithId(fairId));
     }
 
     @Override
     public GetCompanyResponse getCompanyWithId(String fairId, String companyId) {
-        try {
-            return new GetCompanyResponse(fairFirebase.getCompanyWithId(fairId, companyId));
-        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
-            throw new InvalidRequestException(ex.getMessage());
-        }
+        return new GetCompanyResponse(firebaseService.getCompanyWithId(fairId, companyId));
+    }
+
+    @Override
+    public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
+        Map<String, Integer> companyWaitTime = Maps.newHashMap();
+        companyWaitTime.put(companyId, queueService.getOverallWaitTime(companyId, role));
+        return new GetWaitTimeResponse(companyWaitTime);
+    }
+
+    @Override
+    public GetWaitTimeResponse getAllCompaniesWaitTime(Role role) {
+        Map<String, Integer> companyWaitTimes = Maps.newHashMap();
+
+        queueService.getAllEmployees().forEach(employee -> {
+            if (employee.getRole() == role && employee.getVirtualQueueId() != null &&
+                    !companyWaitTimes.containsKey(employee.getCompanyId())) {
+                GetWaitTimeResponse waitTimeResponse = getCompanyWaitTime(employee.getCompanyId(),
+                        role);
+                companyWaitTimes.putAll(waitTimeResponse.getCompanyWaitTimes());
+            }
+        });
+
+        return new GetWaitTimeResponse(companyWaitTimes);
     }
 }
