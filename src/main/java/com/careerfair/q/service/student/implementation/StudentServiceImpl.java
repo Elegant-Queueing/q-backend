@@ -4,15 +4,12 @@ import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.service.student.StudentService;
 import com.careerfair.q.service.student.request.AddStudentRequest;
 import com.careerfair.q.service.student.request.UpdateStudentRequest;
-import com.careerfair.q.service.student.response.AddStudentResponse;
-import com.careerfair.q.service.student.response.DeleteStudentResponse;
-import com.careerfair.q.service.student.response.GetStudentResponse;
-import com.careerfair.q.service.student.response.UpdateStudentResponse;
+import com.careerfair.q.service.student.response.*;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -39,9 +36,12 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public UpdateStudentResponse updateStudent(String id, UpdateStudentRequest updateStudentRequest) {
-        // TODO
-        return null;
+    public UpdateStudentResponse updateStudent(String id, Map<String, Object> updatedValues) {
+        try {
+            return new UpdateStudentResponse(studentFirebase.updateStudent(id, updatedValues));
+        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
+            throw new InvalidRequestException(ex.getMessage());
+        }
     }
 
     @Override

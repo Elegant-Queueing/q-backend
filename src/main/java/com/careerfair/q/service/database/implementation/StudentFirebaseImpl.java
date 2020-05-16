@@ -6,14 +6,19 @@ import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.google.api.client.util.Lists;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.careerfair.q.util.constant.Firebase.EMPLOYEE_COLLECTION;
@@ -85,7 +90,7 @@ public class StudentFirebaseImpl implements StudentFirebase {
             throw new FirebaseException("No student with student id=" + studentId + " exists");
         }
 
-        student.setStudentId(studentId);
+        student.setStudentId(documentSnapshot.getId());
         return student;
     }
 
@@ -109,5 +114,57 @@ public class StudentFirebaseImpl implements StudentFirebase {
         }
 
         throw new FirebaseException("No student with email=" + email + " exists");
+    }
+
+    @Override
+    public Student updateStudent(String studentId, Map<String, Object> updatedValues) throws ExecutionException,
+            InterruptedException {
+
+        Firestore firestore = FirestoreClient.getFirestore();
+        DocumentSnapshot document = firestore.collection(STUDENT_COLLECTION)
+                .document(studentId).get().get();
+        if (!document.exists()) {
+            throw new FirebaseException("No student with student id=" + studentId + " exists");
+        }
+        Student student = document.toObject(Student.class);
+        assert student != null;
+
+        updatedValues.forEach(
+                (field, v) -> {
+                    switch (field) {
+
+                        // TODO: What if university_id/student_id is attempted to be modified?
+
+                        // Since these attributes are mapped to camel case, have to separate them out
+                        // Not the best way since it's 'hardcoded'
+                        case "last_name": student.setLastName((String) v); break;
+                        case "first_name": student.setFirstName((String) v); break;
+                        case "grad_date":
+                            LinkedHashMap tmp = (LinkedHashMap) v;
+                            Integer seconds = (Integer) tmp.get("seconds");
+                            Integer nanos = (Integer) tmp.get("nanos");
+                            Timestamp grad = Timestamp.ofTimeSecondsAndNanos(seconds.longValue(), nanos);
+                            student.setGraduationDate(grad);
+                            updatedValues.put("grad_date", grad);
+                            break;
+                        default:
+                            Field studentField = ReflectionUtils.findField(Student.class, field);
+                            try {
+                                studentField.setAccessible(true);
+                            } catch (NullPointerException ex) {
+                                throw new IllegalArgumentException("Invalid field name provided: " + field);
+                            }
+                            ReflectionUtils.setField(studentField, student, v);
+                    }
+                }
+        );
+
+        // This will update all the needed fields at once, instead of many accesses
+        // Will only reach here if all the fields are valid
+        firestore.collection(STUDENT_COLLECTION).document(studentId).update(updatedValues);
+
+        // Have to update the studentId for the response student object
+        student.setStudentId(studentId);
+        return student;
     }
 }
