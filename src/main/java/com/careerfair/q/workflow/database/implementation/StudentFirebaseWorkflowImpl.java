@@ -38,10 +38,9 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         Firestore firestore = FirestoreClient.getFirestore();
 
         try {
-            DocumentSnapshot documentSnapshot = firestore.collection(STUDENT_COLLECTION)
-                    .document(studentId).get().get();
-
-            Student student = documentSnapshot.toObject(Student.class);
+            Student student = firestore.collection(STUDENT_COLLECTION).document(studentId)
+                    .get().get()
+                    .toObject(Student.class);
 
             if (student == null) {
                 throw new FirebaseException("No student with student id=" + studentId + " exists");

@@ -101,7 +101,7 @@ public interface QueueService {
      *
      * @param companyId id of the company that the queue is associated with
      * @param role role that the queue is associated with
-     * @return int indicating the overall wait time
+     * @return int indicating the overall wait time in seconds
      */
     int getOverallWaitTime(String companyId, Role role);
 
