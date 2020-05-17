@@ -1,12 +1,13 @@
 package com.careerfair.q.model.db;
 
+import com.careerfair.q.service.database.deserializer.TimestampDeserializer;
 import com.careerfair.q.util.enums.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.PropertyName;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.util.List;
 
 @Getter
@@ -47,15 +48,16 @@ public class Student {
 
     @PropertyName("gpa")
     @JsonProperty("gpa")
-    public double gpa;
+    public Double gpa;
 
     @PropertyName("grad_date")
     @JsonProperty("grad_date")
+    @JsonDeserialize(using = TimestampDeserializer.class)
     public Timestamp graduationDate;
 
     @PropertyName("international")
     @JsonProperty("international")
-    public boolean international;
+    public Boolean international;
 
     @PropertyName("employees")
     @JsonProperty("employees")

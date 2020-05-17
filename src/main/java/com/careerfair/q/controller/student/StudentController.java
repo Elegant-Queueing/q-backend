@@ -29,7 +29,7 @@ public interface StudentController {
      * @param updatedValues
      * @return UpdateStudentResponse
      */
-    UpdateStudentResponse updateStudent(String id, Map<String, Object> updatedValues);
+    UpdateStudentResponse updateStudent(String id, UpdateStudentRequest updateStudent);
 
     /**
      *

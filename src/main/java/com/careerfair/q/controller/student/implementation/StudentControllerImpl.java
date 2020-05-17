@@ -7,7 +7,6 @@ import com.careerfair.q.service.student.request.UpdateStudentRequest;
 import com.careerfair.q.service.student.response.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
 
 @RestController
 @RequestMapping("student")
@@ -27,12 +26,6 @@ public class StudentControllerImpl implements StudentController {
         return studentService.getStudentWithEmail(email);
     }
 
-//    @PutMapping("/update/{id}")
-//    @Override
-//    public UpdateStudentResponse updateStudent(@PathVariable("id") String id,
-//                                               @RequestBody UpdateStudentRequest updateStudentRequest) {
-//        return studentService.updateStudent(id, updateStudentRequest);
-//    }
 
     @DeleteMapping("/delete/{id}")
     @Override
@@ -46,7 +39,7 @@ public class StudentControllerImpl implements StudentController {
         return studentService.addStudent(addStudentRequest);
     }
 
-    @PutMapping("/upload-resume/{id}/{email}")
+    @PutMapping("/upload-resume/{id}/")
     @Override
     public UpdateStudentResponse uploadStudentResume(@PathVariable("id") String id,
                                                      @RequestBody UpdateStudentRequest uploadStudentResume) {
@@ -60,10 +53,10 @@ public class StudentControllerImpl implements StudentController {
         return "Pong";
     }
 
-    @PatchMapping(value = "/update-student/{id}")
+    @PutMapping(value = "/update-student/{id}")
     @Override
     public UpdateStudentResponse updateStudent(@PathVariable("id") String id,
-                                               @RequestBody Map<String, Object> updatedValues) {
-        return studentService.updateStudent(id, updatedValues);
+                                               @RequestBody UpdateStudentRequest updateStudent) {
+        return studentService.updateStudent(id, updateStudent);
     }
 }

@@ -3,7 +3,6 @@ package com.careerfair.q.service.student;
 import com.careerfair.q.service.student.request.AddStudentRequest;
 import com.careerfair.q.service.student.request.UpdateStudentRequest;
 import com.careerfair.q.service.student.response.*;
-import java.util.Map;
 
 public interface StudentService {
 
@@ -26,10 +25,10 @@ public interface StudentService {
     /**
      *
      * @param id
-     * @param updatedValues
+     * @param updateStudent
      * @return UpdateStudentResponse
      */
-    UpdateStudentResponse updateStudent(String id, Map<String, Object> updatedValues);
+    UpdateStudentResponse updateStudent(String id, UpdateStudentRequest updateStudent);
 
     /**
      *

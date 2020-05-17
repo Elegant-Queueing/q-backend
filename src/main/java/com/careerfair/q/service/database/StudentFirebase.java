@@ -1,7 +1,8 @@
 package com.careerfair.q.service.database;
 
 import com.careerfair.q.model.db.Student;
-import java.util.Map;
+import com.careerfair.q.service.student.request.UpdateStudentRequest;
+
 import java.util.concurrent.ExecutionException;
 
 public interface StudentFirebase {
@@ -33,10 +34,10 @@ public interface StudentFirebase {
      * Updates all the fields that the user changes
      *
      * @param studentId
-     * @param updatedValues
+     * @param updateStudent
      * @return Student
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    Student updateStudent(String studentId, Map<String, Object> updatedValues) throws ExecutionException, InterruptedException;
+    Student updateStudent(String studentId, UpdateStudentRequest updateStudent) throws ExecutionException, InterruptedException;
 }

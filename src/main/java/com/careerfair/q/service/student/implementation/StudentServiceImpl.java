@@ -9,7 +9,6 @@ import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -36,9 +35,9 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public UpdateStudentResponse updateStudent(String id, Map<String, Object> updatedValues) {
+    public UpdateStudentResponse updateStudent(String id, UpdateStudentRequest updateStudent) {
         try {
-            return new UpdateStudentResponse(studentFirebase.updateStudent(id, updatedValues));
+            return new UpdateStudentResponse(studentFirebase.updateStudent(id, updateStudent));
         } catch (ExecutionException | InterruptedException | FirebaseException ex) {
             throw new InvalidRequestException(ex.getMessage());
         }

@@ -3,22 +3,17 @@ package com.careerfair.q.service.database.implementation;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Student;
 import com.careerfair.q.service.database.StudentFirebase;
+import com.careerfair.q.service.student.request.UpdateStudentRequest;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.google.api.client.util.Lists;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ReflectionUtils;
-
-import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static com.careerfair.q.util.constant.Firebase.EMPLOYEE_COLLECTION;
@@ -90,7 +85,7 @@ public class StudentFirebaseImpl implements StudentFirebase {
             throw new FirebaseException("No student with student id=" + studentId + " exists");
         }
 
-        student.setStudentId(documentSnapshot.getId());
+        student.setStudentId(studentId);
         return student;
     }
 
@@ -117,7 +112,7 @@ public class StudentFirebaseImpl implements StudentFirebase {
     }
 
     @Override
-    public Student updateStudent(String studentId, Map<String, Object> updatedValues) throws ExecutionException,
+    public Student updateStudent(String studentId, UpdateStudentRequest updateStudent) throws ExecutionException,
             InterruptedException {
 
         Firestore firestore = FirestoreClient.getFirestore();
@@ -126,44 +121,58 @@ public class StudentFirebaseImpl implements StudentFirebase {
         if (!document.exists()) {
             throw new FirebaseException("No student with student id=" + studentId + " exists");
         }
+
+        // Student's current database instance
         Student student = document.toObject(Student.class);
         assert student != null;
 
-        updatedValues.forEach(
-                (field, v) -> {
-                    switch (field) {
+        // Allows to only write to database the attributes that were changed
+        HashMap<String, Object> updatedValues = new HashMap<>();
 
-                        // TODO: What if university_id/student_id is attempted to be modified?
+        Student requestStudent = updateStudent.getStudent();
+        if (requestStudent.getFirstName() != null && !student.getFirstName().equals(requestStudent.getFirstName())) {
+            student.setFirstName(requestStudent.getFirstName());
+            updatedValues.put("first_name", requestStudent.getFirstName());
+        }
+        if (requestStudent.getLastName() != null && !student.getLastName().equals(requestStudent.getLastName())) {
+            student.setLastName(requestStudent.getLastName());
+            updatedValues.put("last_name", requestStudent.getLastName());
+        }
+        if (requestStudent.getMajor() != null && !student.getMajor().equals(requestStudent.getMajor())) {
+            student.setMajor(requestStudent.getMajor());
+            updatedValues.put("major", requestStudent.getMajor());
+        }
+        if (requestStudent.getRole() != null && !student.getRole().equals(requestStudent.getRole())) {
+            student.setRole(requestStudent.getRole());
+            updatedValues.put("role", requestStudent.getRole());
+        }
+        if (requestStudent.getBio() != null && !student.getBio().equals(requestStudent.getBio())) {
+            student.setBio(requestStudent.getBio());
+            updatedValues.put("bio", requestStudent.getBio());
+        }
 
-                        // Since these attributes are mapped to camel case, have to separate them out
-                        // Not the best way since it's 'hardcoded'
-                        case "last_name": student.setLastName((String) v); break;
-                        case "first_name": student.setFirstName((String) v); break;
-                        case "grad_date":
-                            LinkedHashMap tmp = (LinkedHashMap) v;
-                            Integer seconds = (Integer) tmp.get("seconds");
-                            Integer nanos = (Integer) tmp.get("nanos");
-                            Timestamp grad = Timestamp.ofTimeSecondsAndNanos(seconds.longValue(), nanos);
-                            student.setGraduationDate(grad);
-                            updatedValues.put("grad_date", grad);
-                            break;
-                        default:
-                            Field studentField = ReflectionUtils.findField(Student.class, field);
-                            try {
-                                studentField.setAccessible(true);
-                            } catch (NullPointerException ex) {
-                                throw new IllegalArgumentException("Invalid field name provided: " + field);
-                            }
-                            ReflectionUtils.setField(studentField, student, v);
-                    }
-                }
-        );
+        if (requestStudent.getGpa() != null && !student.getGpa().equals(requestStudent.getGpa())) {
+            student.setGpa(requestStudent.getGpa());
+            updatedValues.put("gpa", requestStudent.getGpa());
+        }
 
-        // This will update all the needed fields at once, instead of many accesses
-        // Will only reach here if all the fields are valid
-        firestore.collection(STUDENT_COLLECTION).document(studentId).update(updatedValues);
+        // This is an issue
+//        if (requestStudent.getGraduationDate() != null && !student.getGraduationDate().equals(requestStudent.getGraduationDate())) {
+//            student.setGraduationDate(requestStudent.getGraduationDate());
+//            updatedValues.put("grad_date", requestStudent.getGraduationDate());
+//        }
+        if (requestStudent.getInternational() != null && !student.getInternational().equals(requestStudent.getInternational())) {
+            student.setInternational(requestStudent.getInternational());
+            updatedValues.put("international", requestStudent.getInternational());
+        }
 
-        // Have to update the studentId for the response student object
+        // This will update all the needed fields at once, instead of several separate updates
+        if (!updatedValues.isEmpty()) {
+            firestore.collection(STUDENT_COLLECTION).document(studentId)
+                    .update(updatedValues);
+        }
+
+        // Set studentId for the response
         student.setStudentId(studentId);
         return student;
     }
