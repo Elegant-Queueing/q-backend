@@ -1,10 +1,10 @@
 package com.careerfair.q.controller.queue.implementation;
 
 import com.careerfair.q.controller.queue.QueueController;
-import com.careerfair.q.model.redis.Student;
-import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.service.queue.QueueService;
+import com.careerfair.q.service.queue.request.JoinQueueRequest;
 import com.careerfair.q.service.queue.response.*;
+import com.careerfair.q.util.enums.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,15 +14,12 @@ public class QueueControllerImpl implements QueueController {
 
     @Autowired private QueueService queueService;
 
-    @PostMapping("/join/company-id/{company-id}/student-id/{student-id}/role/{role}/name/{name}")
+    @PostMapping("/join/company-id/{company-id}/role/{role}")
     @Override
     public JoinQueueResponse joinQueue(@PathVariable("company-id") String companyId,
-                                       @PathVariable("student-id") String studentId,
                                        @PathVariable("role") Role role,
-                                       @PathVariable("name") String name) {
-        // TODO: remove this vvvvv and accept a student object. Also change post mapping
-        Student student = new Student(studentId, name);
-        return queueService.joinVirtualQueue(companyId, role, student);
+                                       @RequestBody JoinQueueRequest joinQueueRequest) {
+        return queueService.joinVirtualQueue(companyId, role, joinQueueRequest.getStudent());
     }
 
     @PostMapping("/join/employee-id/{employee-id}/student-id/{student-id}")
@@ -56,7 +53,8 @@ public class QueueControllerImpl implements QueueController {
 
     @GetMapping("/data/employee-id/{employee-id}")
     @Override
-    public GetEmployeeQueueDataResponse getEmployeeQueueData(@PathVariable("employee-id") String employeeId) {
+    public GetEmployeeQueueDataResponse getEmployeeQueueData(
+            @PathVariable("employee-id") String employeeId) {
         return queueService.getEmployeeQueueData(employeeId);
     }
 
