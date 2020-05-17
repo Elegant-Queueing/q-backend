@@ -4,25 +4,23 @@ import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
-import com.careerfair.q.service.database.StudentFirebase;
+import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.service.validation.ValidationService;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.WindowQueueWorkflow;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
-import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static com.careerfair.q.util.constant.Queue.*;
 
@@ -37,45 +35,8 @@ public class QueueServiceImpl implements QueueService {
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 //    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
 
-    @Autowired private StudentFirebase studentFirebase;
+    @Autowired private FirebaseService firebaseService;
     @Autowired private ValidationService validationService;
-
-    @Override
-    public GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role) {
-        double avgStudentsInEmployeeQueues = virtualQueueWorkflow
-                .getVirtualQueueData(companyId, role).getEmployeeIds()
-                .stream()
-                .mapToLong(employeeId -> windowQueueWorkflow.size(employeeId) +
-                        physicalQueueWorkflow.size(employeeId))
-                .average()
-                .orElse(0);
-
-        int numStudents = (int) (avgStudentsInEmployeeQueues + virtualQueueWorkflow.size(
-                companyId, role));
-        int waitTime = getOverallWaitTime(companyId, role, numStudents);
-
-        Map<String, Integer> companyWaitTime = Maps.newHashMap();
-        companyWaitTime.put(companyId, waitTime);
-        return new GetWaitTimeResponse(companyWaitTime);
-    }
-
-    @Override
-    public GetWaitTimeResponse getAllCompaniesWaitTime(Role role) {
-        Map<Object, Object> allEmployees = employeeRedisTemplate.opsForHash()
-                .entries(EMPLOYEE_CACHE_NAME);
-        Map<String, Integer> companyWaitTimes = Maps.newHashMap();
-
-        for (Object key : allEmployees.keySet()) {
-            Employee employee = (Employee) allEmployees.get(key);
-
-            if (employee.getRole() == role && employee.getVirtualQueueId() != null) {
-                GetWaitTimeResponse response = getCompanyWaitTime(employee.getCompanyId(), role);
-                companyWaitTimes.putAll(response.getCompanyWaitTimes());
-            }
-        }
-
-        return new GetWaitTimeResponse(companyWaitTimes);
-    }
 
     @Override
     public JoinQueueResponse joinVirtualQueue(String companyId, Role role, Student student) {
@@ -204,13 +165,6 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
-    public GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId) {
-        EmployeeQueueData employeeQueueData = physicalQueueWorkflow.getEmployeeQueueData(
-                employeeId);
-        return new GetEmployeeQueueDataResponse(employeeQueueData);
-    }
-
-    @Override
     public PauseQueueResponse pauseQueue(String employeeId) {
         virtualQueueWorkflow.pauseQueueForEmployee(employeeId);
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.getEmployeeQueueData(
@@ -222,13 +176,7 @@ public class QueueServiceImpl implements QueueService {
     public RemoveStudentResponse registerStudent(String employeeId, String studentId) {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.registerStudent(employeeId,
                 studentId);
-
-        try {
-            studentFirebase.registerStudent(studentId, employeeId);
-        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
-            throw new InvalidRequestException(ex.getMessage());
-        }
-
+        firebaseService.registerStudent(studentId, employeeId);
         return removeStudentFromQueue(employeeId, employeeQueueData);
     }
 
@@ -237,6 +185,44 @@ public class QueueServiceImpl implements QueueService {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.skipStudent(employeeId,
                 studentId);
         return removeStudentFromQueue(employeeId, employeeQueueData);
+    }
+
+    @Override
+    public GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId) {
+        EmployeeQueueData employeeQueueData = physicalQueueWorkflow.getEmployeeQueueData(
+                employeeId);
+        return new GetEmployeeQueueDataResponse(employeeQueueData);
+    }
+
+    @Override
+    public List<Employee> getAllEmployees() {
+        return employeeRedisTemplate.opsForHash().values(EMPLOYEE_CACHE_NAME)
+                .stream()
+                .map(obj -> (Employee) obj)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public int getOverallWaitTime(String companyId, Role role) {
+        double avgStudentsInEmployeeQueues = virtualQueueWorkflow
+                .getVirtualQueueData(companyId, role).getEmployeeIds().stream()
+                .mapToLong(this::getEmployeeQueueSize)
+                .average()
+                .orElse(0);
+
+        int numStudents = (int) (avgStudentsInEmployeeQueues +
+                getVirtualQueueSize(companyId, role));
+        return getVirtualQueueWaitTime(companyId, role, numStudents);
+    }
+
+    @Override
+    public long getVirtualQueueSize(String companyId, Role role) {
+        return virtualQueueWorkflow.size(companyId, role);
+    }
+
+    @Override
+    public long getEmployeeQueueSize(String employeeId) {
+        return windowQueueWorkflow.size(employeeId) + physicalQueueWorkflow.size(employeeId);
     }
 
 //    @Override
@@ -401,7 +387,7 @@ public class QueueServiceImpl implements QueueService {
 
             case VIRTUAL:
                 queueStatus.setPosition(queueStatus.getPosition() + MAX_EMPLOYEE_QUEUE_SIZE);
-                queueStatus.setWaitTime(getOverallWaitTime(queueStatus.getCompanyId(),
+                queueStatus.setWaitTime(getVirtualQueueWaitTime(queueStatus.getCompanyId(),
                         queueStatus.getRole(), queueStatus.getPosition()));
                 break;
 
@@ -431,7 +417,7 @@ public class QueueServiceImpl implements QueueService {
      * @param position current *overall* position of the student
      * @return wait time in seconds
      */
-    private int getOverallWaitTime(String companyId, Role role, int position) {
+    private int getVirtualQueueWaitTime(String companyId, Role role, int position) {
         double sum = 0;
         Set<String> employeeIds = virtualQueueWorkflow.getVirtualQueueData(companyId, role)
                 .getEmployeeIds();

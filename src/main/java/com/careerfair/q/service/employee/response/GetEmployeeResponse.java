@@ -4,10 +4,12 @@ import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.util.enums.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class GetEmployeeResponse extends EmployeeResponse {
+
     @JsonProperty("employee")
     private final Employee employee;
-
 }

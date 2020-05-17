@@ -14,19 +14,6 @@ public class QueueControllerImpl implements QueueController {
 
     @Autowired private QueueService queueService;
 
-    @GetMapping("/wait-time/company-id/{company-id}/role/{role}")
-    @Override
-    public GetWaitTimeResponse getCompanyWaitTime(@PathVariable("company-id") String companyId,
-                                                  @PathVariable("role") Role role) {
-        return queueService.getCompanyWaitTime(companyId, role);
-    }
-
-    @GetMapping("/wait-time/role/{role}")
-    @Override
-    public GetWaitTimeResponse getAllCompaniesWaitTime(@PathVariable("role") Role role) {
-        return queueService.getAllCompaniesWaitTime(role);
-    }
-
     @PostMapping("/join/company-id/{company-id}/role/{role}")
     @Override
     public JoinQueueResponse joinQueue(@PathVariable("company-id") String companyId,
@@ -66,7 +53,8 @@ public class QueueControllerImpl implements QueueController {
 
     @GetMapping("/data/employee-id/{employee-id}")
     @Override
-    public GetEmployeeQueueDataResponse getEmployeeQueueData(@PathVariable("employee-id") String employeeId) {
+    public GetEmployeeQueueDataResponse getEmployeeQueueData(
+            @PathVariable("employee-id") String employeeId) {
         return queueService.getEmployeeQueueData(employeeId);
     }
 
