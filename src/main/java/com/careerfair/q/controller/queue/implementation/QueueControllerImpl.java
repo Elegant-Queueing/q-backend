@@ -14,19 +14,6 @@ public class QueueControllerImpl implements QueueController {
 
     @Autowired private QueueService queueService;
 
-    @GetMapping("/wait-time/company-id/{company-id}/role/{role}")
-    @Override
-    public GetWaitTimeResponse getCompanyWaitTime(@PathVariable("company-id") String companyId,
-                                                  @PathVariable("role") Role role) {
-        return queueService.getCompanyWaitTime(companyId, role);
-    }
-
-    @GetMapping("/wait-time/role/{role}")
-    @Override
-    public GetWaitTimeResponse getAllCompaniesWaitTime(@PathVariable("role") Role role) {
-        return queueService.getAllCompaniesWaitTime(role);
-    }
-
     @PostMapping("/join/company-id/{company-id}/student-id/{student-id}/role/{role}/name/{name}")
     @Override
     public JoinQueueResponse joinQueue(@PathVariable("company-id") String companyId,
