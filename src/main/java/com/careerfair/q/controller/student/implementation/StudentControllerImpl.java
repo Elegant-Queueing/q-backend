@@ -39,7 +39,7 @@ public class StudentControllerImpl implements StudentController {
         return studentService.addStudent(addStudentRequest);
     }
 
-    @PutMapping("/upload-resume/{id}/")
+    @PutMapping("/upload-resume/{id}")
     @Override
     public UpdateStudentResponse uploadStudentResume(@PathVariable("id") String id,
                                                      @RequestBody UpdateStudentRequest uploadStudentResume) {

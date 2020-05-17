@@ -24,9 +24,10 @@ public interface StudentController {
     GetStudentResponse getStudentWithEmail(String email);
 
     /**
+     * Updates the student's profile fields
      *
      * @param id
-     * @param updatedValues
+     * @param updateStudent
      * @return UpdateStudentResponse
      */
     UpdateStudentResponse updateStudent(String id, UpdateStudentRequest updateStudent);

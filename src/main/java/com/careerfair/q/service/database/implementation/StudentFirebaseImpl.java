@@ -107,7 +107,6 @@ public class StudentFirebaseImpl implements StudentFirebase {
                 return student;
             }
         }
-
         throw new FirebaseException("No student with email=" + email + " exists");
     }
 
@@ -130,38 +129,43 @@ public class StudentFirebaseImpl implements StudentFirebase {
         HashMap<String, Object> updatedValues = new HashMap<>();
 
         Student requestStudent = updateStudent.getStudent();
-        if (requestStudent.getFirstName() != null && !student.getFirstName().equals(requestStudent.getFirstName())) {
+        if (requestStudent.getFirstName() != null && !student.getFirstName()
+                .equals(requestStudent.getFirstName())) {
             student.setFirstName(requestStudent.getFirstName());
             updatedValues.put("first_name", requestStudent.getFirstName());
         }
-        if (requestStudent.getLastName() != null && !student.getLastName().equals(requestStudent.getLastName())) {
+        if (requestStudent.getLastName() != null && !student.getLastName()
+                .equals(requestStudent.getLastName())) {
             student.setLastName(requestStudent.getLastName());
             updatedValues.put("last_name", requestStudent.getLastName());
         }
-        if (requestStudent.getMajor() != null && !student.getMajor().equals(requestStudent.getMajor())) {
+        if (requestStudent.getMajor() != null && !student.getMajor()
+                .equals(requestStudent.getMajor())) {
             student.setMajor(requestStudent.getMajor());
             updatedValues.put("major", requestStudent.getMajor());
         }
-        if (requestStudent.getRole() != null && !student.getRole().equals(requestStudent.getRole())) {
+        if (requestStudent.getRole() != null && !student.getRole()
+                .equals(requestStudent.getRole())) {
             student.setRole(requestStudent.getRole());
             updatedValues.put("role", requestStudent.getRole());
         }
-        if (requestStudent.getBio() != null && !student.getBio().equals(requestStudent.getBio())) {
+        if (requestStudent.getBio() != null && !student.getBio()
+                .equals(requestStudent.getBio())) {
             student.setBio(requestStudent.getBio());
             updatedValues.put("bio", requestStudent.getBio());
         }
-
-        if (requestStudent.getGpa() != null && !student.getGpa().equals(requestStudent.getGpa())) {
+        if (requestStudent.getGpa() != null && !student.getGpa()
+                .equals(requestStudent.getGpa())) {
             student.setGpa(requestStudent.getGpa());
             updatedValues.put("gpa", requestStudent.getGpa());
         }
-
-        // This is an issue
-//        if (requestStudent.getGraduationDate() != null && !student.getGraduationDate().equals(requestStudent.getGraduationDate())) {
-//            student.setGraduationDate(requestStudent.getGraduationDate());
-//            updatedValues.put("grad_date", requestStudent.getGraduationDate());
-//        }
-        if (requestStudent.getInternational() != null && !student.getInternational().equals(requestStudent.getInternational())) {
+        if (requestStudent.getGraduationDate() != null && !student.getGraduationDate()
+                .equals(requestStudent.getGraduationDate())) {
+            student.setGraduationDate(requestStudent.getGraduationDate());
+            updatedValues.put("grad_date", requestStudent.getGraduationDate());
+        }
+        if (requestStudent.getInternational() != null && !student.getInternational()
+                .equals(requestStudent.getInternational())) {
             student.setInternational(requestStudent.getInternational());
             updatedValues.put("international", requestStudent.getInternational());
         }
