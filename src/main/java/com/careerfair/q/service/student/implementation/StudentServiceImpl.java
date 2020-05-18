@@ -1,5 +1,6 @@
 package com.careerfair.q.service.student.implementation;
 
+import com.careerfair.q.model.db.Student;
 import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.student.StudentService;
 import com.careerfair.q.service.student.request.AddStudentRequest;
@@ -31,9 +32,11 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public UpdateStudentResponse updateStudent(String studentId, UpdateStudentRequest updateStudentRequest) {
-        return new UpdateStudentResponse(firebaseService
-                .updateStudent(studentId, updateStudentRequest.getStudent()));
+    public UpdateStudentResponse updateStudent(String studentId,
+                                               UpdateStudentRequest updateStudentRequest) {
+        Student updateStudent = firebaseService.updateStudent(studentId,
+                updateStudentRequest.getStudent());
+        return new UpdateStudentResponse(updateStudent);
     }
 
     @Override
@@ -49,7 +52,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public UpdateStudentResponse uploadStudentResume(String id, UpdateStudentRequest uploadStudentResume) {
+    public UpdateStudentResponse uploadStudentResume(String id,
+                                                     UpdateStudentRequest uploadStudentResume) {
         // TODO
         return null;
     }

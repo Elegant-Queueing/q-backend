@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.PropertyName;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -32,7 +32,8 @@ public interface StudentController {
      * @param updateStudentRequest Request object holding all the changes to the student
      * @return UpdateStudentResponse
      */
-    UpdateStudentResponse updateStudent(String studentId, UpdateStudentRequest updateStudentRequest);
+    UpdateStudentResponse updateStudent(String studentId,
+                                        UpdateStudentRequest updateStudentRequest);
 
     /**
      *

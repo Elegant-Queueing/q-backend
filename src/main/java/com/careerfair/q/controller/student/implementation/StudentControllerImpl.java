@@ -32,7 +32,7 @@ public class StudentControllerImpl implements StudentController {
     @PutMapping(value = "/update/student-id/{student-id}")
     @Override
     public UpdateStudentResponse updateStudent(@PathVariable("student-id") String studentId,
-                                               @RequestBody UpdateStudentRequest updateStudentRequest) {
+            @RequestBody UpdateStudentRequest updateStudentRequest) {
         return studentService.updateStudent(studentId, updateStudentRequest);
     }
 
@@ -51,7 +51,7 @@ public class StudentControllerImpl implements StudentController {
     @PutMapping("/upload-resume/{id}")
     @Override
     public UpdateStudentResponse uploadStudentResume(@PathVariable("id") String id,
-                                                     @RequestBody UpdateStudentRequest uploadStudentResume) {
+            @RequestBody UpdateStudentRequest uploadStudentResume) {
         return studentService.uploadStudentResume(id, uploadStudentResume);
     }
 

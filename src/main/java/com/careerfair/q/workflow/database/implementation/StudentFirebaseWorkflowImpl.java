@@ -79,7 +79,8 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
     }
 
     @Override
-    public void registerEmployeeToStudent(String studentId, String employeeId) throws FirebaseException {
+    public void registerEmployeeToStudent(String studentId,
+                                          String employeeId) throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
         Student student = getStudentWithId(studentId);
 
@@ -93,7 +94,8 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
     }
 
     @Override
-    public Student updateStudent(String studentId, Student updatedStudent) throws FirebaseException {
+    public Student updateStudent(String studentId,
+                                 Student updatedStudent) throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
         Student firebaseStudent = getStudentWithId(studentId);
         updateResponseStudent(studentId, firebaseStudent, updatedStudent);
@@ -101,7 +103,8 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         return updatedStudent;
     }
 
-    private void updateResponseStudent(String studentId, Student firebaseStudent, Student updatedStudent) {
+    private void updateResponseStudent(String studentId, Student firebaseStudent,
+                                       Student updatedStudent) {
         if (updatedStudent.getFirstName() == null) {
             updatedStudent.setFirstName(firebaseStudent.getFirstName());
         }
