@@ -4,6 +4,7 @@ import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.model.db.Student;
+import com.careerfair.q.model.exchange.StudentDTO;
 import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.EmployeeFirebaseWorkflow;
@@ -92,6 +93,11 @@ public class FirebaseServiceImpl implements FirebaseService {
     @Override
     public Student updateStudent(String studentId, Student student) {
         return studentFirebaseWorkflow.updateStudent(studentId, student);
+    }
+
+    @Override
+    public StudentDTO addStudent(StudentDTO addedStudent) {
+        return studentFirebaseWorkflow.addStudent(addedStudent);
     }
 
     // Use this method to test your firebase connection

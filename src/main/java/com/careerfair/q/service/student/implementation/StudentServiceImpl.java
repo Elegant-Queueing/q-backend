@@ -1,6 +1,7 @@
 package com.careerfair.q.service.student.implementation;
 
 import com.careerfair.q.model.db.Student;
+import com.careerfair.q.model.exchange.StudentDTO;
 import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.student.StudentService;
 import com.careerfair.q.service.student.request.AddStudentRequest;
@@ -47,8 +48,8 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public AddStudentResponse addStudent(AddStudentRequest addStudentRequest) {
-        // TODO
-        return null;
+        StudentDTO addedStudent = firebaseService.addStudent(addStudentRequest.getStudentDTO());
+        return new AddStudentResponse(addedStudent);
     }
 
     @Override

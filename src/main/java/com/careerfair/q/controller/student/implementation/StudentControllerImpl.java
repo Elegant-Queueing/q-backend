@@ -11,6 +11,8 @@ import com.careerfair.q.service.student.response.UpdateStudentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("student")
 public class StudentControllerImpl implements StudentController {
@@ -44,7 +46,7 @@ public class StudentControllerImpl implements StudentController {
 
     @PostMapping("/add")
     @Override
-    public AddStudentResponse addStudent(@RequestBody AddStudentRequest addStudentRequest) {
+    public AddStudentResponse addStudent(@Valid @RequestBody AddStudentRequest addStudentRequest) {
         return studentService.addStudent(addStudentRequest);
     }
 

@@ -43,9 +43,10 @@ public interface StudentService {
     DeleteStudentResponse deleteStudent(String id);
 
     /**
+     * Adds a student with the given details in the request
      *
      * @param addStudentRequest
-     * @return
+     * @return AddStudentResponse
      */
     AddStudentResponse addStudent(AddStudentRequest addStudentRequest);
 

@@ -1,6 +1,7 @@
 package com.careerfair.q.workflow.database.implementation;
 
 import com.careerfair.q.model.db.Student;
+import com.careerfair.q.model.exchange.StudentDTO;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.StudentFirebaseWorkflow;
 import com.google.api.client.util.Lists;
@@ -136,5 +137,13 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
 
         // TODO: work on employee update
         updatedStudent.employees = firebaseStudent.employees;
+    }
+
+    @Override
+    public StudentDTO addStudent(StudentDTO addedStudent) {
+        Firestore firestore = FirestoreClient.getFirestore();
+        CollectionReference studentCollection = firestore.collection(STUDENT_COLLECTION);
+        studentCollection.add(addedStudent);
+        return addedStudent;
     }
 }
