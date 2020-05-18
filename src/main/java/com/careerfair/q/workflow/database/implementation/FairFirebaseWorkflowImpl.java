@@ -2,8 +2,8 @@ package com.careerfair.q.workflow.database.implementation;
 
 import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Fair;
-import com.careerfair.q.workflow.database.FairFirebaseWorkflow;
 import com.careerfair.q.util.exception.FirebaseException;
+import com.careerfair.q.workflow.database.FairFirebaseWorkflow;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;

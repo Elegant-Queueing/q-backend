@@ -79,7 +79,8 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
     }
 
     @Override
-    public void registerEmployeeToStudent(String studentId, String employeeId) throws FirebaseException {
+    public void registerEmployeeToStudent(String studentId, String employeeId)
+            throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
         Student student = getStudentWithId(studentId);
 
@@ -88,8 +89,50 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         }
 
         student.getEmployees().add(employeeId);
-
         firestore.collection(STUDENT_COLLECTION).document(studentId).update("employees",
                 student.getEmployees());
+    }
+
+    @Override
+    public Student updateStudent(String studentId, Student updatedStudent)
+            throws FirebaseException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        Student firebaseStudent = getStudentWithId(studentId);
+        updateResponseStudent(studentId, firebaseStudent, updatedStudent);
+        firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent);
+        return updatedStudent;
+    }
+
+    private void updateResponseStudent(String studentId, Student firebaseStudent,
+                                       Student updatedStudent) {
+        if (updatedStudent.getFirstName() == null) {
+            updatedStudent.setFirstName(firebaseStudent.getFirstName());
+        }
+        if (updatedStudent.getLastName() == null) {
+            updatedStudent.setLastName(firebaseStudent.getLastName());
+        }
+        if (updatedStudent.getMajor() == null) {
+            updatedStudent.setMajor(firebaseStudent.getMajor());
+        }
+        if (updatedStudent.getRole() == null) {
+            updatedStudent.setRole(firebaseStudent.getRole());
+        }
+        if (updatedStudent.getBio() == null) {
+            updatedStudent.setMajor(firebaseStudent.getMajor());
+        }
+        if (updatedStudent.getGpa() == null) {
+            updatedStudent.setGpa(firebaseStudent.getGpa());
+        }
+        if (updatedStudent.getGraduationDate() == null) {
+            updatedStudent.setGraduationDate(firebaseStudent.getGraduationDate());
+        }
+        if (updatedStudent.getInternational() == null) {
+            updatedStudent.setInternational(firebaseStudent.getInternational());
+        }
+        updatedStudent.setStudentId(studentId);
+        updatedStudent.setUniversityId(firebaseStudent.getUniversityId());
+
+        // TODO: work on employee update
+        updatedStudent.setEmployees(firebaseStudent.getEmployees());
     }
 }

@@ -89,6 +89,11 @@ public class FirebaseServiceImpl implements FirebaseService {
         employeeFirebaseWorkflow.registerStudentToEmployee(employeeId, studentId);
     }
 
+    @Override
+    public Student updateStudent(String studentId, Student student) {
+        return studentFirebaseWorkflow.updateStudent(studentId, student);
+    }
+
     // Use this method to test your firebase connection
     @Override
     public void test() {

@@ -36,7 +36,17 @@ public interface StudentFirebaseWorkflow {
      *
      * @param studentId id of student to register
      * @param employeeId id of the employee that the student has finished talking to
-     * @throws FirebaseException if the student or employee do not exist
+     * @throws FirebaseException if the student does not exist
      */
     void registerEmployeeToStudent(String studentId, String employeeId) throws FirebaseException;
+
+    /**
+     * Updates all the fields that the user changes
+     *
+     * @param studentId id of the student to make changes to
+     * @param updatedStudent Student object with all the changes made
+     * @return Student
+     * @throws FirebaseException if the student does not exist
+     */
+    Student updateStudent(String studentId, Student updatedStudent) throws FirebaseException;
 }

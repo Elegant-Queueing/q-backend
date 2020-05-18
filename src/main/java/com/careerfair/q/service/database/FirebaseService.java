@@ -4,7 +4,6 @@ import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.model.db.Student;
-import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.FirebaseException;
 
 import java.util.List;
@@ -106,6 +105,15 @@ public interface FirebaseService {
      * @throws FirebaseException if the student or employee do not exist
      */
     void registerStudent(String studentId, String employeeId) throws FirebaseException;
+
+    /**
+     * Updates the student given the changes
+     *
+     * @param studentId id of the student to update
+     * @param student student object with the updated fields
+     * @return Student
+     */
+    Student updateStudent(String studentId, Student student);
 
     /**
      * Test firebase connection

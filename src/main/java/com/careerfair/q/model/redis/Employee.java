@@ -1,7 +1,8 @@
 package com.careerfair.q.model.redis;
 
 import com.careerfair.q.util.enums.Role;
-import lombok.*;
+import lombok.Data;
+import lombok.NonNull;
 
 import java.io.Serializable;
 

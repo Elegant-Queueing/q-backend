@@ -26,12 +26,14 @@ public interface StudentController {
     GetStudentResponse getStudentWithEmail(String email);
 
     /**
+     * Updates the student given the changes
      *
-     * @param id
-     * @param updateStudentRequest
-     * @return
+     * @param studentId id of the student to update
+     * @param updateStudentRequest Request object holding all the changes to the student
+     * @return UpdateStudentResponse
      */
-    UpdateStudentResponse updateStudent(String id, UpdateStudentRequest updateStudentRequest);
+    UpdateStudentResponse updateStudent(String studentId,
+                                        UpdateStudentRequest updateStudentRequest);
 
     /**
      *
