@@ -14,7 +14,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@EqualsAndHashCode
 public class Student {
 
     @PropertyName("student_id")

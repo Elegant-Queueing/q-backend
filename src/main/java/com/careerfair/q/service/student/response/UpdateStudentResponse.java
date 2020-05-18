@@ -7,7 +7,6 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-
 public class UpdateStudentResponse extends StudentResponse {
 
     @JsonProperty("student")

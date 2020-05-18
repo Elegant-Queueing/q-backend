@@ -32,7 +32,8 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public UpdateStudentResponse updateStudent(String studentId, UpdateStudentRequest updateStudentRequest) {
-        return new UpdateStudentResponse(firebaseService.updateStudent(studentId, updateStudentRequest.getStudent()));
+        return new UpdateStudentResponse(firebaseService
+                .updateStudent(studentId, updateStudentRequest.getStudent()));
     }
 
     @Override
