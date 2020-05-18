@@ -6,15 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.PropertyName;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.util.List;
 
-@Getter
-@Setter
 public class Student {
-
     @PropertyName("student_id")
     @JsonProperty("student_id")
     public String studentId;
@@ -63,4 +57,5 @@ public class Student {
     @PropertyName("employees")
     @JsonProperty("employees")
     public List<String> employees;
+
 }

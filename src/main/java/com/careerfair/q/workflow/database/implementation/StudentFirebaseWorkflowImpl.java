@@ -46,7 +46,7 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
                 throw new FirebaseException("No student with student id=" + studentId + " exists");
             }
 
-            student.setStudentId(studentId);
+            student.studentId = studentId;
             return student;
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
@@ -67,7 +67,7 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
                     Student student = documentSnapshot.toObject(Student.class);
                     assert student != null;
 
-                    student.setStudentId(documentSnapshot.getId());
+                    student.studentId = documentSnapshot.getId();
                     return student;
                 }
             }
@@ -84,13 +84,13 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         Firestore firestore = FirestoreClient.getFirestore();
         Student student = getStudentWithId(studentId);
 
-        if (student.getEmployees() == null) {
-            student.setEmployees(Lists.newArrayList());
+        if (student.employees == null) {
+            student.employees = Lists.newArrayList();
         }
 
-        student.getEmployees().add(employeeId);
+        student.employees.add(employeeId);
         firestore.collection(STUDENT_COLLECTION).document(studentId).update("employees",
-                student.getEmployees());
+                student.employees);
     }
 
     @Override
@@ -105,34 +105,36 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
 
     private void updateResponseStudent(String studentId, Student firebaseStudent,
                                        Student updatedStudent) {
-        if (updatedStudent.getFirstName() == null) {
-            updatedStudent.setFirstName(firebaseStudent.getFirstName());
+        if (updatedStudent.firstName == null) {
+            updatedStudent.firstName = firebaseStudent.firstName;
         }
-        if (updatedStudent.getLastName() == null) {
-            updatedStudent.setLastName(firebaseStudent.getLastName());
+        if (updatedStudent.lastName == null) {
+            updatedStudent.lastName = firebaseStudent.lastName;
         }
-        if (updatedStudent.getMajor() == null) {
-            updatedStudent.setMajor(firebaseStudent.getMajor());
+        if (updatedStudent.major == null) {
+            updatedStudent.major = firebaseStudent.major;
         }
-        if (updatedStudent.getRole() == null) {
-            updatedStudent.setRole(firebaseStudent.getRole());
+        if (updatedStudent.role == null) {
+            updatedStudent.role = firebaseStudent.role;
         }
-        if (updatedStudent.getBio() == null) {
-            updatedStudent.setMajor(firebaseStudent.getMajor());
+        if (updatedStudent.bio == null) {
+            updatedStudent.bio = firebaseStudent.bio;
         }
-        if (updatedStudent.getGpa() == null) {
-            updatedStudent.setGpa(firebaseStudent.getGpa());
+        if (updatedStudent.gpa == null) {
+            updatedStudent.gpa = firebaseStudent.gpa;
         }
-        if (updatedStudent.getGraduationDate() == null) {
-            updatedStudent.setGraduationDate(firebaseStudent.getGraduationDate());
+        if (updatedStudent.graduationDate == null) {
+            updatedStudent.graduationDate = firebaseStudent.graduationDate;
         }
-        if (updatedStudent.getInternational() == null) {
-            updatedStudent.setInternational(firebaseStudent.getInternational());
+        if (updatedStudent.international == null) {
+            updatedStudent.international = firebaseStudent.international;
         }
-        updatedStudent.setStudentId(studentId);
-        updatedStudent.setUniversityId(firebaseStudent.getUniversityId());
+        updatedStudent.studentId = studentId;
+
+        // TODO: work on university-id and email update
+        updatedStudent.universityId = firebaseStudent.universityId;
 
         // TODO: work on employee update
-        updatedStudent.setEmployees(firebaseStudent.getEmployees());
+        updatedStudent.employees = firebaseStudent.employees;
     }
 }
