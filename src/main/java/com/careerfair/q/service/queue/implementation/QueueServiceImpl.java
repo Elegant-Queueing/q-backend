@@ -18,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +35,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
-//    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
+    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
 
     @Autowired private FirebaseService firebaseService;
     @Autowired private ValidationService validationService;
@@ -137,8 +139,7 @@ public class QueueServiceImpl implements QueueService {
                 .get(EMPLOYEE_CACHE_NAME, employeeId);
         if (employee == null) {
             employee = new Employee(employeeId, companyId, role);
-            employeeRedisTemplate.opsForHash()
-                    .put(EMPLOYEE_CACHE_NAME, employeeId, employee);
+            employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
         }
 
         virtualQueueWorkflow.addQueue(companyId, employeeId, role);
@@ -225,43 +226,43 @@ public class QueueServiceImpl implements QueueService {
         return windowQueueWorkflow.size(employeeId) + physicalQueueWorkflow.size(employeeId);
     }
 
-//    @Override
-//    public void clearAll() {
-//        Collection<String> keys = studentRedisTemplate.keys("*");  // redis magic
-//        if (keys != null) {
-//            studentRedisTemplate.delete(keys);
-//        }
-//    }
-//
-//    @Override
-//    public String getAll() {
-//        Collection<String> keys = studentRedisTemplate.keys("*");
-//        StringBuilder stringBuilder = new StringBuilder();
-//        stringBuilder.append("\n\n\n");
-//        stringBuilder.append("*****************************\n");
-//        stringBuilder.append("All keys:" + keys + "\n");
-//        if (keys != null) {
-//            for (String key: keys) {
-//                stringBuilder.append(key + ":\n");
-//                try {
-//                    List<Student> list = queueRedisTemplate.opsForList().range(key, 0L, -1L);
-//                    stringBuilder.append("\t" + list + "\n");
-//                } catch(Exception e) {
-//                    // redis magic
-//                    Map<Object, Object> map = studentRedisTemplate.opsForHash().entries(key);
-//                    for(Object mapKey: map.keySet()) {
-//                        stringBuilder.append("\t" + mapKey + ":" + map.get(mapKey) + "\n");
-//                    }
-//                }
-//                stringBuilder.append("--------\n");
-//
-//            }
-//        }
-//
-//        stringBuilder.append("*****************************\n");
-//        return stringBuilder.toString();
-//
-//    }
+    @Override
+    public void clearAll() {
+        Collection<String> keys = studentRedisTemplate.keys("*");  // redis magic
+        if (keys != null) {
+            studentRedisTemplate.delete(keys);
+        }
+    }
+
+    @Override
+    public String getAll() {
+        Collection<String> keys = studentRedisTemplate.keys("*");
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\n\n\n");
+        stringBuilder.append("*****************************\n");
+        stringBuilder.append("All keys:" + keys + "\n");
+        if (keys != null) {
+            for (String key: keys) {
+                stringBuilder.append(key + ":\n");
+                try {
+                    List<Student> list = queueRedisTemplate.opsForList().range(key, 0L, -1L);
+                    stringBuilder.append("\t" + list + "\n");
+                } catch(Exception e) {
+                    // redis magic
+                    Map<Object, Object> map = studentRedisTemplate.opsForHash().entries(key);
+                    for(Object mapKey: map.keySet()) {
+                        stringBuilder.append("\t" + mapKey + ":" + map.get(mapKey) + "\n");
+                    }
+                }
+                stringBuilder.append("--------\n");
+
+            }
+        }
+
+        stringBuilder.append("*****************************\n");
+        return stringBuilder.toString();
+
+    }
 
     /**
      * Removes the student from the given employee's queue

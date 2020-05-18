@@ -78,13 +78,13 @@ public class QueueControllerImpl implements QueueController {
         return queueService.skipStudent(employeeId, studentId);
     }
 
-//    @DeleteMapping("/clearAll")
-//    public void clearAll() {
-//        queueService.clearAll();
-//    }
-//
-//    @GetMapping("/getAll")
-//    public String getAll() {
-//        return queueService.getAll();
-//    }
+    @DeleteMapping("/clearAll")
+    public void clearAll() {
+        queueService.clearAll();
+    }
+
+    @GetMapping("/getAll")
+    public String getAll() {
+        return queueService.getAll();
+    }
 }

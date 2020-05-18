@@ -122,13 +122,13 @@ public interface QueueService {
      */
     long getEmployeeQueueSize(String employeeId);
 
-//    /**
-//     * Clears all data in Redis. USED FOR TESTING ONLY
-//     */
-//    void clearAll();
-//
-//    /**
-//     * Gets all data in Redis. USED FOR TESTING ONLY
-//     */
-//    String getAll();
+    /**
+     * Clears all data in Redis. USED FOR TESTING ONLY
+     */
+    void clearAll();
+
+    /**
+     * Gets all data in Redis. USED FOR TESTING ONLY
+     */
+    String getAll();
 }

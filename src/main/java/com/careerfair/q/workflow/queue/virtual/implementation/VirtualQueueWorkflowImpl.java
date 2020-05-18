@@ -4,9 +4,11 @@ import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
+import com.careerfair.q.service.notification.NotificationService;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
+import com.careerfair.q.util.enums.Topic;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.AbstractQueueWorkflow;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
@@ -29,6 +31,8 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
+
+    @Autowired private NotificationService notificationService;
 
     @Override
     public QueueStatus joinQueue(String companyId, Role role, Student student) {
@@ -107,6 +111,8 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
                 .get(companyId, role);
         if (virtualQueueData == null) {
             virtualQueueData = createRedisVirtualQueue();
+            System.out.println("Notifying user");
+            notificationService.notifyQueueOpen(companyId, role.getTopic());
         }
         virtualQueueData.getEmployeeIds().add(employeeId);
         companyRedisTemplate.opsForHash().put(companyId, role, virtualQueueData);
