@@ -3,11 +3,9 @@ package com.careerfair.q.workflow.queue.employee.physical.implementation;
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
-import com.careerfair.q.service.database.StudentFirebase;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
-import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.employee.AbstractEmployeeQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
@@ -17,9 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-import static com.careerfair.q.service.queue.implementation.QueueServiceImpl.*;
 import static com.careerfair.q.util.constant.Queue.*;
 
 @Component

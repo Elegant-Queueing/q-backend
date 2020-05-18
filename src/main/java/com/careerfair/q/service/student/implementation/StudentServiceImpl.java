@@ -1,46 +1,38 @@
 package com.careerfair.q.service.student.implementation;
 
-import com.careerfair.q.service.database.StudentFirebase;
+import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.student.StudentService;
 import com.careerfair.q.service.student.request.AddStudentRequest;
 import com.careerfair.q.service.student.request.UpdateStudentRequest;
-import com.careerfair.q.service.student.response.*;
-import com.careerfair.q.util.exception.FirebaseException;
-import com.careerfair.q.util.exception.InvalidRequestException;
+import com.careerfair.q.service.student.response.AddStudentResponse;
+import com.careerfair.q.service.student.response.DeleteStudentResponse;
+import com.careerfair.q.service.student.response.GetStudentResponse;
+import com.careerfair.q.service.student.response.UpdateStudentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.concurrent.ExecutionException;
 
 @Service
 public class StudentServiceImpl implements StudentService {
 
-    @Autowired private StudentFirebase studentFirebase;
+    private final FirebaseService firebaseService;
+
+    public StudentServiceImpl(@Autowired FirebaseService firebaseService) {
+        this.firebaseService = firebaseService;
+    }
 
     @Override
     public GetStudentResponse getStudentWithId(String studentId) {
-        try {
-            return new GetStudentResponse(studentFirebase.getStudentWithId(studentId));
-        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
-            throw new InvalidRequestException(ex.getMessage());
-        }
+        return new GetStudentResponse(firebaseService.getStudentWithId(studentId));
     }
 
     @Override
     public GetStudentResponse getStudentWithEmail(String email) {
-        try {
-            return new GetStudentResponse(studentFirebase.getStudentWithEmail(email));
-        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
-            throw new InvalidRequestException(ex.getMessage());
-        }
+        return new GetStudentResponse(firebaseService.getStudentWithEmail(email));
     }
 
     @Override
-    public UpdateStudentResponse updateStudent(String id, UpdateStudentRequest updateStudent) {
-        try {
-            return new UpdateStudentResponse(studentFirebase.updateStudent(id, updateStudent));
-        } catch (ExecutionException | InterruptedException | FirebaseException ex) {
-            throw new InvalidRequestException(ex.getMessage());
-        }
+    public UpdateStudentResponse updateStudent(String studentId, UpdateStudentRequest updateStudentRequest) {
+        return new UpdateStudentResponse(firebaseService.updateStudent(studentId, updateStudentRequest.getStudent()));
     }
 
     @Override
@@ -63,6 +55,6 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public void testDatabaseConnection() {
-        studentFirebase.test();
+        firebaseService.test();
     }
 }

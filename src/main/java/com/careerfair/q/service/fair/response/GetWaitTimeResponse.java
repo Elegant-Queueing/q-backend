@@ -1,4 +1,4 @@
-package com.careerfair.q.service.queue.response;
+package com.careerfair.q.service.fair.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

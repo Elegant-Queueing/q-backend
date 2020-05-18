@@ -4,7 +4,10 @@ import com.careerfair.q.controller.student.StudentController;
 import com.careerfair.q.service.student.StudentService;
 import com.careerfair.q.service.student.request.AddStudentRequest;
 import com.careerfair.q.service.student.request.UpdateStudentRequest;
-import com.careerfair.q.service.student.response.*;
+import com.careerfair.q.service.student.response.AddStudentResponse;
+import com.careerfair.q.service.student.response.DeleteStudentResponse;
+import com.careerfair.q.service.student.response.GetStudentResponse;
+import com.careerfair.q.service.student.response.UpdateStudentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +29,12 @@ public class StudentControllerImpl implements StudentController {
         return studentService.getStudentWithEmail(email);
     }
 
+    @PutMapping(value = "/update/student-id/{student-id}")
+    @Override
+    public UpdateStudentResponse updateStudent(@PathVariable("student-id") String studentId,
+                                               @RequestBody UpdateStudentRequest updateStudentRequest) {
+        return studentService.updateStudent(studentId, updateStudentRequest);
+    }
 
     @DeleteMapping("/delete/{id}")
     @Override
@@ -51,12 +60,5 @@ public class StudentControllerImpl implements StudentController {
     public String ping() {
         studentService.testDatabaseConnection();
         return "Pong";
-    }
-
-    @PutMapping(value = "/update-student/{id}")
-    @Override
-    public UpdateStudentResponse updateStudent(@PathVariable("id") String id,
-                                               @RequestBody UpdateStudentRequest updateStudent) {
-        return studentService.updateStudent(id, updateStudent);
     }
 }

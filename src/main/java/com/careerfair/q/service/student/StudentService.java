@@ -2,7 +2,10 @@ package com.careerfair.q.service.student;
 
 import com.careerfair.q.service.student.request.AddStudentRequest;
 import com.careerfair.q.service.student.request.UpdateStudentRequest;
-import com.careerfair.q.service.student.response.*;
+import com.careerfair.q.service.student.response.AddStudentResponse;
+import com.careerfair.q.service.student.response.DeleteStudentResponse;
+import com.careerfair.q.service.student.response.GetStudentResponse;
+import com.careerfair.q.service.student.response.UpdateStudentResponse;
 
 public interface StudentService {
 
@@ -23,12 +26,13 @@ public interface StudentService {
     GetStudentResponse getStudentWithEmail(String email);
 
     /**
+     * Updates the student given the changes
      *
-     * @param id
-     * @param updateStudent
+     * @param studentId id of the student to update
+     * @param updateStudentRequest Request object holding all the changes to the student
      * @return UpdateStudentResponse
      */
-    UpdateStudentResponse updateStudent(String id, UpdateStudentRequest updateStudent);
+    UpdateStudentResponse updateStudent(String studentId, UpdateStudentRequest updateStudentRequest);
 
     /**
      *
