@@ -109,11 +109,12 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
 
         VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash()
                 .get(companyId, role);
+
         if (virtualQueueData == null) {
             virtualQueueData = createRedisVirtualQueue();
-            System.out.println("Notifying user");
-            notificationService.notifyQueueOpen(companyId, role.getTopic());
+            notificationService.notifyQueueOpen(companyId, Topic.valueOf(role.name()));
         }
+
         virtualQueueData.getEmployeeIds().add(employeeId);
         companyRedisTemplate.opsForHash().put(companyId, role, virtualQueueData);
 
@@ -126,15 +127,18 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     @Override
     public void pauseQueueForEmployee(String employeeId) {
         Employee employee = getEmployeeWithId(employeeId);
+
         if (employee.getVirtualQueueId() == null) {
             throw new InvalidRequestException("Employee with employeeId=" + employeeId
                     + " is not associated with a virtual queue");
         }
+
         String companyId = employee.getCompanyId();
         Role role = employee.getRole();
 
         VirtualQueueData virtualQueueData = getVirtualQueueData(companyId, role);
         Set<String> employees = virtualQueueData.getEmployeeIds();
+
         if (employees.size() == 1) {
             removeQueue(companyId, role);
         } else {
@@ -150,8 +154,8 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     @Override
     public void removeQueue(String companyId, Role role) {
         VirtualQueueData virtualQueueData = getVirtualQueueData(companyId, role);
-
         Set<String> employeeIds = virtualQueueData.getEmployeeIds();
+
         for(String id: employeeIds) {
             Employee employee = getEmployeeWithId(id);
             employee.setVirtualQueueId(null);
@@ -161,12 +165,15 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         String virtualQueueId = virtualQueueData.getVirtualQueueId();
         List<Student> students = queueRedisTemplate.opsForList().range(virtualQueueId, 0L, -1L);
         assert students != null;
+
         for(Student student: students) {
             studentRedisTemplate.opsForHash().delete(STUDENT_CACHE_NAME, student.getId());
         }
 
         queueRedisTemplate.delete(virtualQueueId);
         companyRedisTemplate.opsForHash().delete(companyId, role);
+
+        notificationService.notifyQueueClose(companyId, Topic.valueOf(role.name()));
     }
 
     @Override

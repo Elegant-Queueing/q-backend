@@ -22,13 +22,13 @@ public enum Topic {
      */
     DS("ds");
 
-    private final String topicName;
+    private final String topic;
 
-    Topic(String topicName) {
-        this.topicName = topicName;
+    Topic(String topic) {
+        this.topic = topic;
     }
 
-    public String getTopicName() {
-        return this.topicName;
+    public String getTopic() {
+        return topic;
     }
 }

@@ -2,23 +2,17 @@ package com.careerfair.q.util.enums;
 
 public enum Role {
 
-    SWE("swe", Topic.SWE),
-    PM("pm", Topic.PM),
-    DS("ds", Topic.DS);
+    SWE("swe"),
+    PM("pm"),
+    DS("ds");
 
     private final String role;
-    private final Topic topic;
 
-    Role(String role, Topic topic) {
+    Role(String role) {
         this.role = role;
-        this.topic = topic;
     }
 
     public String getRole() {
-        return this.role;
-    }
-
-    public Topic getTopic() {
-        return topic;
+        return role;
     }
 }
