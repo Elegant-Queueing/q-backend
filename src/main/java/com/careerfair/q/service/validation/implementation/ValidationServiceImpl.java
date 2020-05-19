@@ -2,9 +2,7 @@ package com.careerfair.q.service.validation.implementation;
 
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.service.database.FirebaseService;
-import com.careerfair.q.service.student.request.AddStudentRequest;
 import com.careerfair.q.service.student.request.StudentRequest;
-import com.careerfair.q.service.student.request.UpdateStudentRequest;
 import com.careerfair.q.service.validation.ValidationService;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.FirebaseException;

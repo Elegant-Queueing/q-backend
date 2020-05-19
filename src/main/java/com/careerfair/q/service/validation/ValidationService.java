@@ -1,8 +1,6 @@
 package com.careerfair.q.service.validation;
 
-import com.careerfair.q.service.student.request.AddStudentRequest;
 import com.careerfair.q.service.student.request.StudentRequest;
-import com.careerfair.q.service.student.request.UpdateStudentRequest;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.ValidationException;
 
