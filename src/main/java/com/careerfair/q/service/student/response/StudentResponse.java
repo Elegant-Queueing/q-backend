@@ -5,51 +5,42 @@ import com.careerfair.q.util.enums.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.Timestamp;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
+@Getter
+@Setter
 @Data
 public abstract class StudentResponse {
     @JsonProperty("first_name")
-    @NotEmpty
-    public String firstName;
+    private String firstName;
 
     @JsonProperty("last_name")
-    @NotEmpty
-    public String lastName;
+    private String lastName;
 
     @JsonProperty("university_id")
-    @NotEmpty
-    public String universityId;
+    private String universityId;
 
     @JsonProperty("major")
-    @NotEmpty
-    public String major;
+    private String major;
 
     @JsonProperty("role")
-    @NotEmpty
-    public Role role;
+    private Role role;
 
     @JsonProperty("bio")
-    @NotNull
-    public String bio;
+    private String bio;
 
     @JsonProperty("email")
-    @NotEmpty
-    public String email;
+    private String email;
 
     @JsonProperty("gpa")
-    @NotNull
-    public Double gpa;
+    private Double gpa;
 
     @JsonProperty("grad_date")
-    @NotNull
-    public Timestamp graduationDate;
+    private Timestamp graduationDate;
 
     @JsonProperty("international")
-    @NotNull
-    public Boolean international;
+    private Boolean international;
 
     public StudentResponse(Student student) {
         this.firstName = student.firstName;

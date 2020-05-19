@@ -67,30 +67,36 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public <T extends StudentRequest> void checkValidStudentRequest(T studentRequest)
             throws ValidationException {
-        if (studentRequest.firstName == null || studentRequest.firstName.isEmpty()) {
+        checkStudentRequestConstraints(studentRequest);
+    }
+
+    private <T extends StudentRequest> void checkStudentRequestConstraints(T studentRequest)
+            throws ValidationException {
+        if (studentRequest.getFirstName() == null || studentRequest.getFirstName().isEmpty()) {
             throw new ValidationException("Empty or missing first name");
-        } else if (studentRequest.lastName == null || studentRequest.lastName.isEmpty()) {
+        } else if (studentRequest.getLastName() == null || studentRequest.getLastName().isEmpty()) {
             throw new ValidationException("Empty or missing last name");
-        } else if (studentRequest.universityId == null || studentRequest.universityId.isEmpty()) {
+        } else if (studentRequest.getUniversityId() == null ||
+                studentRequest.getUniversityId().isEmpty()) {
             throw new ValidationException("Empty or missing university name");
-        } else if (studentRequest.major == null || studentRequest.major.isEmpty()) {
+        } else if (studentRequest.getMajor() == null || studentRequest.getMajor().isEmpty()) {
             throw new ValidationException("Empty or missing major");
-        } else if (studentRequest.role == null) {
+        } else if (studentRequest.getRole() == null) {
             throw new ValidationException("Empty or missing role");
-        } else if (studentRequest.bio == null || studentRequest.bio.isEmpty()) {
+        } else if (studentRequest.getBio() == null || studentRequest.getBio().isEmpty()) {
             throw new ValidationException("Empty or missing bio");
-        } else if (studentRequest.gpa == null || studentRequest.gpa.isNaN()) {
+        } else if (studentRequest.getGpa() == null || studentRequest.getGpa().isNaN()) {
             throw new ValidationException("Empty or Invalid GPA");
-        } else if (studentRequest.graduationDate == null) {
+        } else if (studentRequest.getGraduationDate() == null) {
             throw new ValidationException("Missing graduation date");
-        } else if (studentRequest.international == null) {
+        } else if (studentRequest.getInternational() == null) {
             throw new ValidationException("Missing international field");
-        } else if (studentRequest.email == null || !checkValidEmail(studentRequest.email)) {
+        } else if (studentRequest.getEmail() == null || !checkValidEmail(studentRequest.getEmail())) {
             throw new ValidationException("Missing or invalid email format");
         }
     }
 
-    private Boolean checkValidEmail(String email) {
+    private boolean checkValidEmail(String email) {
         String emailRegex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
         return email.matches(emailRegex);
     }

@@ -48,16 +48,16 @@ public class StudentServiceImpl implements StudentService {
 
     private <T extends StudentRequest> Student createStudentFromRequest(T studentRequest) {
         Student student = new Student();
-        student.firstName = studentRequest.firstName;
-        student.lastName = studentRequest.lastName;
-        student.universityId = studentRequest.universityId;
-        student.major = studentRequest.major;
-        student.role = studentRequest.role;
-        student.bio = studentRequest.bio;
-        student.email = studentRequest.email;
-        student.gpa = studentRequest.gpa;
-        student.graduationDate = studentRequest.graduationDate;
-        student.international = studentRequest.international;
+        student.firstName = studentRequest.getFirstName();
+        student.lastName = studentRequest.getLastName();
+        student.universityId = studentRequest.getUniversityId();
+        student.major = studentRequest.getMajor();
+        student.role = studentRequest.getRole();
+        student.bio = studentRequest.getBio();
+        student.email = studentRequest.getEmail();
+        student.gpa = studentRequest.getGpa();
+        student.graduationDate = studentRequest.getGraduationDate();
+        student.international = studentRequest.getInternational();
         return student;
     }
 

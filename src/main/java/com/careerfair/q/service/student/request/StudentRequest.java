@@ -12,33 +12,33 @@ import lombok.Getter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StudentRequest {
     @JsonProperty("first_name")
-    public String firstName;
+    private String firstName;
 
     @JsonProperty("last_name")
-    public String lastName;
+    private String lastName;
 
     @JsonProperty("university_id")
-    public String universityId;
+    private String universityId;
 
     @JsonProperty("major")
-    public String major;
+    private String major;
 
     @JsonProperty("role")
-    public Role role;
+    private Role role;
 
     @JsonProperty("bio")
-    public String bio;
+    private String bio;
 
     @JsonProperty("email")
-    public String email;
+    private String email;
 
     @JsonProperty("gpa")
-    public Double gpa;
+    private Double gpa;
 
     @JsonProperty("grad_date")
     @JsonDeserialize(using = TimestampDeserializer.class)
-    public Timestamp graduationDate;
+    private Timestamp graduationDate;
 
     @JsonProperty("international")
-    public Boolean international;
+    private Boolean international;
 }

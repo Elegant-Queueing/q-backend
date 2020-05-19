@@ -3,8 +3,6 @@ package com.careerfair.q.workflow.database;
 import com.careerfair.q.model.db.Student;
 import com.careerfair.q.util.exception.FirebaseException;
 
-import java.util.concurrent.ExecutionException;
-
 public interface StudentFirebaseWorkflow {
 
     /**
@@ -55,10 +53,10 @@ public interface StudentFirebaseWorkflow {
     /**
      * Adds a student with the given details
      *
-     * @param addedStudent id of the student to make changes to
+     * @param newStudent id of the student to make changes to
      * @return Student
      */
-    Student addStudent(Student addedStudent);
+    Student addStudent(Student newStudent);
 
     /**
      * Deletes the student with the given student id
