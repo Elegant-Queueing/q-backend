@@ -158,6 +158,17 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
     }
 
     /**
+     * Returns the list of students present in the given queue
+     *
+     * @param employeeId id of the employee whose students are to be retrieved
+     * @return List of students
+     */
+    protected List<Student> getAllStudents(String employeeId) {
+        Employee employee = getEmployeeWithId(employeeId);
+        return queueRedisTemplate.opsForList().range(checkQueueAssociated(employee), 0L, -1L);
+    }
+
+    /**
      * Checks whether a queue is associated with the given employee
      *
      * @param employee employee to validate
@@ -173,6 +184,6 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
      * @param studentQueueStatus status of the student to update
      * @param employee the employee to update
      */
-    protected abstract void updateStudentQueueStatus(
-            StudentQueueStatus studentQueueStatus, Employee employee);
+    protected abstract void updateStudentQueueStatus(StudentQueueStatus studentQueueStatus,
+                                                     Employee employee);
 }

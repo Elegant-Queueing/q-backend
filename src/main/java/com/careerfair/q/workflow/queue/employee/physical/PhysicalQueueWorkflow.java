@@ -6,6 +6,8 @@ import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
 
+import java.util.List;
+
 public interface PhysicalQueueWorkflow {
 
     /**
@@ -85,4 +87,12 @@ public interface PhysicalQueueWorkflow {
      * @return QueueStatus
      */
     QueueStatus getQueueStatus(StudentQueueStatus studentQueueStatus);
+
+    /**
+     * Returns a list of students present in the given employee's physical queue
+     *
+     * @param employeeId id of the employee whose students are to be retrieved
+     * @return List of students in queue
+     */
+    List<Student> getAllStudents(String employeeId);
 }

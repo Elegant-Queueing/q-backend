@@ -5,6 +5,7 @@ import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
 import com.careerfair.q.service.database.FirebaseService;
+import com.careerfair.q.service.notification.NotificationService;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.service.validation.ValidationService;
@@ -39,11 +40,12 @@ public class QueueServiceImpl implements QueueService {
 
     @Autowired private FirebaseService firebaseService;
     @Autowired private ValidationService validationService;
+    @Autowired private NotificationService notificationService;
 
     @Override
     public JoinQueueResponse joinVirtualQueue(String companyId, Role role, Student student) {
-        validationService.checkValidCompanyId(companyId);
-        validationService.checkValidStudentId(student.getId());
+//        validationService.checkValidCompanyId(companyId);
+//        validationService.checkValidStudentId(student.getId());
 
         QueueStatus status = virtualQueueWorkflow.joinQueue(companyId, role, student);
         String employeeId = getEmployeeWithMostQueueSpace(companyId, role);
@@ -51,6 +53,8 @@ public class QueueServiceImpl implements QueueService {
             status = shiftStudentToWindow(companyId, employeeId, role, student);
         }
         setOverallPositionAndWaitTime(status);
+
+        notificationService.notifyCompanyWaitTime(companyId, role);
 
         return new JoinQueueResponse(status);
     }
@@ -63,42 +67,47 @@ public class QueueServiceImpl implements QueueService {
         QueueStatus queueStatus = physicalQueueWorkflow.joinQueue(employeeId, student,
                 studentQueueStatus);
         setOverallPositionAndWaitTime(queueStatus);
+
+        notificationService.notifyStudentAdditionFromEmployeeQueue(employeeId, studentId);
+
         return new JoinQueueResponse(queueStatus);
     }
 
     @Override
     public void leaveQueue(String companyId, String studentId, Role role) {
-        StudentQueueStatus studentQueueStatus= getStudentQueueStatus(studentId);
+        StudentQueueStatus studentQueueStatus = getStudentQueueStatus(studentId);
         QueueType queueType = studentQueueStatus.getQueueType();
         String employeeId = studentQueueStatus.getEmployeeId();
 
         switch (queueType) {
 
             case VIRTUAL:
+                int position = virtualQueueWorkflow.getStudentPosition(companyId, studentId, role);
                 virtualQueueWorkflow.leaveQueue(companyId, studentId, role);
+
+                notificationService.notifyPositionUpdate(companyId, role, position);
                 break;
 
             case WINDOW:
                 windowQueueWorkflow.leaveQueue(employeeId, studentId);
+                shiftStudentAtHeadToWindow(employeeId);
 
-                Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
-                if (studentAtHead != null) {
-                    shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
-                }
+                notificationService.notifyPositionUpdate(companyId, role, 1);
                 break;
 
             case PHYSICAL:
-                physicalQueueWorkflow.leaveQueue(studentQueueStatus.getEmployeeId(), studentId);
+                physicalQueueWorkflow.leaveQueue(employeeId, studentId);
+                shiftStudentAtHeadToWindow(employeeId);
 
-                studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
-                if (studentAtHead != null) {
-                    shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
-                }
+                notificationService.notifyPositionUpdate(companyId, employeeId, role);
+                notificationService.notifyStudentRemovalFromEmployeeQueue(employeeId, studentId);
                 break;
 
             default:
                 throw new InvalidRequestException("No such QueueType exists");
         }
+
+        notificationService.notifyCompanyWaitTime(companyId, role);
     }
 
     @Override
@@ -131,9 +140,9 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public AddQueueResponse addQueue(String companyId, String employeeId, Role role) {
-        validationService.checkValidCompanyId(companyId);
-        validationService.checkValidEmployeeId(employeeId);
-        validationService.checkEmployeeAssociations(companyId, employeeId, role);
+//        validationService.checkValidCompanyId(companyId);
+//        validationService.checkValidEmployeeId(employeeId);
+//        validationService.checkEmployeeAssociations(companyId, employeeId, role);
 
         Employee employee = (Employee) employeeRedisTemplate.opsForHash()
                 .get(EMPLOYEE_CACHE_NAME, employeeId);
@@ -153,21 +162,39 @@ public class QueueServiceImpl implements QueueService {
 
         int space = (int) getEmployeeQueueSpace(employeeId);
         for (int i = 0; i < space ; i++) {
-            Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
-            if (studentAtHead == null) {
-                break;
-            }
-            shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
+            shiftStudentAtHeadToWindow(employeeId);
         }
 
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.getEmployeeQueueData(
                 employeeId);
+
+        notificationService.notifyQueueOpen(companyId, role);
+        notificationService.notifyPositionUpdate(companyId, role, 1);
+        notificationService.notifyCompanyWaitTime(companyId, role);
+
         return new AddQueueResponse(employeeQueueData);
     }
 
     @Override
     public PauseQueueResponse pauseQueue(String employeeId) {
+        // TODO: This is just a temporary fix
+        Employee employee = getEmployeeWithId(employeeId);
+
+        if (employee.getVirtualQueueId() != null) {
+            VirtualQueueData virtualQueueData = virtualQueueWorkflow.getVirtualQueueData(
+                    employee.getCompanyId(), employee.getRole());
+            Set<String> employees = virtualQueueData.getEmployeeIds();
+
+            if (employees.size() == 1) {
+                notificationService.notifyStudentRemovalFromVirtualQueue(employee.getCompanyId(),
+                        employee.getRole());
+            }
+        }
+
         virtualQueueWorkflow.pauseQueueForEmployee(employeeId);
+
+        notificationService.notifyQueueClose(employee.getCompanyId(), employee.getRole());
+
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.getEmployeeQueueData(
                 employeeId);
         return new PauseQueueResponse(employeeQueueData);
@@ -177,15 +204,29 @@ public class QueueServiceImpl implements QueueService {
     public RemoveStudentResponse registerStudent(String employeeId, String studentId) {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.registerStudent(employeeId,
                 studentId);
-        firebaseService.registerStudent(studentId, employeeId);
-        return removeStudentFromQueue(employeeId, employeeQueueData);
+//        firebaseService.registerStudent(studentId, employeeId);
+        shiftStudentAtHeadToWindow(employeeId);
+
+        Employee employee = getEmployeeWithId(employeeId);
+        notificationService.notifyPositionUpdate(employee.getCompanyId(), employeeId,
+                employee.getRole());
+        notificationService.notifyCompanyWaitTime(employee.getCompanyId(), employee.getRole());
+
+        return new RemoveStudentResponse(employeeQueueData);
     }
 
     @Override
     public RemoveStudentResponse skipStudent(String employeeId, String studentId) {
         EmployeeQueueData employeeQueueData = physicalQueueWorkflow.skipStudent(employeeId,
                 studentId);
-        return removeStudentFromQueue(employeeId, employeeQueueData);
+        shiftStudentAtHeadToWindow(employeeId);
+
+        Employee employee = getEmployeeWithId(employeeId);
+        notificationService.notifyPositionUpdate(employee.getCompanyId(), employeeId,
+                employee.getRole());
+        notificationService.notifyCompanyWaitTime(employee.getCompanyId(), employee.getRole());
+
+        return new RemoveStudentResponse(employeeQueueData);
     }
 
     @Override
@@ -217,8 +258,20 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
+    public List<Student> getVirtualQueueStudents(String companyId, Role role) {
+        return virtualQueueWorkflow.getAllStudents(companyId, role);
+    }
+
+    @Override
     public long getVirtualQueueSize(String companyId, Role role) {
         return virtualQueueWorkflow.size(companyId, role);
+    }
+
+    @Override
+    public List<Student> getEmployeeQueueStudents(String employeeId) {
+        List<Student> students = physicalQueueWorkflow.getAllStudents(employeeId);
+        students.addAll(windowQueueWorkflow.getAllStudents(employeeId));
+        return students;
     }
 
     @Override
@@ -240,18 +293,18 @@ public class QueueServiceImpl implements QueueService {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("\n\n\n");
         stringBuilder.append("*****************************\n");
-        stringBuilder.append("All keys:" + keys + "\n");
+        stringBuilder.append("All keys:").append(keys).append("\n");
         if (keys != null) {
             for (String key: keys) {
-                stringBuilder.append(key + ":\n");
+                stringBuilder.append(key).append(":\n");
                 try {
                     List<Student> list = queueRedisTemplate.opsForList().range(key, 0L, -1L);
-                    stringBuilder.append("\t" + list + "\n");
+                    stringBuilder.append("\t").append(list).append("\n");
                 } catch(Exception e) {
                     // redis magic
                     Map<Object, Object> map = studentRedisTemplate.opsForHash().entries(key);
                     for(Object mapKey: map.keySet()) {
-                        stringBuilder.append("\t" + mapKey + ":" + map.get(mapKey) + "\n");
+                        stringBuilder.append("\t").append(mapKey).append(":").append(map.get(mapKey)).append("\n");
                     }
                 }
                 stringBuilder.append("--------\n");
@@ -261,27 +314,6 @@ public class QueueServiceImpl implements QueueService {
 
         stringBuilder.append("*****************************\n");
         return stringBuilder.toString();
-
-    }
-
-    /**
-     * Removes the student from the given employee's queue
-     *
-     * @param employeeId id of the employee
-     * @param employeeQueueData data of the queue for the employee
-     * @return RemoveStudentResponse
-     */
-    private RemoveStudentResponse removeStudentFromQueue(String employeeId,
-                                                         EmployeeQueueData employeeQueueData) {
-        Employee employee = getEmployeeWithId(employeeId);
-        String companyId = employee.getCompanyId();
-        Role role = employee.getRole();
-
-        Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
-        if (studentAtHead != null) {
-            shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
-        }
-        return new RemoveStudentResponse(employeeQueueData);
     }
 
     /**
@@ -342,6 +374,22 @@ public class QueueServiceImpl implements QueueService {
     }
 
     /**
+     * Shifts a student from virtual queue, if possible, to the given employee's window queue
+     *
+     * @param employeeId id of employee whose window queue to transfer the student to
+     */
+    private void shiftStudentAtHeadToWindow(String employeeId) {
+        Employee employee = getEmployeeWithId(employeeId);
+        String companyId = employee.getCompanyId();
+        Role role = employee.getRole();
+
+        Student studentAtHead = virtualQueueWorkflow.getStudentAtHead(companyId, role);
+        if (studentAtHead != null) {
+            shiftStudentToWindow(companyId, employeeId, role, studentAtHead);
+        }
+    }
+
+    /**
      * Shifts the given student from the virtual queue to the window queue of the employee
      * associated with the given company and role
      *
@@ -355,7 +403,13 @@ public class QueueServiceImpl implements QueueService {
                                              Student student) {
         StudentQueueStatus studentQueueStatus = virtualQueueWorkflow.leaveQueue(companyId,
                 student.getId(), role);
-        return windowQueueWorkflow.joinQueue(employeeId, student, studentQueueStatus);
+        QueueStatus queueStatus = windowQueueWorkflow.joinQueue(employeeId, student,
+                studentQueueStatus);
+
+        notificationService.notifyPositionUpdate(student.getId(), queueStatus.getPosition());
+        notificationService.notifyEmployeeAssociation(employeeId, student.getId());
+
+        return queueStatus;
     }
 
     /**

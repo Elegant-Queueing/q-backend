@@ -56,6 +56,14 @@ public interface StudentService {
     UpdateStudentResponse uploadStudentResume(String id, UpdateStudentRequest uploadStudentResume);
 
     /**
+     * Retrieves and returns the student's device registration token
+     *
+     * @param studentId id of the student whose device registration token is to be retrieved
+     * @return String representing the registration token
+     */
+    String getRegistrationToken(String studentId);
+
+    /**
      *
      */
     void testDatabaseConnection();

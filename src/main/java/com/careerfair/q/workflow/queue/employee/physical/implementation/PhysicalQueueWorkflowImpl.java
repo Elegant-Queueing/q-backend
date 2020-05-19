@@ -103,8 +103,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
     @Override
     public EmployeeQueueData getEmployeeQueueData(String employeeId) {
         Employee employee = getEmployeeWithId(employeeId);
-        List<Student> students = queueRedisTemplate.opsForList()
-                .range(checkQueueAssociated(employee), 0L, -1L);
+        List<Student> students = getAllStudents(employeeId);
 
         return new EmployeeQueueData(students, employee.getNumRegisteredStudents(),
                 calcEmployeeAverageTime(employee));
@@ -122,6 +121,11 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         }
 
         return super.getQueueStatus(studentQueueStatus);
+    }
+
+    @Override
+    public List<Student> getAllStudents(String employeeId) {
+        return super.getAllStudents(employeeId);
     }
 
     @Override

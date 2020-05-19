@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class StudentServiceImpl implements StudentService {
 
+    private static final String ID = "efPdfJkESbSRX1KfVyD0tF:APA91bFdpTGvXwA3pN6yQksV1oeQFeOyEY-GuJ9HmTW2XoiZeeRUNd19TApPNny8xn3etYILvrxbbRlf0qZuOVOKQ7hwvJfY-P6G_nu2e6po0TTnARg-WzfH6F11ujIMDCajHaBCR_DJ";
+
     private final FirebaseService firebaseService;
 
     public StudentServiceImpl(@Autowired FirebaseService firebaseService) {
@@ -52,6 +54,11 @@ public class StudentServiceImpl implements StudentService {
     public UpdateStudentResponse uploadStudentResume(String id, UpdateStudentRequest uploadStudentResume) {
         // TODO
         return null;
+    }
+
+    @Override
+    public String getRegistrationToken(String studentId) {
+        return ID;
     }
 
     @Override

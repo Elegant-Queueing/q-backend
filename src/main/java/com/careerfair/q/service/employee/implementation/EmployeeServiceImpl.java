@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
+    private static final String ID = "efPdfJkESbSRX1KfVyD0tF:APA91bFdpTGvXwA3pN6yQksV1oeQFeOyEY-GuJ9HmTW2XoiZeeRUNd19TApPNny8xn3etYILvrxbbRlf0qZuOVOKQ7hwvJfY-P6G_nu2e6po0TTnARg-WzfH6F11ujIMDCajHaBCR_DJ";
+
     private final FirebaseService firebaseService;
 
     public EmployeeServiceImpl(@Autowired FirebaseService firebaseService) {
@@ -47,5 +49,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     public AddEmployeeResponse addEmployee(AddEmployeeRequest addEmployeeRequest) {
         // TODO
         return null;
+    }
+
+    @Override
+    public String getRegistrationToken(String employeeId) {
+        return ID;
     }
 }

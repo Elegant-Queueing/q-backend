@@ -46,4 +46,12 @@ public interface EmployeeService {
      * @return
      */
     AddEmployeeResponse addEmployee(AddEmployeeRequest addEmployeeRequest);
+
+    /**
+     * Gets the registration token for the given employee
+     *
+     * @param employeeId id of the employee whose registration token is to be retrieved
+     * @return String representing the registration token
+     */
+    String getRegistrationToken(String employeeId);
 }

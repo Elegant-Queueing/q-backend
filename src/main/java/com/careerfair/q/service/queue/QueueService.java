@@ -106,6 +106,15 @@ public interface QueueService {
     int getOverallWaitTime(String companyId, Role role);
 
     /**
+     * Returns a list of students that are queued up for the given company and for the given role
+     *
+     * @param companyId id of the company the students are queued up for
+     * @param role role that the students are queued up for
+     * @return List of students in the queue
+     */
+    List<Student> getVirtualQueueStudents(String companyId, Role role);
+
+    /**
      * Returns the size of the virtual queue for the given company and role
      *
      * @param companyId id of the company that the queue is associated with
@@ -113,6 +122,14 @@ public interface QueueService {
      * @return long indicating the size of the virtual queue
      */
     long getVirtualQueueSize(String companyId, Role role);
+
+    /**
+     * Returns a list of students that are queued up for the given employee
+     *
+     * @param employeeId id of the employee the students are queued up for
+     * @return List of students in the queue
+     */
+    List<Student> getEmployeeQueueStudents(String employeeId);
 
     /**
      * Returns the size of the queue for the given employee

@@ -7,6 +7,8 @@ import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.InvalidRequestException;
 
+import java.util.List;
+
 public interface VirtualQueueWorkflow {
 
     /**
@@ -95,4 +97,23 @@ public interface VirtualQueueWorkflow {
      * @return Student at the head of the virtual queue or null if the virtual queue is empty
      */
     Student getStudentAtHead(String companyId, Role role);
+
+    /**
+     * Returns a list of students that are queued up for the given company and for the given role
+     *
+     * @param companyId id of the company the students are queued up for
+     * @param role role that the students are queued up for
+     * @return List of students in the queue
+     */
+    List<Student> getAllStudents(String companyId, Role role);
+
+    /**
+     * Returns the position of the student
+     *
+     * @param companyId id of the company that the student is queued in
+     * @param studentId id of the student whose position is to be retrieved
+     * @param role role that the student is queued for
+     * @return int representing the position in the queue
+     */
+    int getStudentPosition(String companyId, String studentId, Role role);
 }

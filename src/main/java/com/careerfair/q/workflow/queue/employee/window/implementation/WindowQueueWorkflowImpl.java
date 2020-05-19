@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 import static com.careerfair.q.util.constant.Queue.EMPLOYEE_CACHE_NAME;
 
 @Component
@@ -72,6 +74,11 @@ public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         }
 
         return super.getQueueStatus(studentQueueStatus);
+    }
+
+    @Override
+    public List<Student> getAllStudents(String employeeId) {
+        return super.getAllStudents(employeeId);
     }
 
     @Override

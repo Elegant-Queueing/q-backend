@@ -4,11 +4,9 @@ import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
-import com.careerfair.q.service.notification.NotificationService;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.util.enums.Topic;
 import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.AbstractQueueWorkflow;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
@@ -31,8 +29,6 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
     @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
     @Autowired private RedisTemplate<String, String> studentRedisTemplate;
-
-    @Autowired private NotificationService notificationService;
 
     @Override
     public QueueStatus joinQueue(String companyId, Role role, Student student) {
@@ -96,11 +92,11 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
     @Override
     public String addQueue(String companyId, String employeeId, Role role) {
         Employee employee = getEmployeeWithId(employeeId);
+
         if (employee.getVirtualQueueId() != null) {
             throw new InvalidRequestException("Employee with id=" + employeeId +
                     " already has a queue");
         }
-
         if (employee.getRole() != role) {
             throw new InvalidRequestException("Employee with id=" + employeeId +
                     " associated with role=" + employee.getRole() +
@@ -112,7 +108,6 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
 
         if (virtualQueueData == null) {
             virtualQueueData = createRedisVirtualQueue();
-            notificationService.notifyQueueOpen(companyId, Topic.valueOf(role.name()));
         }
 
         virtualQueueData.getEmployeeIds().add(employeeId);
@@ -156,7 +151,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         VirtualQueueData virtualQueueData = getVirtualQueueData(companyId, role);
         Set<String> employeeIds = virtualQueueData.getEmployeeIds();
 
-        for(String id: employeeIds) {
+        for (String id: employeeIds) {
             Employee employee = getEmployeeWithId(id);
             employee.setVirtualQueueId(null);
             employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, id, employee);
@@ -166,14 +161,12 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         List<Student> students = queueRedisTemplate.opsForList().range(virtualQueueId, 0L, -1L);
         assert students != null;
 
-        for(Student student: students) {
+        for (Student student: students) {
             studentRedisTemplate.opsForHash().delete(STUDENT_CACHE_NAME, student.getId());
         }
 
         queueRedisTemplate.delete(virtualQueueId);
         companyRedisTemplate.opsForHash().delete(companyId, role);
-
-        notificationService.notifyQueueClose(companyId, Topic.valueOf(role.name()));
     }
 
     @Override
@@ -208,6 +201,18 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         }
 
         return queueRedisTemplate.opsForList().index(virtualQueueId, 0L);
+    }
+
+    @Override
+    public List<Student> getAllStudents(String companyId, Role role) {
+        String virtualQueueId = getVirtualQueueData(companyId, role).getVirtualQueueId();
+        return queueRedisTemplate.opsForList().range(virtualQueueId, 0L, -1L);
+    }
+
+    @Override
+    public int getStudentPosition(String companyId, String studentId, Role role) {
+        List<Student> students = getAllStudents(companyId, role);
+        return getStudentPosition(studentId, students) + 1;
     }
 
     /**
