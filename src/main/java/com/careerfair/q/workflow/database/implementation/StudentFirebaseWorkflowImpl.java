@@ -4,6 +4,7 @@ import com.careerfair.q.model.db.Student;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.StudentFirebaseWorkflow;
 import com.google.api.client.util.Lists;
+import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -107,5 +108,13 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         CollectionReference studentCollection = firestore.collection(STUDENT_COLLECTION);
         studentCollection.add(addedStudent);
         return addedStudent;
+    }
+
+    @Override
+    public Student deleteStudent(String studentId) {
+        Firestore firestore = FirestoreClient.getFirestore();
+        Student deletedStudent = getStudentWithId(studentId);
+        firestore.collection(STUDENT_COLLECTION).document(studentId).delete();
+        return deletedStudent;
     }
 }

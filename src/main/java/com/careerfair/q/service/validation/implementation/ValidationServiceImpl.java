@@ -69,11 +69,9 @@ public class ValidationServiceImpl implements ValidationService {
             throws ValidationException {
         if (studentRequest.firstName == null || studentRequest.firstName.isEmpty()) {
             throw new ValidationException("Empty or missing first name");
-        } else if (studentRequest.lastName == null
-                || studentRequest.lastName.isEmpty()) {
+        } else if (studentRequest.lastName == null || studentRequest.lastName.isEmpty()) {
             throw new ValidationException("Empty or missing last name");
-        } else if (studentRequest.universityId == null
-                || studentRequest.universityId.isEmpty()) {
+        } else if (studentRequest.universityId == null || studentRequest.universityId.isEmpty()) {
             throw new ValidationException("Empty or missing university name");
         } else if (studentRequest.major == null || studentRequest.major.isEmpty()) {
             throw new ValidationException("Empty or missing major");

@@ -3,6 +3,8 @@ package com.careerfair.q.workflow.database;
 import com.careerfair.q.model.db.Student;
 import com.careerfair.q.util.exception.FirebaseException;
 
+import java.util.concurrent.ExecutionException;
+
 public interface StudentFirebaseWorkflow {
 
     /**
@@ -57,4 +59,12 @@ public interface StudentFirebaseWorkflow {
      * @return Student
      */
     Student addStudent(Student addedStudent);
+
+    /**
+     * Deletes the student with the given student id
+     *
+     * @param studentId id of the student to be deleted
+     * @return Student that was deleted
+     */
+    Student deleteStudent(String studentId);
 }

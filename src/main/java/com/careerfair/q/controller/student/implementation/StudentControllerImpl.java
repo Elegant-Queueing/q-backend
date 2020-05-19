@@ -38,10 +38,10 @@ public class StudentControllerImpl implements StudentController {
         return studentService.updateStudent(studentId, updateStudentRequest);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/student-id/{id}")
     @Override
-    public DeleteStudentResponse deleteStudent(@PathVariable("id") String id) {
-        return studentService.deleteStudent(id);
+    public DeleteStudentResponse deleteStudent(@PathVariable("id") String studentId) {
+        return studentService.deleteStudent(studentId);
     }
 
     @PostMapping("/add")

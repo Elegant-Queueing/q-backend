@@ -99,6 +99,11 @@ public class FirebaseServiceImpl implements FirebaseService {
         return studentFirebaseWorkflow.addStudent(addedStudent);
     }
 
+    @Override
+    public Student deleteStudent(String studentId) {
+        return studentFirebaseWorkflow.deleteStudent(studentId);
+    }
+
     // Use this method to test your firebase connection
     @Override
     public void test() {

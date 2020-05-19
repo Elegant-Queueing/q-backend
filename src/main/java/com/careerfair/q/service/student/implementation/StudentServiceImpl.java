@@ -62,9 +62,10 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public DeleteStudentResponse deleteStudent(String id) {
-        // TODO
-        return null;
+    public DeleteStudentResponse deleteStudent(String studentId) {
+        validationService.checkValidStudentId(studentId);
+        Student deletedStudent = firebaseService.deleteStudent(studentId);
+        return new DeleteStudentResponse(deletedStudent);
     }
 
     @Override

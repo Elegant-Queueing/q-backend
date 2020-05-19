@@ -111,7 +111,7 @@ public interface FirebaseService {
      *
      * @param studentId id of the student to update
      * @param student student object with the updated fields
-     * @return Student
+     * @return Student object with the updated fields
      */
     Student updateStudent(String studentId, Student student);
 
@@ -119,9 +119,17 @@ public interface FirebaseService {
      * Adds a student with the given details
      *
      * @param addedStudent Student object with user details
-     * @return Student
+     * @return Student that was deleted
      */
     Student addStudent(Student addedStudent);
+
+    /**
+     * Deletes a student with the given student id
+     *
+     * @param studentId id of the student to be deleted
+     * @return Student
+     */
+    Student deleteStudent(String studentId);
 
     /**
      * Test firebase connection
