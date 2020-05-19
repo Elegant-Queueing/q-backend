@@ -63,8 +63,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public DeleteStudentResponse deleteStudent(String studentId) {
-        Student deletedStudent = firebaseService.deleteStudent(studentId);
-        return new DeleteStudentResponse(deletedStudent);
+        return new DeleteStudentResponse(firebaseService.deleteStudent(studentId));
     }
 
     @Override
