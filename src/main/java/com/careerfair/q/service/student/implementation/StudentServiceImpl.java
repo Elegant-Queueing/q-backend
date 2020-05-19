@@ -1,7 +1,6 @@
 package com.careerfair.q.service.student.implementation;
 
 import com.careerfair.q.model.db.Student;
-import com.careerfair.q.model.exchange.StudentDTO;
 import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.student.StudentService;
 import com.careerfair.q.service.student.request.AddStudentRequest;
@@ -10,6 +9,7 @@ import com.careerfair.q.service.student.response.AddStudentResponse;
 import com.careerfair.q.service.student.response.DeleteStudentResponse;
 import com.careerfair.q.service.student.response.GetStudentResponse;
 import com.careerfair.q.service.student.response.UpdateStudentResponse;
+import com.careerfair.q.service.validation.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 public class StudentServiceImpl implements StudentService {
 
     private final FirebaseService firebaseService;
+    @Autowired private ValidationService validationService;
 
     public StudentServiceImpl(@Autowired FirebaseService firebaseService) {
         this.firebaseService = firebaseService;
@@ -35,6 +36,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public UpdateStudentResponse updateStudent(String studentId,
                                                UpdateStudentRequest updateStudentRequest) {
+        validationService.checkValidStudentUpdateRequest(updateStudentRequest);
         Student updateStudent = firebaseService.updateStudent(studentId,
                 createStudentFromUpdateRequest(updateStudentRequest));
         return new UpdateStudentResponse(updateStudent);
@@ -64,6 +66,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public AddStudentResponse addStudent(AddStudentRequest addStudentRequest) {
+        validationService.checkValidStudentAddRequest(addStudentRequest);
         Student studentFromRequest = createStudentFromAddRequest(addStudentRequest);
         Student addedStudent = firebaseService.addStudent(studentFromRequest);
         return new AddStudentResponse(addedStudent);

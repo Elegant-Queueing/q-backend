@@ -1,5 +1,7 @@
 package com.careerfair.q.service.validation;
 
+import com.careerfair.q.service.student.request.AddStudentRequest;
+import com.careerfair.q.service.student.request.UpdateStudentRequest;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.ValidationException;
 
@@ -39,5 +41,11 @@ public interface ValidationService {
      *      company and role
      */
     void checkEmployeeAssociations(String companyId, String employeeId, Role role)
+            throws ValidationException;
+
+    public void checkValidStudentUpdateRequest(UpdateStudentRequest updateStudentRequest)
+            throws ValidationException;
+
+    public void checkValidStudentAddRequest(AddStudentRequest addStudentRequest)
             throws ValidationException;
 }

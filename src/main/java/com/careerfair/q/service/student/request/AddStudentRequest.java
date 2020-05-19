@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.cloud.Timestamp;
 import lombok.Getter;
+
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 

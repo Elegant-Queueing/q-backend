@@ -1,7 +1,6 @@
 package com.careerfair.q.workflow.database.implementation;
 
 import com.careerfair.q.model.db.Student;
-import com.careerfair.q.model.exchange.StudentDTO;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.StudentFirebaseWorkflow;
 import com.google.api.client.util.Lists;
@@ -101,8 +100,7 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         //Student firebaseStudent = getStudentWithId(studentId);
         //updateResponseStudent(studentId, firebaseStudent, updatedStudent);
         // TODO: removed for testing
-        System.out.println(updatedStudent.employees);
-        firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent);
+        //firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent);
         return updatedStudent;
     }
 
