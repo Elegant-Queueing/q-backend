@@ -4,7 +4,6 @@ import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.model.db.Student;
-import com.careerfair.q.model.exchange.StudentDTO;
 import com.careerfair.q.util.exception.FirebaseException;
 
 import java.util.List;
@@ -119,10 +118,10 @@ public interface FirebaseService {
     /**
      * Adds a student with the given details
      *
-     * @param addedStudent id of the student to make changes to
-     * @return StudentDTO
+     * @param addedStudent Student object with user details
+     * @return Student
      */
-    StudentDTO addStudent(StudentDTO addedStudent);
+    Student addStudent(Student addedStudent);
 
     /**
      * Test firebase connection

@@ -36,8 +36,24 @@ public class StudentServiceImpl implements StudentService {
     public UpdateStudentResponse updateStudent(String studentId,
                                                UpdateStudentRequest updateStudentRequest) {
         Student updateStudent = firebaseService.updateStudent(studentId,
-                updateStudentRequest.getStudent());
+                createStudentFromUpdateRequest(updateStudentRequest));
         return new UpdateStudentResponse(updateStudent);
+    }
+
+    private Student createStudentFromUpdateRequest(UpdateStudentRequest updateStudentRequest) {
+        // Other way is to use BeanUtils but that uses reflection under the hood
+        Student student = new Student();
+        student.firstName = updateStudentRequest.firstName;
+        student.lastName = updateStudentRequest.lastName;
+        student.universityId = updateStudentRequest.universityId;
+        student.major = updateStudentRequest.major;
+        student.role = updateStudentRequest.role;
+        student.bio = updateStudentRequest.bio;
+        student.email = updateStudentRequest.email;
+        student.gpa = updateStudentRequest.gpa;
+        student.graduationDate = updateStudentRequest.graduationDate;
+        student.international = updateStudentRequest.international;
+        return student;
     }
 
     @Override
@@ -48,8 +64,26 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public AddStudentResponse addStudent(AddStudentRequest addStudentRequest) {
-        StudentDTO addedStudent = firebaseService.addStudent(addStudentRequest.getStudentDTO());
+        Student studentFromRequest = createStudentFromAddRequest(addStudentRequest);
+        Student addedStudent = firebaseService.addStudent(studentFromRequest);
         return new AddStudentResponse(addedStudent);
+    }
+
+
+    private Student createStudentFromAddRequest(AddStudentRequest addStudentRequest) {
+        // Other way is to use BeanUtils but that uses reflection under the hood
+        Student student = new Student();
+        student.firstName = addStudentRequest.firstName;
+        student.lastName = addStudentRequest.lastName;
+        student.universityId = addStudentRequest.universityId;
+        student.major = addStudentRequest.major;
+        student.role = addStudentRequest.role;
+        student.bio = addStudentRequest.bio;
+        student.email = addStudentRequest.email;
+        student.gpa = addStudentRequest.gpa;
+        student.graduationDate = addStudentRequest.graduationDate;
+        student.international = addStudentRequest.international;
+        return student;
     }
 
     @Override

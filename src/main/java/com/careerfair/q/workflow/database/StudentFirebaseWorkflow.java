@@ -1,7 +1,6 @@
 package com.careerfair.q.workflow.database;
 
 import com.careerfair.q.model.db.Student;
-import com.careerfair.q.model.exchange.StudentDTO;
 import com.careerfair.q.util.exception.FirebaseException;
 
 public interface StudentFirebaseWorkflow {
@@ -55,7 +54,7 @@ public interface StudentFirebaseWorkflow {
      * Adds a student with the given details
      *
      * @param addedStudent id of the student to make changes to
-     * @return StudentDTO
+     * @return Student
      */
-    StudentDTO addStudent(StudentDTO addedStudent);
+    Student addStudent(Student addedStudent);
 }

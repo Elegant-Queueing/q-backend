@@ -96,7 +96,7 @@ public class FirebaseServiceImpl implements FirebaseService {
     }
 
     @Override
-    public StudentDTO addStudent(StudentDTO addedStudent) {
+    public Student addStudent(Student addedStudent) {
         return studentFirebaseWorkflow.addStudent(addedStudent);
     }
 

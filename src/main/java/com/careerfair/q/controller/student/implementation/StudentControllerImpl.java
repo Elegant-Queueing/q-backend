@@ -34,7 +34,7 @@ public class StudentControllerImpl implements StudentController {
     @PutMapping(value = "/update/student-id/{student-id}")
     @Override
     public UpdateStudentResponse updateStudent(@PathVariable("student-id") String studentId,
-            @RequestBody UpdateStudentRequest updateStudentRequest) {
+            @Valid @RequestBody UpdateStudentRequest updateStudentRequest) {
         return studentService.updateStudent(studentId, updateStudentRequest);
     }
 
