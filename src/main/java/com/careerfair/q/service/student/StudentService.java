@@ -45,7 +45,7 @@ public interface StudentService {
     /**
      * Adds a student with the given details in the request
      *
-     * @param addStudentRequest
+     * @param addStudentRequest details of the student to be added
      * @return AddStudentResponse
      */
     AddStudentResponse addStudent(AddStudentRequest addStudentRequest);

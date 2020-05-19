@@ -47,8 +47,8 @@ public interface ValidationService {
      * Checks if update/add student requests are valid
      *
      * @param studentRequest student add or update request object
-     * @throws ValidationException
+     * @throws ValidationException if any of the required fields are invalid or missing
      */
-    public <T extends StudentRequest> void checkValidStudentRequest(T studentRequest)
+    <T extends StudentRequest> void checkValidStudentRequest(T studentRequest)
             throws ValidationException;
 }

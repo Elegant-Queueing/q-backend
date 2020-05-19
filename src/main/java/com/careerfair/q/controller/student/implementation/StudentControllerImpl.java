@@ -46,7 +46,7 @@ public class StudentControllerImpl implements StudentController {
 
     @PostMapping("/add")
     @Override
-    public AddStudentResponse addStudent(@Valid @RequestBody AddStudentRequest addStudentRequest) {
+    public AddStudentResponse addStudent(@RequestBody AddStudentRequest addStudentRequest) {
         return studentService.addStudent(addStudentRequest);
     }
 
