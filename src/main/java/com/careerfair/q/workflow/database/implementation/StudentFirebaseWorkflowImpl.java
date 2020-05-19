@@ -97,54 +97,15 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
     public Student updateStudent(String studentId, Student updatedStudent)
             throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
-        //Student firebaseStudent = getStudentWithId(studentId);
-        //updateResponseStudent(studentId, firebaseStudent, updatedStudent);
-        // TODO: removed for testing
-        //firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent);
+        firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent);
         return updatedStudent;
     }
-
-//    private void updateResponseStudent(String studentId, Student firebaseStudent,
-//                                       Student updatedStudent) {
-//        if (updatedStudent.firstName == null) {
-//            updatedStudent.firstName = firebaseStudent.firstName;
-//        }
-//        if (updatedStudent.lastName == null) {
-//            updatedStudent.lastName = firebaseStudent.lastName;
-//        }
-//        if (updatedStudent.major == null) {
-//            updatedStudent.major = firebaseStudent.major;
-//        }
-//        if (updatedStudent.role == null) {
-//            updatedStudent.role = firebaseStudent.role;
-//        }
-//        if (updatedStudent.bio == null) {
-//            updatedStudent.bio = firebaseStudent.bio;
-//        }
-//        if (updatedStudent.gpa == null) {
-//            updatedStudent.gpa = firebaseStudent.gpa;
-//        }
-//        if (updatedStudent.graduationDate == null) {
-//            updatedStudent.graduationDate = firebaseStudent.graduationDate;
-//        }
-//        if (updatedStudent.international == null) {
-//            updatedStudent.international = firebaseStudent.international;
-//        }
-//        updatedStudent.studentId = studentId;
-//
-//        // TODO: work on university-id and email update
-//        updatedStudent.universityId = firebaseStudent.universityId;
-//
-//        // TODO: work on employee update
-//        updatedStudent.employees = firebaseStudent.employees;
-//    }
 
     @Override
     public Student addStudent(Student addedStudent) {
         Firestore firestore = FirestoreClient.getFirestore();
         CollectionReference studentCollection = firestore.collection(STUDENT_COLLECTION);
-        // TODO: removed for testing
-        //studentCollection.add(addedStudent);
+        studentCollection.add(addedStudent);
         return addedStudent;
     }
 }

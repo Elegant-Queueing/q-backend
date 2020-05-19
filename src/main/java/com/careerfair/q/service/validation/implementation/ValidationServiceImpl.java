@@ -3,6 +3,7 @@ package com.careerfair.q.service.validation.implementation;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.student.request.AddStudentRequest;
+import com.careerfair.q.service.student.request.StudentRequest;
 import com.careerfair.q.service.student.request.UpdateStudentRequest;
 import com.careerfair.q.service.validation.ValidationService;
 import com.careerfair.q.util.enums.Role;
@@ -66,58 +67,29 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     @Override
-    public void checkValidStudentUpdateRequest(UpdateStudentRequest updateStudentRequest)
+    public <T extends StudentRequest> void checkValidStudentRequest(T studentRequest)
             throws ValidationException {
-        if (updateStudentRequest.firstName == null || updateStudentRequest.firstName.isEmpty()) {
+        if (studentRequest.firstName == null || studentRequest.firstName.isEmpty()) {
             throw new ValidationException("Empty or missing first name");
-        } else if (updateStudentRequest.lastName == null ||
-                updateStudentRequest.lastName.isEmpty()) {
+        } else if (studentRequest.lastName == null
+                || studentRequest.lastName.isEmpty()) {
             throw new ValidationException("Empty or missing last name");
-        } else if (updateStudentRequest.universityId == null ||
-                updateStudentRequest.universityId.isEmpty()) {
+        } else if (studentRequest.universityId == null
+                || studentRequest.universityId.isEmpty()) {
             throw new ValidationException("Empty or missing university name");
-        } else if (updateStudentRequest.major == null || updateStudentRequest.major.isEmpty()) {
+        } else if (studentRequest.major == null || studentRequest.major.isEmpty()) {
             throw new ValidationException("Empty or missing major");
-        } else if (updateStudentRequest.role == null) {
+        } else if (studentRequest.role == null) {
             throw new ValidationException("Empty or missing role");
-        } else if (updateStudentRequest.bio == null || updateStudentRequest.bio.isEmpty()) {
+        } else if (studentRequest.bio == null || studentRequest.bio.isEmpty()) {
             throw new ValidationException("Empty or missing bio");
-        } else if (updateStudentRequest.gpa == null || updateStudentRequest.gpa.isNaN()) {
+        } else if (studentRequest.gpa == null || studentRequest.gpa.isNaN()) {
             throw new ValidationException("Empty or Invalid GPA");
-        } else if (updateStudentRequest.graduationDate == null) {
+        } else if (studentRequest.graduationDate == null) {
             throw new ValidationException("Missing graduation date");
-        } else if (updateStudentRequest.international == null) {
+        } else if (studentRequest.international == null) {
             throw new ValidationException("Missing international field");
-        } else if (updateStudentRequest.email == null ||
-                !checkValidEmail(updateStudentRequest.email)) {
-            throw new ValidationException("Missing or invalid email format");
-        }
-    }
-
-    @Override
-    public void checkValidStudentAddRequest(AddStudentRequest addStudentRequest)
-            throws ValidationException {
-        if (addStudentRequest.firstName == null || addStudentRequest.firstName.isEmpty()) {
-            throw new ValidationException("Empty or missing first name");
-        } else if (addStudentRequest.lastName == null
-                || addStudentRequest.lastName.isEmpty()) {
-            throw new ValidationException("Empty or missing last name");
-        } else if (addStudentRequest.universityId == null
-                || addStudentRequest.universityId.isEmpty()) {
-            throw new ValidationException("Empty or missing university name");
-        } else if (addStudentRequest.major == null || addStudentRequest.major.isEmpty()) {
-            throw new ValidationException("Empty or missing major");
-        } else if (addStudentRequest.role == null) {
-            throw new ValidationException("Empty or missing role");
-        } else if (addStudentRequest.bio == null || addStudentRequest.bio.isEmpty()) {
-            throw new ValidationException("Empty or missing bio");
-        } else if (addStudentRequest.gpa == null || addStudentRequest.gpa.isNaN()) {
-            throw new ValidationException("Empty or Invalid GPA");
-        } else if (addStudentRequest.graduationDate == null) {
-            throw new ValidationException("Missing graduation date");
-        } else if (addStudentRequest.international == null) {
-            throw new ValidationException("Missing international field");
-        } else if (addStudentRequest.email == null || !checkValidEmail(addStudentRequest.email)) {
+        } else if (studentRequest.email == null || !checkValidEmail(studentRequest.email)) {
             throw new ValidationException("Missing or invalid email format");
         }
     }
