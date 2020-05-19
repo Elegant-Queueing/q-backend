@@ -17,11 +17,14 @@ import org.springframework.stereotype.Service;
 public class StudentServiceImpl implements StudentService {
 
     private final FirebaseService firebaseService;
-    @Autowired private ValidationService validationService;
+    private final ValidationService validationService;
 
-    public StudentServiceImpl(@Autowired FirebaseService firebaseService) {
+    public StudentServiceImpl(@Autowired FirebaseService firebaseService,
+                              @Autowired ValidationService validationService) {
         this.firebaseService = firebaseService;
+        this.validationService = validationService;
     }
+
 
     @Override
     public GetStudentResponse getStudentWithId(String studentId) {
