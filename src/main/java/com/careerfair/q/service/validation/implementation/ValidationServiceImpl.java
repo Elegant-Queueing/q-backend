@@ -83,9 +83,9 @@ public class ValidationServiceImpl implements ValidationService {
     private <T> void checkStudentRequestParameters(T fieldValue, String fieldName)
             throws ValidationException {
         if (fieldValue == null) {
-            throw new ValidationException("Missing the field: " + fieldName);
+            throw new ValidationException("Missing the field=" + fieldName);
         } else if ((fieldValue instanceof String) && fieldValue.toString().isEmpty()) {
-            throw new ValidationException("Empty field: " + fieldName);
+            throw new ValidationException("Empty field=" + fieldName);
         } else if (fieldName.equals("email")) {
             checkValidEmail(fieldValue.toString());
         }
