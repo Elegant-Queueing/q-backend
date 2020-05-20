@@ -14,12 +14,15 @@ This repository contains all the code for Q's backend service. On a high level, 
 
 The backend service is a Spring Boot Application that exposes API endpoints. A user (e.g. a front-end developer) can use these APIs by running the Spring Boot Application, thereby exposing the API endpoints to their own application. These APIs may be used to allow students and employees to create profiles and simulate virtual queuing for career fairs.
 
-### User set up
+### User setup
 
+- Set up an environment of your choice using the 'Setup -> Environment' section of this document.
+- Get the code using the 'Setup -> Getting the code' section of this document.
+- 
 
 ---------------------------
 
-## Set up
+## Setup
 
 ### Environment
 You may set up the environment required to run this Spring Boot app in 2 ways:
@@ -38,21 +41,32 @@ You may set up the environment required to run this Spring Boot app in 2 ways:
 - Once the instance is running, you can see it if you go to Service -> EC2 -> Instances.
 - To SSH into this instance, select the instance and click on connect. Then, simply follow the instructions to SSH into it.
 
-This instance will have all the prerequisite software set up for you (except the code).
+This instance will have all the prerequisite software set up for you.
 
 #### Setting up a local environment
-- Download and install Java: https://java.com/en/download/
-- Make sure to test the installation using the command ```java -version```
+- Download and install a version of Java that is greater or equal to Java8: https://java.com/en/download/
+- Make sure to test the installation using: ```java -version```
 - Download and install Redis: https://redis.io/download
 - Test the installation by running: ```redis-server``` on the terminal
-- Download and install Maven: https://maven.apache.org/install.html
+- Download and install Maven v3.6.0: https://maven.apache.org/install.html
+- Make sure to test the installation using: ```mvn -version```
+
+### Getting the code
+
+- Clone the repo using: ```git clone https://github.com/Elegant-Queueing/q-backend.git```
+- Make sure you're on ```master``` since it has the code from the latest release
+
+### Firebase
+
+NOTE: The Q team already has a dev database. To get access to it, please contact the team.
+The following video explains how to set up a database. 
 
 ---------------------------
 
 ## Javadocs
 - Javadocs available here: https://elegant-queueing.github.io/q-docs (only the code for beta release has been documented)
 
-# Set up
+# Setup
 
 You may set up the environment required to run this spring boot app in 2 ways:
 - Set up an instance remotely on AWS using our public AMI (RECOMMENDED)
