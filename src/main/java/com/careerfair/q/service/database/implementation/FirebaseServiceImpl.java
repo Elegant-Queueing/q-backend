@@ -95,8 +95,8 @@ public class FirebaseServiceImpl implements FirebaseService {
     }
 
     @Override
-    public Student addStudent(Student addedStudent) throws FirebaseException {
-        return studentFirebaseWorkflow.addStudent(addedStudent);
+    public Student addStudent(Student newStudent) throws FirebaseException {
+        return studentFirebaseWorkflow.addStudent(newStudent);
     }
 
     @Override

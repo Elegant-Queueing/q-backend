@@ -119,11 +119,11 @@ public interface FirebaseService {
     /**
      * Adds a student with the given details
      *
-     * @param addedStudent Student object with user details
+     * @param newStudent Student object with user details
      * @return Student that was deleted
      * @throws FirebaseException if there are problems with writing the data to the DB
      */
-    Student addStudent(Student addedStudent) throws FirebaseException;
+    Student addStudent(Student newStudent) throws FirebaseException;
 
     /**
      * Deletes a student with the given student id
