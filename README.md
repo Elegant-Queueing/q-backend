@@ -204,7 +204,7 @@ students:
 	AUTO-ID
 	bio: String
 	email: String
-	employees: Array<String [must be valid employeeID]>. // the employees student has talked to 
+	employees: Array<String [must be valid employeeID]>  // the employees student has talked to 
 	first_name: String
 	last_name: String
 	gpa: Number
