@@ -112,16 +112,18 @@ public interface FirebaseService {
      * @param studentId id of the student to update
      * @param student student object with the updated fields
      * @return Student object with the updated fields
+     * @throws FirebaseException if there are problems with writing the data
      */
-    Student updateStudent(String studentId, Student student);
+    Student updateStudent(String studentId, Student student) throws FirebaseException;
 
     /**
      * Adds a student with the given details
      *
      * @param addedStudent Student object with user details
      * @return Student that was deleted
+     * @throws FirebaseException if there are problems with writing the data to the DB
      */
-    Student addStudent(Student addedStudent);
+    Student addStudent(Student addedStudent) throws FirebaseException;
 
     /**
      * Deletes a student with the given student id
@@ -129,7 +131,7 @@ public interface FirebaseService {
      * @param studentId id of the student to be deleted
      * @return Student
      */
-    Student deleteStudent(String studentId);
+    Student deleteStudent(String studentId) throws FirebaseException;
 
     /**
      * Test firebase connection

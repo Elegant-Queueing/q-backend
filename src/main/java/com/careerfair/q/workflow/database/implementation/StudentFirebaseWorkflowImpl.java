@@ -97,20 +97,29 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
     public Student updateStudent(String studentId, Student updatedStudent)
             throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
-        firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent);
-        return updatedStudent;
+        try {
+            firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent).get();
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new FirebaseException(ex.getMessage());
+        }
+        return getStudentWithId(studentId);
     }
 
     @Override
-    public Student addStudent(Student newStudent) {
+    public Student addStudent(Student newStudent) throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
-        CollectionReference studentCollection = firestore.collection(STUDENT_COLLECTION);
-        studentCollection.add(newStudent);
-        return newStudent;
+        DocumentReference documentReference = firestore.collection(STUDENT_COLLECTION).document();
+        String studentId = documentReference.getId();
+        try {
+            documentReference.set(newStudent).get();
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new FirebaseException(ex.getMessage());
+        }
+        return getStudentWithId(studentId);
     }
 
     @Override
-    public Student deleteStudent(String studentId) {
+    public Student deleteStudent(String studentId) throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
         Student deletedStudent = getStudentWithId(studentId);
         firestore.collection(STUDENT_COLLECTION).document(studentId).delete();

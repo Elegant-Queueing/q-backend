@@ -90,17 +90,17 @@ public class FirebaseServiceImpl implements FirebaseService {
     }
 
     @Override
-    public Student updateStudent(String studentId, Student student) {
+    public Student updateStudent(String studentId, Student student) throws FirebaseException {
         return studentFirebaseWorkflow.updateStudent(studentId, student);
     }
 
     @Override
-    public Student addStudent(Student addedStudent) {
+    public Student addStudent(Student addedStudent) throws FirebaseException {
         return studentFirebaseWorkflow.addStudent(addedStudent);
     }
 
     @Override
-    public Student deleteStudent(String studentId) {
+    public Student deleteStudent(String studentId) throws FirebaseException {
         return studentFirebaseWorkflow.deleteStudent(studentId);
     }
 

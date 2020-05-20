@@ -4,13 +4,11 @@ import com.careerfair.q.model.db.Student;
 import com.careerfair.q.util.enums.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.Timestamp;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@Data
 public abstract class StudentResponse {
     @JsonProperty("first_name")
     private String firstName;
