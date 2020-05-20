@@ -68,7 +68,15 @@ Resume tagging </br>
 Employee service POST API calls </br>
 
 ### Reporting a bug
----------------------------
+
+Please use GitHub issues on this repository to report any bugs. Make sure all your software is up to date and you followed all the setup steps. 
+
+In your report, be sure to add the error message, the versions of the prerequisite softwares you are using, along with your operating system and IDE (if applicable). If possible, please provide the precise steps that resulted in the issue. Also mention what was expected to happen, and what happened. 
+
+To report a bug: 
+- Go to the issues tab of this repository
+- Click on New Issue and write a report of the issue
+- Add the label 'bug' and submit the report
 
 ## Developer Documentation
 
