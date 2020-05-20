@@ -15,10 +15,28 @@ This repository contains all the code for Q's backend service. On a high level, 
 The backend service is a Spring Boot Application that exposes API endpoints. A user (e.g. a front-end developer) can use these APIs by running the Spring Boot Application, thereby exposing the API endpoints to their own application. These APIs may be used to allow students and employees to create profiles and simulate virtual queuing for career fairs.
 
 ### User setup
-
 - Set up an environment of your choice using the 'Setup -> Environment' section of this document.
 - Get the code using the 'Setup -> Getting the code' section of this document.
 - Set up a database on Firebase using the 'Setup -> Firebase' section.
+
+### Running the Spring Boot Application
+- After setting everything up, use the terminal to cd into the code repository.
+- Use the terminal to run: ```mvn install```
+- Now run ```mvn spring-boot:run```
+- Maven will run all the tests and you will see a message saying that the spring boot application has started on port 8080.
+- While this is running, open another terminal (or SSH into your instance using another terminal if you set everything up remotely) and run Redis using: ```redis-server```
+
+### Using the Spring Boot Application
+
+#### Get the address and port
+- If you're running the application locally, any API calls made on localhost:8080 will be accepted.
+
+- If you're running the application remotely, you should be able to make calls using the Public DNS (IPv4) of your instance. Go to the instances page on AWS, and it should be mentioned there. It will be something like, ec2-x-x-x-x.us-west-2.compute.amazonaws.com (where x is a number with up to 3 or 4 digits). Any API calls made on ec2-x-x-x-x.us-west-2.compute.amazonaws.com:8080 will be accepted.
+
+#### Using the APIs
+To be able to use the API, you will have to look at the Javadocs available here: https://elegant-queueing.github.io/q-docs
+
+Notice the classes in ```package com.careerfair.q.controller```. The *implementation* classes of all the controllers should provide information as to how the API call should be structured. In particular, look at the method details to know the exact mappings.
 
 ---------------------------
 
@@ -40,6 +58,11 @@ You may set up the environment required to run this Spring Boot app in 2 ways:
 - Choose an instance setting that suits your needs and budget (there should be a free one too) and launch the instance.
 - Once the instance is running, you can see it if you go to Service -> EC2 -> Instances.
 - To SSH into this instance, select the instance and click on connect. Then, simply follow the instructions to SSH into it.
+- Go to AWS -> Services -> EC2 -> Instances. You should see your instance running there.
+- In the same row, you should find the security group column. Click on the security group for that instance.
+- Select the security group, click on Actions, and then, Edit Inbound Rules
+- Add a rule that accepts Type:All traffic, and Source:Anywhere.
+DISCLAIMER: This^ exposes the instance to the public. We still need to work on security and none of us have experience with it. This might be a security risk. Please don't add this rule if you're not comfortable and set the environment up locally. If you do, please refrain from sharing information about this instance with anyone else.
 
 This instance will have all the prerequisite software set up for you.
 
@@ -57,14 +80,12 @@ This instance will have all the prerequisite software set up for you.
 - Make sure you're on ```master``` since it has the code from the latest release
 
 ### Firebase
+NOTE: The Q team already has a dev database. To get access to it, please contact the team. To create your own database, use the following information.
 
-NOTE: The Q team already has a dev database. To get access to it, please contact the team.
-The following video explains how to set up the database: https://drive.google.com/file/d/1TMxiXX76JmJRJR1CP60grtf9WiX7aRxs/view?usp=sharing
+First, set up the database using the video: https://drive.google.com/file/d/1TMxiXX76JmJRJR1CP60grtf9WiX7aRxs/view?usp=sharing
 
-- Now, we need to give the our code access to the database we just created. Go to your Project Overview Page -> Project Settings -> Service Accounts, and download your service account key. This will be a .json file
-- Rename this file to service_account_key.json
-- DANGER ZONE! Move this json file at the same directory level as src/. This file is NOT to be pushed to Github. .gitignore has it mentioned in it, so it's imperitive that you get the directory level right and double check using git status before you push.
-- On the same webpage as before, you'll have the databaseUrl mentioned. Copy and paste it in the code: go to q-
+Then, make changes to the code using the video:
+
 
 ---------------------------
 
