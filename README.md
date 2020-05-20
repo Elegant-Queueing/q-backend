@@ -18,7 +18,7 @@ The backend service is a Spring Boot Application that exposes API endpoints. A u
 
 - Set up an environment of your choice using the 'Setup -> Environment' section of this document.
 - Get the code using the 'Setup -> Getting the code' section of this document.
-- 
+- Set up a database on Firebase using the 'Setup -> Firebase' section.
 
 ---------------------------
 
@@ -59,7 +59,12 @@ This instance will have all the prerequisite software set up for you.
 ### Firebase
 
 NOTE: The Q team already has a dev database. To get access to it, please contact the team.
-The following video explains how to set up a database. 
+The following video explains how to set up the database: https://drive.google.com/file/d/1TMxiXX76JmJRJR1CP60grtf9WiX7aRxs/view?usp=sharing
+
+- Now, we need to give the our code access to the database we just created. Go to your Project Overview Page -> Project Settings -> Service Accounts, and download your service account key. This will be a .json file
+- Rename this file to service_account_key.json
+- DANGER ZONE! Move this json file at the same directory level as src/. This file is NOT to be pushed to Github. .gitignore has it mentioned in it, so it's imperitive that you get the directory level right and double check using git status before you push.
+- On the same webpage as before, you'll have the databaseUrl mentioned. Copy and paste it in the code: go to q-
 
 ---------------------------
 
