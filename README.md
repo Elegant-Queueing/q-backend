@@ -14,7 +14,7 @@ This repository contains all the code for Q's backend service. On a high level, 
 
 The backend service is a Spring Boot Application that exposes API endpoints. A user (e.g. a front-end developer) can use these APIs by running the Spring Boot Application, thereby exposing the API endpoints to their own application. These APIs may be used to allow students and employees to create profiles and simulate virtual queuing for career fairs.
 
-### User setup
+### Setup
 - Set up an environment of your choice using the 'Setup -> Environment' section of this document.
 - Get the code using the 'Setup -> Getting the code' section of this document.
 - Set up a database on Firebase using the 'Setup -> Firebase' section.
@@ -38,8 +38,71 @@ To be able to use the API, you will have to look at the Javadocs available here:
 
 Notice the classes in ```package com.careerfair.q.controller```. The *implementation* classes of all the controllers should provide information as to how the API call should be structured. In particular, look at the method details to know the exact mappings.
 
+Just for a sanity check, run the the app and do the following:
+
+Enter the following URI and make a GET API call: 
+If local: ```localhost:8080/employee/get/employee-id/bfkE7Q0k9obASshNApN3```
+If on AWS: ```ec2-x-x-x-x.us-west-2.compute.amazonaws.com:8080/employee/get/employee-id/bfkE7Q0k9obASshNApN3``` (replacing the x's of course)
+- If everything works, you should get a response like this:
+```
+{
+    "employee": {
+        "employee_id": "bfkE7Q0k9obASshNApN3",
+        "name": "John Doe",
+        "company_id": "A51NaN8uB9GEViJZHbuo",
+        "role": "SWE",
+        "bio": "I code. A lot",
+        "email": "codealot@code.com",
+        "students": [
+            "oFEdwg9lnWPPVjHPL0Nk"
+        ]
+    }
+}
+```
+### Work in progress
+
+### Reporting a bug
 ---------------------------
 
+## Developer Documentation
+
+### Obtaining the source code
+Use the 'Setup -> Getting the code' section to get the code
+
+### Layout of the directory structure
+
+#### Source files
+
+Any source files can be found under src/ folder. Inside the src/ folder, there will multiple packages as the following:
+
+configuration: This is the package where all configurations for the building this project will be present. It currently holds two configuration packages, one for redis/ and the other for web/.
+
+controller: This is the package where all the Spring’s RestControllers will be present. These classes sole responsibility is to expose endpoints to the front end. Each sub-package directly corresponds to a package in the service/ package.
+
+database: Any initialization of the database would be present in this directory. It currently contains only one class which sets up a connection to Firebase.
+
+model: This package contains any representation of objects (POJO) that are needed by services to store information. It currently contains two packages db/ and redis/ with each containing the models stored in respective storage units.
+
+service: This package contains all the functionality of the endpoints that the controller/ package is exposing or services that are used internally by other services. Each sub-service package may contain a request/ and response/ package which signify the request and response objects to be received from and sent to the front end respectively. The logic for the core functionality is present in these packages.
+
+util: The util package consists of 3 packages - enum/, constant/, and exception/.
+    enum/ stores any enums that are used throughout the whole system.
+	constant/ stores any constants that are used throughout the whole system.
+	exception/ stores any custom exception that need to be thrown in the whole system
+
+workflow: This package contains any subtask the service might have. Each sub-package should have a corresponding service/ associated with it.
+
+#### Test files
+
+Any test files can be found under test/ folder. The directory under this folder should exactly match that in src/ with each test file in those packages testing the corresponding source file. Currently, this is not setup and is a work in progress and will basically emulate the above once all the tests have been written.
+
+### Setup
+Use the same steps mentioned in the 'User Documentation -> Setup' section to get everything setup.
+
+### Build, Run
+
+
+---------------------------
 ## Setup
 
 ### Environment
@@ -82,9 +145,9 @@ This instance will have all the prerequisite software set up for you.
 ### Firebase
 NOTE: The Q team already has a dev database. To get access to it, please contact the team. To create your own database, use the following information.
 
-First, set up the database using the video: https://drive.google.com/file/d/1TMxiXX76JmJRJR1CP60grtf9WiX7aRxs/view?usp=sharing
+First, set up the database using the video: https://drive.google.com/file/d/1TMxiXX76JmJRJR1CP60grtf9WiX7aRxs/view
 
-Then, make changes to the code using the video:
+Then, make changes to the code using the video: https://drive.google.com/file/d/1eiZPQq5OnAkD-kf628ZCYe6tTYlACvDB/view
 
 
 ---------------------------
