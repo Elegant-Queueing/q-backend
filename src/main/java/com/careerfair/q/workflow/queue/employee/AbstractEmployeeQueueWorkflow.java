@@ -16,7 +16,6 @@ import static com.careerfair.q.util.constant.Queue.STUDENT_CACHE_NAME;
 public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflow {
 
     @Autowired protected RedisTemplate<String, Student> queueRedisTemplate;
-    @Autowired protected RedisTemplate<String, String> studentRedisTemplate;
 
     /**
      * Adds the given student to the given employee's queue

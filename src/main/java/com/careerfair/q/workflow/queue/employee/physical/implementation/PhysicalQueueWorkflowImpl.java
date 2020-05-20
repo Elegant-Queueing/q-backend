@@ -10,8 +10,6 @@ import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.employee.AbstractEmployeeQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.google.cloud.Timestamp;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,8 +19,6 @@ import static com.careerfair.q.util.constant.Queue.*;
 @Component
 public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         implements PhysicalQueueWorkflow {
-
-    @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
 
     @Override
     public QueueStatus joinQueue(String employeeId, Student student,

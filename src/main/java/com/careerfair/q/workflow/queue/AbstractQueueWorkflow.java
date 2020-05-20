@@ -16,8 +16,8 @@ import static com.careerfair.q.util.constant.Queue.STUDENT_CACHE_NAME;
 
 public abstract class AbstractQueueWorkflow {
 
-    @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
-    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
+    @Autowired protected RedisTemplate<String, String> employeeRedisTemplate;
+    @Autowired protected RedisTemplate<String, String> studentRedisTemplate;
 
     /**
      * Checks and returns whether the employee is present at the career fair
