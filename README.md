@@ -179,16 +179,45 @@ companies:
 	bio: String
 	employees: Array<String [must be valid employeeID]>
 	name: String
-	roles: Array<String [must be one of SWE, PM, DS only]>
+	roles: Array<String [must be one of SWE, PM, DS only]>  // roles this company is recruiting for
 	website: String
 
 employees:
-	Auto-ID
+	AUTO-ID
 	bio: String
 	company_id: String [must be a valid companyID]
 	email: String
 	name: String
-	role: String [must be one of SWE, PM, DS only]
-	students: Array<String [must be valid studentID]>
+	role: String [must be one of SWE, PM, DS only]  // role this employee will be recruiting for
+	students: Array<String [must be valid studentID]>  // the students this employee has talked to
+	
+fairs:
+	AUTO-ID
+	companies: Array<String [must be valid companyID]>  // companies attending the fair
+	desc: String
+	start_time: Timestamp
+	end_time: Timestamp
+	name: String
+	university: String [must be valid universityID]
+	
+students:
+	AUTO-ID
+	bio: String
+	email: String
+	employees: Array<String [must be valid employeeID]>. // the employees student has talked to 
+	first_name: String
+	last_name: String
+	gpa: Number
+	grad_date: Timestamp
+	international: Boolean
+	major: String
+	
+test: no document required
+
+universities:
+	AUTO-ID
+	desc: String
+	name: String
+	past_fairs: Map<'fair_id', String [must be valid fairID]>  // the key is literally the word: fair_id
 ```
 	
