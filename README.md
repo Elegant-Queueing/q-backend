@@ -173,3 +173,22 @@ Then, make changes to the code using the video: https://drive.google.com/file/d/
 
 Schema:
 
+```
+companies:
+	Auto-ID
+	bio: String
+	employees: Array<String [must be valid employeeID]>
+	name: String
+	roles: Array<String [must be one of SWE, PM, DS only]>
+	website: String
+
+employees:
+	Auto-ID
+	bio: String
+	company_id: String [must be a valid companyID]
+	email: String
+	name: String
+	role: String [must be one of SWE, PM, DS only]
+	students: Array<String [must be valid studentID]>
+```
+	
