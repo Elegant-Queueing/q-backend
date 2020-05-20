@@ -1,6 +1,7 @@
 package com.careerfair.q.controller.queue.implementation;
 
 import com.careerfair.q.controller.queue.QueueController;
+import com.careerfair.q.service.queue.response.GetWaitTimeResponse;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.queue.request.JoinQueueRequest;
 import com.careerfair.q.service.queue.response.*;
@@ -12,7 +13,24 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("queue")
 public class QueueControllerImpl implements QueueController {
 
-    @Autowired private QueueService queueService;
+    private final QueueService queueService;
+
+    public QueueControllerImpl(@Autowired QueueService queueService) {
+        this.queueService = queueService;
+    }
+
+    @GetMapping("/wait-time/role/{role}")
+    @Override
+    public GetWaitTimeResponse getAllCompaniesWaitTime(@PathVariable("role") Role role) {
+        return queueService.getAllCompaniesWaitTime(role);
+    }
+
+    @GetMapping("/wait-time/company-id/{company-id}/role/{role}")
+    @Override
+    public GetWaitTimeResponse getCompanyWaitTime(@PathVariable("company-id") String companyId,
+                                                  @PathVariable("role") Role role) {
+        return queueService.getCompanyWaitTime(companyId, role);
+    }
 
     @PostMapping("/join/company-id/{company-id}/role/{role}")
     @Override
@@ -78,13 +96,13 @@ public class QueueControllerImpl implements QueueController {
         return queueService.skipStudent(employeeId, studentId);
     }
 
-    @DeleteMapping("/clearAll")
-    public void clearAll() {
-        queueService.clearAll();
-    }
-
-    @GetMapping("/getAll")
-    public String getAll() {
-        return queueService.getAll();
-    }
+//    @DeleteMapping("/clearAll")
+//    public void clearAll() {
+//        queueService.clearAll();
+//    }
+//
+//    @GetMapping("/getAll")
+//    public String getAll() {
+//        return queueService.getAll();
+//    }
 }

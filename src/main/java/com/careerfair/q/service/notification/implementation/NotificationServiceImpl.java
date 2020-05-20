@@ -2,12 +2,10 @@ package com.careerfair.q.service.notification.implementation;
 
 import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Employee;
-import com.careerfair.q.model.db.Student;
+import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.service.employee.EmployeeService;
 import com.careerfair.q.service.fair.FairService;
-import com.careerfair.q.service.fair.response.GetWaitTimeResponse;
 import com.careerfair.q.service.notification.NotificationService;
-import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.service.student.StudentService;
 import com.careerfair.q.util.constant.Fair;
 import com.careerfair.q.util.enums.Role;
@@ -27,37 +25,34 @@ import java.util.Map;
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
-    private final QueueService queueService;
     private final StudentService studentService;
     private final FairService fairService;
     private final EmployeeService employeeService;
 
-    public NotificationServiceImpl(@Autowired QueueService queueService,
-                                   @Autowired StudentService studentService,
+    public NotificationServiceImpl(@Autowired StudentService studentService,
                                    @Autowired FairService fairService,
                                    @Autowired EmployeeService employeeService) {
-        this.queueService = queueService;
         this.studentService = studentService;
         this.fairService = fairService;
         this.employeeService = employeeService;
     }
 
     @Override
-    public void notifyQueueOpen(String companyId, Role role) throws NotificationException {
-        new Thread(() -> notifyQueueChange(companyId, role, true)).start();
+    public void notifyQueueOpen(String companyId, Role role, int waitTime)
+            throws NotificationException {
+        new Thread(() -> notifyQueueChange(companyId, role, waitTime, true)).start();
     }
 
     @Override
     public void notifyQueueClose(String companyId, Role role) throws NotificationException {
-        new Thread(() -> notifyQueueChange(companyId, role, false)).start();
+        new Thread(() -> notifyQueueChange(companyId, role, -1, false)).start();
     }
 
     @Override
-    public void notifyCompanyWaitTime(String companyId, Role role) throws NotificationException {
+    public void notifyCompanyWaitTime(String companyId, Role role, int waitTime)
+            throws NotificationException {
         new Thread(() -> {
             Topic notificationTopic = getTopicFromRole(role);
-            GetWaitTimeResponse waitTimeResponse = fairService.getCompanyWaitTime(companyId, role);
-            int waitTime = waitTimeResponse.getCompanyWaitTimes().get(companyId);
 
             Message message = Message.builder()
                     .putData("company-id", companyId)
@@ -69,32 +64,25 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyPositionUpdate(String companyId, Role role, int position)
+    public void notifyPositionUpdate(List<Student> students) throws NotificationException {
+        new Thread(() -> {
+            for (int i = 0; i < students.size(); i++) {
+                notifyPositionUpdate(students.get(i).getId(), i + 1);
+            }
+        }).start();
+    }
+
+    @Override
+    public void notifyPositionUpdate(List<Student> students, int position)
             throws NotificationException {
         new Thread(() -> {
-            ListIterator<com.careerfair.q.model.redis.Student> studentListIterator = queueService
-                    .getVirtualQueueStudents(companyId, role).listIterator(position - 1);
+            ListIterator<Student> studentListIterator = students.listIterator(position - 1);
 
             while (studentListIterator.hasNext()) {
                 int index = studentListIterator.nextIndex();
                 String studentId = studentListIterator.next().getId();
 
                 notifyPositionUpdate(studentId, index + 1);
-            }
-        }).start();
-    }
-
-    @Override
-    public void notifyPositionUpdate(String companyId, String employeeId, Role role)
-            throws NotificationException {
-        notifyPositionUpdate(companyId, role, 1);
-
-        new Thread(() -> {
-            List<com.careerfair.q.model.redis.Student> students = queueService
-                    .getEmployeeQueueStudents(employeeId);
-
-            for (int i = 0; i < students.size(); i++) {
-                notifyPositionUpdate(students.get(i).getId(), i + 1);
             }
         }).start();
     }
@@ -148,11 +136,10 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void notifyStudentRemovalFromVirtualQueue(String companyId, Role role) {
-        new Thread(() -> {
-            queueService.getVirtualQueueStudents(companyId, role).forEach(student ->
-                    notifyPositionUpdate(student.getId(), -1));
-        }).start();
+    public void notifyStudentRemovalFromVirtualQueue(List<Student> students) {
+        new Thread(() ->
+                students.forEach(student -> notifyPositionUpdate(student.getId(), -1))
+        ).start();
     }
 
     /**
@@ -163,7 +150,7 @@ public class NotificationServiceImpl implements NotificationService {
      * @param role role that the client has to be registered to
      * @param isAddition signifies whether the queue is added or removed
      */
-    private void notifyQueueChange(String companyId, Role role, boolean isAddition) {
+    private void notifyQueueChange(String companyId, Role role, int waitTime, boolean isAddition) {
         Topic notificationTopic = getTopicFromRole(role);
         Company company = fairService.getCompanyWithId(Fair.THE_FAIR_ID, companyId).getCompany();
 
@@ -173,8 +160,6 @@ public class NotificationServiceImpl implements NotificationService {
         companyData.put("add", String.valueOf(isAddition));
 
         if (isAddition) {
-            int waitTime = queueService.getOverallWaitTime(companyId, role);
-            companyData.put("employer-match", "100");  // TODO: Update this. How do I even get this?? No student here...
             companyData.put("wait-time", String.valueOf(waitTime));
         }
 
@@ -194,7 +179,8 @@ public class NotificationServiceImpl implements NotificationService {
      */
     private void notifyEmployeeQueueUpdate(String employeeId, String studentId,
                                            boolean isAddition) {
-        Student student = studentService.getStudentWithId(studentId).getStudent();
+        com.careerfair.q.model.db.Student student = studentService.getStudentWithId(studentId)
+                .getStudent();
         String registrationToken = employeeService.getRegistrationToken(employeeId);
 
         Map<String, String> queueData = Maps.newHashMap();

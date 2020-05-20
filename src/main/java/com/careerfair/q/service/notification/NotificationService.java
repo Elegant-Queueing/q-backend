@@ -1,7 +1,10 @@
 package com.careerfair.q.service.notification;
 
+import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.NotificationException;
+
+import java.util.List;
 
 public interface NotificationService {
 
@@ -10,10 +13,11 @@ public interface NotificationService {
      *
      * @param companyId id of the company whose queue is added
      * @param role role that the client has to be registered to
+     * @param waitTime the wait time for the company
      * @throws NotificationException if the topic is not valid or an unexpected error occurs in
      *      sending the notification
      */
-    void notifyQueueOpen(String companyId, Role role) throws NotificationException;
+    void notifyQueueOpen(String companyId, Role role, int waitTime) throws NotificationException;
 
     /**
      * Notifies any client registered to the given role about a company's removal of queue
@@ -30,32 +34,28 @@ public interface NotificationService {
      *
      * @param companyId id of the company whose wait time is to be notified
      * @param role role that the client has to be registered to
+     * @param waitTime the wait time of the company
      * @throws NotificationException if an unexpected error occurs in sending the notification
      */
-    void notifyCompanyWaitTime(String companyId, Role role) throws NotificationException;
-
-    /**
-     * Notifies all the students in the queue for the given company and role about their position in
-     * the queue
-     *
-     * @param companyId id of the company that the students are in
-     * @param role role for which the student is queueing for
-     * @param position the start position in the virtual queue to send notifications
-     * @throws NotificationException if an unexpected error occurs in sending the notification
-     */
-    void notifyPositionUpdate(String companyId, Role role, int position)
+    void notifyCompanyWaitTime(String companyId, Role role, int waitTime)
             throws NotificationException;
 
     /**
-     * Notifies all the students in the employee's queue about their position in the queue
+     * Notifies all the students from the given position in the given list
      *
-     * @param companyId id of the company the employee is associated with
-     * @param employeeId id of the employee that the students are in
-     * @param role role that the employee is associated with
+     * @param students list of students to notify
      * @throws NotificationException if an unexpected error occurs in sending the notification
      */
-    void notifyPositionUpdate(String companyId, String employeeId, Role role)
-            throws NotificationException;
+    void notifyPositionUpdate(List<Student> students) throws NotificationException;
+
+    /**
+     * Notifies the students from the given position in the given list
+     *
+     * @param students list of students to notify
+     * @param position position of the student from which the notification is to be sent
+     * @throws NotificationException if an unexpected error occurs in sending the notification
+     */
+    void notifyPositionUpdate(List<Student> students, int position) throws NotificationException;
 
     /**
      * Notifies a student about their position in the queue
@@ -97,10 +97,9 @@ public interface NotificationService {
             throws NotificationException;
 
     /**
-     * Notifies all the students that they have been removed from the virtual queue
+     * Notifies all the students in the list that they have been removed from the virtual queue
      *
-     * @param companyId id of the company that the students were in
-     * @param role role that the students were queued up for
+     * @param students list of students to notify removal from queue
      */
-    void notifyStudentRemovalFromVirtualQueue(String companyId, Role role);
+    void notifyStudentRemovalFromVirtualQueue(List<Student> students);
 }

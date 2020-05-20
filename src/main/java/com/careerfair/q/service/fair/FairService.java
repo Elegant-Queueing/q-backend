@@ -3,8 +3,6 @@ package com.careerfair.q.service.fair;
 import com.careerfair.q.service.fair.response.GetAllFairsResponse;
 import com.careerfair.q.service.fair.response.GetCompanyResponse;
 import com.careerfair.q.service.fair.response.GetFairResponse;
-import com.careerfair.q.service.fair.response.GetWaitTimeResponse;
-import com.careerfair.q.util.enums.Role;
 
 public interface FairService {
 
@@ -31,21 +29,4 @@ public interface FairService {
      * @return GetCompanyResponse
      */
     GetCompanyResponse getCompanyWithId(String fairId, String companyId);
-
-    /**
-     * Gets the wait time for the given company and role
-     *
-     * @param companyId id of the company whose wait time is to retrieved
-     * @param role role the student is recruiting for
-     * @return GetWaitTimeResponse
-     */
-    GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role);
-
-    /**
-     * Gets the wait time for the all the companies with a queue open for the given role
-     *
-     * @param role role the student is recruiting for
-     * @return GetWaitTimeResponse
-     */
-    GetWaitTimeResponse getAllCompaniesWaitTime(Role role);
 }

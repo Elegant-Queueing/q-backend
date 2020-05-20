@@ -1,13 +1,27 @@
 package com.careerfair.q.service.queue;
 
-import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.util.enums.Role;
 
-import java.util.List;
-
 public interface QueueService {
+
+    /**
+     * Gets the wait time for the given company and role
+     *
+     * @param companyId id of the company whose wait time is to retrieved
+     * @param role role the student is recruiting for
+     * @return GetWaitTimeResponse
+     */
+    GetWaitTimeResponse getCompanyWaitTime(String companyId, Role role);
+
+    /**
+     * Gets the wait time for the all the companies with a queue open for the given role
+     *
+     * @param role role the student is recruiting for
+     * @return GetWaitTimeResponse
+     */
+    GetWaitTimeResponse getAllCompaniesWaitTime(Role role);
 
     /**
      * Adds the given student to the given company's virtual queue for the given role
@@ -90,31 +104,6 @@ public interface QueueService {
     GetEmployeeQueueDataResponse getEmployeeQueueData(String employeeId);
 
     /**
-     * Returns a list of all employees present at the fair
-     *
-     * @return List containing all the employees
-     */
-    List<Employee> getAllEmployees();
-
-    /**
-     * Returns the overall wait time of a queue associated with the given company and role
-     *
-     * @param companyId id of the company that the queue is associated with
-     * @param role role that the queue is associated with
-     * @return int indicating the overall wait time in seconds
-     */
-    int getOverallWaitTime(String companyId, Role role);
-
-    /**
-     * Returns a list of students that are queued up for the given company and for the given role
-     *
-     * @param companyId id of the company the students are queued up for
-     * @param role role that the students are queued up for
-     * @return List of students in the queue
-     */
-    List<Student> getVirtualQueueStudents(String companyId, Role role);
-
-    /**
      * Returns the size of the virtual queue for the given company and role
      *
      * @param companyId id of the company that the queue is associated with
@@ -124,14 +113,6 @@ public interface QueueService {
     long getVirtualQueueSize(String companyId, Role role);
 
     /**
-     * Returns a list of students that are queued up for the given employee
-     *
-     * @param employeeId id of the employee the students are queued up for
-     * @return List of students in the queue
-     */
-    List<Student> getEmployeeQueueStudents(String employeeId);
-
-    /**
      * Returns the size of the queue for the given employee
      *
      * @param employeeId id of the employee that the queue is associated with
@@ -139,13 +120,13 @@ public interface QueueService {
      */
     long getEmployeeQueueSize(String employeeId);
 
-    /**
-     * Clears all data in Redis. USED FOR TESTING ONLY
-     */
-    void clearAll();
-
-    /**
-     * Gets all data in Redis. USED FOR TESTING ONLY
-     */
-    String getAll();
+//    /**
+//     * Clears all data in Redis. USED FOR TESTING ONLY
+//     */
+//    void clearAll();
+//
+//    /**
+//     * Gets all data in Redis. USED FOR TESTING ONLY
+//     */
+//    String getAll();
 }
