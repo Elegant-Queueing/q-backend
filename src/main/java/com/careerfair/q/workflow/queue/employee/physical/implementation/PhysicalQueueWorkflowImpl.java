@@ -23,8 +23,6 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         implements PhysicalQueueWorkflow {
 
     @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
-    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
-    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Override
     public QueueStatus joinQueue(String employeeId, Student student,
@@ -36,7 +34,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         if (studentWindowQueueStatus.getJoinedWindowQueueAt().getSeconds() + WINDOW + BUFFER <
                 Timestamp.now().getSeconds()) {
             throw new InvalidRequestException("Student with student id=" + student.getId() +
-                    " did not scan the code od employee with employee id=" + employeeId +
+                    " did not scan the code of employee with employee id=" + employeeId +
                     " in time");
         }
 
