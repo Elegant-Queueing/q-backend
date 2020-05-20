@@ -61,11 +61,11 @@ Replace the {address} with localhost or your public DNS. Replace the {employee_i
 ```
 ### Work in progress
 
-Authentication: Login, Sign up, API authentication
-Resume upload
-Image upload
-Resume tagging
-Employee service POST API calls
+Authentication: Login, Sign up, API authentication </br>
+Resume upload </br>
+Image upload </br>
+Resume tagging </br>
+Employee service POST API calls </br>
 
 ### Reporting a bug
 ---------------------------
