@@ -2,6 +2,7 @@ package com.careerfair.q.service.validation.implementation;
 
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.service.database.FirebaseService;
+import com.careerfair.q.service.student.request.StudentRequest;
 import com.careerfair.q.service.validation.ValidationService;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.FirebaseException;
@@ -60,6 +61,40 @@ public class ValidationServiceImpl implements ValidationService {
             }
         } catch (FirebaseException ex) {
             throw new ValidationException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public <T extends StudentRequest> void checkValidStudentRequest(T studentRequest)
+            throws ValidationException {
+        checkStudentRequestParameters(studentRequest.getFirstName(), "first_name");
+        checkStudentRequestParameters(studentRequest.getLastName(), "last_name");
+        checkStudentRequestParameters(studentRequest.getUniversityId(), "university_id");
+        checkStudentRequestParameters(studentRequest.getMajor(), "major");
+        checkStudentRequestParameters(studentRequest.getBio(), "bio");
+        checkStudentRequestParameters(studentRequest.getEmail(), "email");
+        checkStudentRequestParameters(studentRequest.getRole(), "role");
+        checkStudentRequestParameters(studentRequest.getGpa(), "gpa");
+        checkStudentRequestParameters(studentRequest.getInternational(), "international");
+        checkStudentRequestParameters(studentRequest.getGraduationDate(),
+                "graduation_date");
+    }
+
+    private <T> void checkStudentRequestParameters(T fieldValue, String fieldName)
+            throws ValidationException {
+        if (fieldValue == null) {
+            throw new ValidationException("Missing the field=" + fieldName);
+        } else if ((fieldValue instanceof String) && fieldValue.toString().isEmpty()) {
+            throw new ValidationException("Empty field=" + fieldName);
+        } else if (fieldName.equals("email")) {
+            checkValidEmail(fieldValue.toString());
+        }
+    }
+
+    private void checkValidEmail(String email) throws ValidationException {
+        String emailRegex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
+        if (!email.matches(emailRegex)) {
+            throw new ValidationException("Incorrect email format");
         }
     }
 }

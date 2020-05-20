@@ -36,16 +36,18 @@ public interface StudentController {
                                         UpdateStudentRequest updateStudentRequest);
 
     /**
+     * Deletes the student with the given student id
      *
-     * @param id
-     * @return
+     * @param studentId id of the Student who is to be deleted
+     * @return DeleteStudentResponse
      */
-    DeleteStudentResponse deleteStudent(String id);
+    DeleteStudentResponse deleteStudent(String studentId);
 
     /**
+     * Adds students with the given details
      *
-     * @param addStudentRequest
-     * @return
+     * @param addStudentRequest Request object holding all the student details
+     * @return AddStudentResponse
      */
     AddStudentResponse addStudent(AddStudentRequest addStudentRequest);
 

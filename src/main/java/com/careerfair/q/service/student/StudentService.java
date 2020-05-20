@@ -36,16 +36,18 @@ public interface StudentService {
                                         UpdateStudentRequest updateStudentRequest);
 
     /**
+     * Deletes the student with the given id
      *
-     * @param id
-     * @return
+     * @param studentId id of the student to be deleted
+     * @return DeleteStudentResponse
      */
-    DeleteStudentResponse deleteStudent(String id);
+    DeleteStudentResponse deleteStudent(String studentId);
 
     /**
+     * Adds a student with the given details in the request
      *
-     * @param addStudentRequest
-     * @return
+     * @param addStudentRequest details of the student to be added
+     * @return AddStudentResponse
      */
     AddStudentResponse addStudent(AddStudentRequest addStudentRequest);
 

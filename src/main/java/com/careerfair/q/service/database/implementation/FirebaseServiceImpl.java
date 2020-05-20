@@ -90,8 +90,18 @@ public class FirebaseServiceImpl implements FirebaseService {
     }
 
     @Override
-    public Student updateStudent(String studentId, Student student) {
+    public Student updateStudent(String studentId, Student student) throws FirebaseException {
         return studentFirebaseWorkflow.updateStudent(studentId, student);
+    }
+
+    @Override
+    public Student addStudent(Student newStudent) throws FirebaseException {
+        return studentFirebaseWorkflow.addStudent(newStudent);
+    }
+
+    @Override
+    public Student deleteStudent(String studentId) throws FirebaseException {
+        return studentFirebaseWorkflow.deleteStudent(studentId);
     }
 
     // Use this method to test your firebase connection

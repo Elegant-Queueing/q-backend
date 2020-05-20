@@ -46,7 +46,7 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
                 throw new FirebaseException("No student with student id=" + studentId + " exists");
             }
 
-            student.setStudentId(studentId);
+            student.studentId = studentId;
             return student;
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
@@ -67,7 +67,7 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
                     Student student = documentSnapshot.toObject(Student.class);
                     assert student != null;
 
-                    student.setStudentId(documentSnapshot.getId());
+                    student.studentId = documentSnapshot.getId();
                     return student;
                 }
             }
@@ -84,55 +84,45 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         Firestore firestore = FirestoreClient.getFirestore();
         Student student = getStudentWithId(studentId);
 
-        if (student.getEmployees() == null) {
-            student.setEmployees(Lists.newArrayList());
+        if (student.employees == null) {
+            student.employees = Lists.newArrayList();
         }
 
-        student.getEmployees().add(employeeId);
+        student.employees.add(employeeId);
         firestore.collection(STUDENT_COLLECTION).document(studentId).update("employees",
-                student.getEmployees());
+                student.employees);
     }
 
     @Override
     public Student updateStudent(String studentId, Student updatedStudent)
             throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
-        Student firebaseStudent = getStudentWithId(studentId);
-        updateResponseStudent(studentId, firebaseStudent, updatedStudent);
-        firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent);
-        return updatedStudent;
+        try {
+            firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent).get();
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new FirebaseException(ex.getMessage());
+        }
+        return getStudentWithId(studentId);
     }
 
-    private void updateResponseStudent(String studentId, Student firebaseStudent,
-                                       Student updatedStudent) {
-        if (updatedStudent.getFirstName() == null) {
-            updatedStudent.setFirstName(firebaseStudent.getFirstName());
+    @Override
+    public Student addStudent(Student newStudent) throws FirebaseException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        DocumentReference documentReference = firestore.collection(STUDENT_COLLECTION).document();
+        String studentId = documentReference.getId();
+        try {
+            documentReference.set(newStudent).get();
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new FirebaseException(ex.getMessage());
         }
-        if (updatedStudent.getLastName() == null) {
-            updatedStudent.setLastName(firebaseStudent.getLastName());
-        }
-        if (updatedStudent.getMajor() == null) {
-            updatedStudent.setMajor(firebaseStudent.getMajor());
-        }
-        if (updatedStudent.getRole() == null) {
-            updatedStudent.setRole(firebaseStudent.getRole());
-        }
-        if (updatedStudent.getBio() == null) {
-            updatedStudent.setMajor(firebaseStudent.getMajor());
-        }
-        if (updatedStudent.getGpa() == null) {
-            updatedStudent.setGpa(firebaseStudent.getGpa());
-        }
-        if (updatedStudent.getGraduationDate() == null) {
-            updatedStudent.setGraduationDate(firebaseStudent.getGraduationDate());
-        }
-        if (updatedStudent.getInternational() == null) {
-            updatedStudent.setInternational(firebaseStudent.getInternational());
-        }
-        updatedStudent.setStudentId(studentId);
-        updatedStudent.setUniversityId(firebaseStudent.getUniversityId());
+        return getStudentWithId(studentId);
+    }
 
-        // TODO: work on employee update
-        updatedStudent.setEmployees(firebaseStudent.getEmployees());
+    @Override
+    public Student deleteStudent(String studentId) throws FirebaseException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        Student deletedStudent = getStudentWithId(studentId);
+        firestore.collection(STUDENT_COLLECTION).document(studentId).delete();
+        return deletedStudent;
     }
 }

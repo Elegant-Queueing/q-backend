@@ -11,6 +11,8 @@ import com.careerfair.q.service.student.response.UpdateStudentResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("student")
 public class StudentControllerImpl implements StudentController {
@@ -32,14 +34,14 @@ public class StudentControllerImpl implements StudentController {
     @PutMapping(value = "/update/student-id/{student-id}")
     @Override
     public UpdateStudentResponse updateStudent(@PathVariable("student-id") String studentId,
-            @RequestBody UpdateStudentRequest updateStudentRequest) {
+            @Valid @RequestBody UpdateStudentRequest updateStudentRequest) {
         return studentService.updateStudent(studentId, updateStudentRequest);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/student-id/{id}")
     @Override
-    public DeleteStudentResponse deleteStudent(@PathVariable("id") String id) {
-        return studentService.deleteStudent(id);
+    public DeleteStudentResponse deleteStudent(@PathVariable("id") String studentId) {
+        return studentService.deleteStudent(studentId);
     }
 
     @PostMapping("/add")

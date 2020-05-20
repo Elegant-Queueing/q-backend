@@ -1,15 +1,16 @@
-package com.careerfair.q.service.student.response;
+package com.careerfair.q.service.student.request;
 
-import com.careerfair.q.model.db.Student;
+import com.careerfair.q.service.database.deserializer.TimestampDeserializer;
 import com.careerfair.q.util.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.cloud.Timestamp;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
-public abstract class StudentResponse {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class StudentRequest {
     @JsonProperty("first_name")
     private String firstName;
 
@@ -35,21 +36,9 @@ public abstract class StudentResponse {
     private Double gpa;
 
     @JsonProperty("grad_date")
+    @JsonDeserialize(using = TimestampDeserializer.class)
     private Timestamp graduationDate;
 
     @JsonProperty("international")
     private Boolean international;
-
-    public StudentResponse(Student student) {
-        this.firstName = student.firstName;
-        this.lastName = student.lastName;
-        this.universityId = student.universityId;
-        this.major = student.major;
-        this.role = student.role;
-        this.bio = student.bio;
-        this.email = student.email;
-        this.gpa = student.gpa;
-        this.graduationDate = student.graduationDate;
-        this.international = student.international;
-    }
 }

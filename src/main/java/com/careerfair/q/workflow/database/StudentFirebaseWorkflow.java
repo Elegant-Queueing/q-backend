@@ -49,4 +49,22 @@ public interface StudentFirebaseWorkflow {
      * @throws FirebaseException if the student does not exist
      */
     Student updateStudent(String studentId, Student updatedStudent) throws FirebaseException;
+
+    /**
+     * Adds a student with the given details
+     *
+     * @param newStudent id of the student to make changes to
+     * @return Student
+     * @throws FirebaseException if there are any issues with writing to the DB
+     */
+    Student addStudent(Student newStudent) throws FirebaseException;
+
+    /**
+     * Deletes the student with the given student id
+     *
+     * @param studentId id of the student to be deleted
+     * @return Student that was deleted
+     * @throws FirebaseException if the studentId is not in the DB
+     */
+    Student deleteStudent(String studentId) throws FirebaseException;
 }
