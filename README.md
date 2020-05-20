@@ -1,11 +1,51 @@
 # q-backend
 
+This document provides the user and developer documentations for q-backend.
+
+The code on the ```master``` branch is the latest released code.
+
+## User Documentation
+
+### Description
 This repository contains all the code for Q's backend service. On a high level, it has 3 services: 
 - Employee service for the employee front-end application
 - Student service for the student front-end application
 - Queue service for everything related to queuing, that both the front-end apps may use
 
-A user (e.g. a front-end developer) can use the APIs that this backend provides. These APIs may allow students and employees to create profiles and simulate virtual queuing for career fairs.
+The backend service is a Spring Boot Application that exposes API endpoints. A user (e.g. a front-end developer) can use these APIs by running the Spring Boot Application, thereby exposing the API endpoints to their own application. These APIs may be used to allow students and employees to create profiles and simulate virtual queuing for career fairs.
+
+### User set up
+
+
+---------------------------
+
+## Set up
+
+### Environment
+You may set up the environment required to run this Spring Boot app in 2 ways:
+- Set up an instance remotely on AWS using our public AMI
+- Set up locally by installing all the dependencies and prerequisites
+
+#### Setting up a remote instance on AWS
+- Create an new account on AWS if you don't have one already: https://aws.amazon.com/
+- Sign in to your account.
+- Click on Services (top left) and select EC2. If you can't find EC2, search for it and it should show up.
+- Click on AMI. It should be on the left panel, under 'Images'.
+- Next to the search bar, should be a filter saying 'Owned by me'. Change that to public images.
+- Search for ```q-public-ami``` and press enter.
+- Select the AMI and click on Launch.
+- Choose an instance setting that suits your needs and budget (there should be a free one too) and launch the instance.
+- Once the instance is running, you can see it if you go to Service -> EC2 -> Instances.
+- To SSH into this instance, select the instance and click on connect. Then, simply follow the instructions to SSH into it.
+
+This instance will have all the prerequisite software set up for you (except the code).
+
+#### Setting up a local environment
+- Download and install Java: https://java.com/en/download/
+- Make sure to test the installation using the command ```java -version```
+- Download and install Redis: https://redis.io/download
+- Test the installation by running: ```redis-server``` on the terminal
+- Download and install Maven: https://maven.apache.org/install.html
 
 ---------------------------
 
