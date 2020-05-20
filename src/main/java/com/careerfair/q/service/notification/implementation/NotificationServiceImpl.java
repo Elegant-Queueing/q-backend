@@ -16,6 +16,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,108 +39,106 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Async
     public void notifyQueueOpen(String companyId, Role role, int waitTime)
             throws NotificationException {
-        new Thread(() -> notifyQueueChange(companyId, role, waitTime, true)).start();
+        notifyQueueChange(companyId, role, waitTime, true);
     }
 
     @Override
+    @Async
     public void notifyQueueClose(String companyId, Role role) throws NotificationException {
-        new Thread(() -> notifyQueueChange(companyId, role, -1, false)).start();
+        notifyQueueChange(companyId, role, -1, false);
     }
 
     @Override
+    @Async
     public void notifyCompanyWaitTime(String companyId, Role role, int waitTime)
             throws NotificationException {
-        new Thread(() -> {
-            Topic notificationTopic = getTopicFromRole(role);
+        Topic notificationTopic = getTopicFromRole(role);
 
-            Message message = Message.builder()
-                    .putData("company-id", companyId)
-                    .putData("wait-time", String.valueOf(waitTime))
-                    .setTopic(notificationTopic.getTopic())
-                    .build();
-            sendMessage(message);
-        }).start();
+        Message message = Message.builder()
+                .putData("company-id", companyId)
+                .putData("wait-time", String.valueOf(waitTime))
+                .setTopic(notificationTopic.getTopic())
+                .build();
+        sendMessage(message);
     }
 
     @Override
+    @Async
     public void notifyPositionUpdate(List<Student> students) throws NotificationException {
-        new Thread(() -> {
-            for (int i = 0; i < students.size(); i++) {
-                notifyPositionUpdate(students.get(i).getId(), i + 1);
-            }
-        }).start();
+        for (int i = 0; i < students.size(); i++) {
+            notifyPositionUpdate(students.get(i).getId(), i + 1);
+        }
     }
 
     @Override
+    @Async
     public void notifyPositionUpdate(List<Student> students, int position)
             throws NotificationException {
-        new Thread(() -> {
-            ListIterator<Student> studentListIterator = students.listIterator(position - 1);
+        ListIterator<Student> studentListIterator = students.listIterator(position - 1);
 
-            while (studentListIterator.hasNext()) {
-                int index = studentListIterator.nextIndex();
-                String studentId = studentListIterator.next().getId();
+        while (studentListIterator.hasNext()) {
+            int index = studentListIterator.nextIndex();
+            String studentId = studentListIterator.next().getId();
 
-                notifyPositionUpdate(studentId, index + 1);
-            }
-        }).start();
+            notifyPositionUpdate(studentId, index + 1);
+        }
     }
 
     @Override
+    @Async
     public void notifyPositionUpdate(String studentId, int position) {
-        new Thread(() -> {
-            String registrationToken = studentService.getRegistrationToken(studentId);
+        String registrationToken = studentService.getRegistrationToken(studentId);
 
-            Message message = Message.builder()
-                    .setToken(registrationToken)
-                    .putData("student-id", studentId)
-                    .putData("position", String.valueOf(position))
-                    .build();
-            sendMessage(message);
-        }).start();
+        Message message = Message.builder()
+                .setToken(registrationToken)
+                .putData("student-id", studentId)
+                .putData("position", String.valueOf(position))
+                .build();
+        sendMessage(message);
     }
 
     @Override
+    @Async
     public void notifyEmployeeAssociation(String employeeId, String studentId)
             throws NotificationException{
-        new Thread(() -> {
-            String registrationToken = studentService.getRegistrationToken(studentId);
-            Employee employee = employeeService.getEmployeeWithId(employeeId).getEmployee();
+        String registrationToken = studentService.getRegistrationToken(studentId);
+        Employee employee = employeeService.getEmployeeWithId(employeeId).getEmployee();
 
-            Map<String, String> employeeData = Maps.newHashMap();
-            employeeData.put("student-id", studentId);
-            employeeData.put("employee-id", employeeId);
-            employeeData.put("name", employee.getName());
-            employeeData.put("bio", employee.getBio());
-            employeeData.put("email", employee.getEmail());
+        Map<String, String> employeeData = Maps.newHashMap();
+        employeeData.put("student-id", studentId);
+        employeeData.put("employee-id", employeeId);
+        employeeData.put("name", employee.getName());
+        employeeData.put("bio", employee.getBio());
+        employeeData.put("email", employee.getEmail());
 
-            Message message = Message.builder()
-                    .setToken(registrationToken)
-                    .putAllData(employeeData)
-                    .build();
-            sendMessage(message);
-        }).start();
+        Message message = Message.builder()
+                .setToken(registrationToken)
+                .putAllData(employeeData)
+                .build();
+        sendMessage(message);
     }
 
     @Override
+    @Async
     public void notifyStudentAdditionFromEmployeeQueue(String employeeId, String studentId)
             throws NotificationException {
-        new Thread(() -> notifyEmployeeQueueUpdate(employeeId, studentId, true)).start();
+        notifyEmployeeQueueUpdate(employeeId, studentId, true);
     }
 
     @Override
+    @Async
     public void notifyStudentRemovalFromEmployeeQueue(String employeeId, String studentId)
             throws NotificationException {
-        new Thread(() -> notifyEmployeeQueueUpdate(employeeId, studentId, false)).start();
+        notifyEmployeeQueueUpdate(employeeId, studentId, false);
     }
 
     @Override
+    @Async
     public void notifyStudentRemovalFromVirtualQueue(List<Student> students) {
-        new Thread(() ->
-                students.forEach(student -> notifyPositionUpdate(student.getId(), -1))
-        ).start();
+        students.forEach(student -> notifyPositionUpdate(student.getId(), -1));
     }
 
     /**

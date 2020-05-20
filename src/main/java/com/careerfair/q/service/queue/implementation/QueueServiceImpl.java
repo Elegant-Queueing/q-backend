@@ -73,11 +73,11 @@ public class QueueServiceImpl implements QueueService {
         Map<String, Integer> companyWaitTimes = Maps.newHashMap();
 
         getAllEmployees().forEach(employee -> {
+            String companyId = employee.getCompanyId();
+
             if (employee.getRole() == role && employee.getVirtualQueueId() != null &&
-                    !companyWaitTimes.containsKey(employee.getCompanyId())) {
-                GetWaitTimeResponse waitTimeResponse = getCompanyWaitTime(employee.getCompanyId(),
-                        role);
-                companyWaitTimes.putAll(waitTimeResponse.getCompanyWaitTimes());
+                    !companyWaitTimes.containsKey(companyId)) {
+                companyWaitTimes.put(companyId, getOverallWaitTime(companyId, role));
             }
         });
 
