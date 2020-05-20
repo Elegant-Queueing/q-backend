@@ -9,8 +9,6 @@ import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.employee.AbstractEmployeeQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.WindowQueueWorkflow;
 import com.google.cloud.Timestamp;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import static com.careerfair.q.util.constant.Queue.EMPLOYEE_CACHE_NAME;
@@ -18,8 +16,6 @@ import static com.careerfair.q.util.constant.Queue.EMPLOYEE_CACHE_NAME;
 @Component
 public class WindowQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         implements WindowQueueWorkflow {
-
-    @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
 
     @Override
     public QueueStatus joinQueue(String employeeId, Student student,

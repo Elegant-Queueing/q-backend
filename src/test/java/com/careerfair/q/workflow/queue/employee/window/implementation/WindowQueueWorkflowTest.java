@@ -1,4 +1,4 @@
-package com.careerfair.q.workflow.queue.employee.window;
+package com.careerfair.q.workflow.queue.employee.window.implementation;
 
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
@@ -6,8 +6,7 @@ import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
-import com.careerfair.q.workflow.queue.employee.window.implementation.WindowQueueWorkflowImpl;
+import com.careerfair.q.util.exception.InvalidRequestException;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,11 +47,9 @@ public class WindowQueueWorkflowTest {
     private Student student;
     @Mock
     private StudentQueueStatus studentQueueStatus;
-    @Mock
-    private PhysicalQueueWorkflow physicalQueueWorkflow;
 
     @InjectMocks
-    private WindowQueueWorkflow windowQueueWorkflow = new WindowQueueWorkflowImpl();
+    private final WindowQueueWorkflowImpl windowQueueWorkflow = new WindowQueueWorkflowImpl();
 
     @BeforeEach
     public void setupMock() {
@@ -124,6 +121,21 @@ public class WindowQueueWorkflowTest {
     }
 
     @Test
+    public void testAddQueueWithQueueExisting() {
+        employee.setWindowQueueId("wq1");
+
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+
+        try {
+            windowQueueWorkflow.addQueue(employee.getId());
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(),
+                    "Employee with employee id=e1 is associated with window queue with id=wq1");
+        }
+    }
+
+    @Test
     public void testRemoveQueueNonEmpty() {
         employee.setWindowQueueId("wq1");
         studentQueueStatus.setEmployeeId("e1");
@@ -192,7 +204,51 @@ public class WindowQueueWorkflowTest {
         assertEquals(queueStatus.getPosition(), 1);
     }
 
-    private Answer addStudentAnswer(List<Student> students) {
+    @Test
+    public void testGetQueueStatusBadQueueType() {
+        studentQueueStatus.setQueueType(QueueType.PHYSICAL);
+
+        try {
+            windowQueueWorkflow.getQueueStatus(studentQueueStatus);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "QueueType in studentQueueStatus != WINDOW");
+        }
+    }
+
+    @Test
+    public void testUpdateQueueStatus() {
+        employee.setWindowQueueId("wq1");
+
+        windowQueueWorkflow.updateStudentQueueStatus(studentQueueStatus, employee);
+
+        assertEquals(studentQueueStatus.getQueueType(), QueueType.WINDOW);
+        assertEquals(studentQueueStatus.getQueueId(), "wq1");
+        assertEquals(studentQueueStatus.getEmployeeId(), "e1");
+        assertNotNull(studentQueueStatus.getJoinedWindowQueueAt());
+    }
+
+    @Test
+    public void testCheckQueueAssociated() {
+        employee.setWindowQueueId("wq1");
+
+        String queueId = windowQueueWorkflow.checkQueueAssociated(employee);
+
+        assertEquals(queueId, "wq1");
+    }
+
+    @Test
+    public void testCheckQueueAssociatedBadQueueId() {
+        try {
+            windowQueueWorkflow.checkQueueAssociated(employee);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(),
+                    "Employee with employee id=e1 is not associated with any window queue");
+        }
+    }
+
+    private Answer<List<Student>> addStudentAnswer(List<Student> students) {
         return invocationOnMock -> {
             List<Student> temp = Lists.newArrayList(students);
             students.add(student);
@@ -200,7 +256,7 @@ public class WindowQueueWorkflowTest {
         };
     }
 
-    private Answer removeStudentAnswer(List<Student> students) {
+    private Answer<List<Student>> removeStudentAnswer(List<Student> students) {
         return invocationOnMock -> {
             List<Student> temp = Lists.newArrayList(students);
             students.remove(student);

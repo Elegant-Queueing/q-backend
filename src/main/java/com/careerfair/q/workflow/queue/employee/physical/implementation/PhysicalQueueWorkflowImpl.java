@@ -10,8 +10,6 @@ import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.employee.AbstractEmployeeQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.google.cloud.Timestamp;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,10 +19,6 @@ import static com.careerfair.q.util.constant.Queue.*;
 @Component
 public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         implements PhysicalQueueWorkflow {
-
-    @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
-    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
-    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
 
     @Override
     public QueueStatus joinQueue(String employeeId, Student student,
@@ -36,7 +30,7 @@ public class PhysicalQueueWorkflowImpl extends AbstractEmployeeQueueWorkflow
         if (studentWindowQueueStatus.getJoinedWindowQueueAt().getSeconds() + WINDOW + BUFFER <
                 Timestamp.now().getSeconds()) {
             throw new InvalidRequestException("Student with student id=" + student.getId() +
-                    " did not scan the code od employee with employee id=" + employeeId +
+                    " did not scan the code of employee with employee id=" + employeeId +
                     " in time");
         }
 

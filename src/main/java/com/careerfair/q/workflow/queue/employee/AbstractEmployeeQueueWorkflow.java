@@ -15,8 +15,7 @@ import static com.careerfair.q.util.constant.Queue.STUDENT_CACHE_NAME;
 
 public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflow {
 
-    @Autowired private RedisTemplate<String, Student> queueRedisTemplate;
-    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
+    @Autowired protected RedisTemplate<String, Student> queueRedisTemplate;
 
     /**
      * Adds the given student to the given employee's queue
@@ -33,7 +32,7 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
         List<Student> studentsInQueue = queueRedisTemplate.opsForList().range(queueId, 0L, -1L);
         assert studentsInQueue != null;
 
-        if (getStudentPosition(student.getId(), studentsInQueue) != -1) {
+        if (getStudentIndex(student.getId(), studentsInQueue) != -1) {
             throw new InvalidRequestException("Student with student id=" + student.getId() +
                     " is already present in the queue of the employee with employee id=" +
                     employee.getId());
@@ -62,7 +61,7 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
         List<Student> studentsInQueue = queueRedisTemplate.opsForList().range(queueId, 0L, -1L);
         assert studentsInQueue != null;
 
-        int position = getStudentPosition(studentId, studentsInQueue);
+        int position = getStudentIndex(studentId, studentsInQueue);
 
         if (position == -1) {
             throw new InvalidRequestException("Student with student id=" + studentId +
@@ -153,7 +152,7 @@ public abstract class AbstractEmployeeQueueWorkflow extends AbstractQueueWorkflo
                 .range(studentQueueStatus.getQueueId(), 0L, -1L);
         assert studentsInQueue != null;
 
-        int position = getStudentPosition(studentQueueStatus.getStudentId(), studentsInQueue) + 1;
+        int position = getStudentIndex(studentQueueStatus.getStudentId(), studentsInQueue) + 1;
         return createQueueStatus(studentQueueStatus, employee, position);
     }
 
