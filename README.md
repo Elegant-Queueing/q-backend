@@ -1,5 +1,14 @@
 # q-backend
 
+This repository contains all the code for Q's backend service. On a high level, it has 3 services: 
+- Employee service for the employee front-end application
+- Student service for the student front-end application
+- Queue service for everything related to queuing, that both the front-end apps may use
+
+A user (e.g. a front-end developer) can use the APIs that this backend provides. These APIs may allow students and employees to create profiles and simulate virtual queuing for career fairs.
+
+---------------------------
+
 ## Javadocs
 - Javadocs available here: https://elegant-queueing.github.io/q-docs (only the code for beta release has been documented)
 
