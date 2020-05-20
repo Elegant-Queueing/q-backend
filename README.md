@@ -40,10 +40,10 @@ Notice the classes in ```package com.careerfair.q.controller```. The *implementa
 
 Just for a sanity check, run the the app and do the following:
 
-Enter the following URI and make a GET API call: 
-If local: ```localhost:8080/employee/get/employee-id/bfkE7Q0k9obASshNApN3```
-If on AWS: ```ec2-x-x-x-x.us-west-2.compute.amazonaws.com:8080/employee/get/employee-id/bfkE7Q0k9obASshNApN3``` (replacing the x's of course)
-- If everything works, you should get a response like this:
+Enter the following URI and make a GET API call to {address}:8080/employee/get/employee-id/{employee_id}
+Replace the {address} with localhost or your public DNS. Replace the {employee_id} with the id of an employee that you created when you added a document in the ```employees``` collection.
+
+- If everything works, you should get the employee document on the database:
 ```
 {
     "employee": {
@@ -60,6 +60,12 @@ If on AWS: ```ec2-x-x-x-x.us-west-2.compute.amazonaws.com:8080/employee/get/empl
 }
 ```
 ### Work in progress
+
+Authentication: Login, Sign up, API authentication
+Resume upload
+Image upload
+Resume tagging
+Employee service POST API calls
 
 ### Reporting a bug
 ---------------------------
@@ -164,4 +170,6 @@ NOTE: The Q team already has a dev database. To get access to it, please contact
 First, set up the database using the video: https://drive.google.com/file/d/1TMxiXX76JmJRJR1CP60grtf9WiX7aRxs/view
 
 Then, make changes to the code using the video: https://drive.google.com/file/d/1eiZPQq5OnAkD-kf628ZCYe6tTYlACvDB/view
+
+Schema:
 
