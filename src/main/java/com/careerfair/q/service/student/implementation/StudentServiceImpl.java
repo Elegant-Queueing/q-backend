@@ -70,8 +70,8 @@ public class StudentServiceImpl implements StudentService {
     public AddStudentResponse addStudent(AddStudentRequest addStudentRequest) {
         validationService.checkValidStudentRequest(addStudentRequest);
         Student studentFromRequest = createStudentFromRequest(addStudentRequest);
-        Student addedStudent = firebaseService.addStudent(studentFromRequest);
-        return new AddStudentResponse(addedStudent);
+        Student newStudent = firebaseService.addStudent(studentFromRequest);
+        return new AddStudentResponse(newStudent);
     }
 
     @Override

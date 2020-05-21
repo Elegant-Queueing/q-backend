@@ -2,6 +2,7 @@ package com.careerfair.q.service.validation.implementation;
 
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.service.database.FirebaseService;
+import com.careerfair.q.service.employee.request.EmployeeRequest;
 import com.careerfair.q.service.student.request.StudentRequest;
 import com.careerfair.q.service.validation.ValidationService;
 import com.careerfair.q.util.enums.Role;
@@ -52,10 +53,10 @@ public class ValidationServiceImpl implements ValidationService {
         try {
             Employee employee = firebaseService.getEmployeeWithId(employeeId);
 
-            if (!companyId.equals(employee.getCompanyId())) {
+            if (!companyId.equals(employee.companyId)) {
                 throw new ValidationException("Employee with employee id=" + employeeId +
                         " is not associated with company with company id=" + companyId);
-            } else if (employee.getRole() != role) {
+            } else if (employee.role != role) {
                 throw new ValidationException("Employee with employee id=" + employeeId +
                         " is not associated with the role=" + role);
             }
@@ -67,20 +68,20 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public <T extends StudentRequest> void checkValidStudentRequest(T studentRequest)
             throws ValidationException {
-        checkStudentRequestParameters(studentRequest.getFirstName(), "first_name");
-        checkStudentRequestParameters(studentRequest.getLastName(), "last_name");
-        checkStudentRequestParameters(studentRequest.getUniversityId(), "university_id");
-        checkStudentRequestParameters(studentRequest.getMajor(), "major");
-        checkStudentRequestParameters(studentRequest.getBio(), "bio");
-        checkStudentRequestParameters(studentRequest.getEmail(), "email");
-        checkStudentRequestParameters(studentRequest.getRole(), "role");
-        checkStudentRequestParameters(studentRequest.getGpa(), "gpa");
-        checkStudentRequestParameters(studentRequest.getInternational(), "international");
-        checkStudentRequestParameters(studentRequest.getGraduationDate(),
+        checkRequestParameters(studentRequest.getFirstName(), "first_name");
+        checkRequestParameters(studentRequest.getLastName(), "last_name");
+        checkRequestParameters(studentRequest.getUniversityId(), "university_id");
+        checkRequestParameters(studentRequest.getMajor(), "major");
+        checkRequestParameters(studentRequest.getBio(), "bio");
+        checkRequestParameters(studentRequest.getEmail(), "email");
+        checkRequestParameters(studentRequest.getRole(), "role");
+        checkRequestParameters(studentRequest.getGpa(), "gpa");
+        checkRequestParameters(studentRequest.getInternational(), "international");
+        checkRequestParameters(studentRequest.getGraduationDate(),
                 "graduation_date");
     }
 
-    private <T> void checkStudentRequestParameters(T fieldValue, String fieldName)
+    private <T> void checkRequestParameters(T fieldValue, String fieldName)
             throws ValidationException {
         if (fieldValue == null) {
             throw new ValidationException("Missing the field=" + fieldName);
@@ -89,6 +90,16 @@ public class ValidationServiceImpl implements ValidationService {
         } else if (fieldName.equals("email")) {
             checkValidEmail(fieldValue.toString());
         }
+    }
+
+    @Override
+    public <T extends EmployeeRequest> void checkValidEmployeeRequest(T employeeRequest)
+            throws ValidationException {
+        checkRequestParameters(employeeRequest.getName(), "name");
+        checkRequestParameters(employeeRequest.getCompanyId(), "company_id");
+        checkRequestParameters(employeeRequest.getBio(), "bio");
+        checkRequestParameters(employeeRequest.getEmail(), "email");
+        checkRequestParameters(employeeRequest.getRole(), "role");
     }
 
     private void checkValidEmail(String email) throws ValidationException {

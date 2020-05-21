@@ -47,7 +47,7 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
                 throw new FirebaseException("No employee with employee id=" + employeeId);
             }
 
-            employee.setEmployeeId(employeeId);
+            employee.employeeId = employeeId;
             return employee;
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
@@ -68,7 +68,7 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
                     Employee employee = documentSnapshot.toObject(Employee.class);
                     assert employee != null;
 
-                    employee.setEmployeeId(documentSnapshot.getId());
+                    employee.employeeId = documentSnapshot.getId();
                     return employee;
                 }
             }
@@ -85,13 +85,47 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
         Firestore firestore = FirestoreClient.getFirestore();
         Employee employee = getEmployeeWithId(employeeId);
 
-        if (employee.getStudents() == null) {
-            employee.setStudents(Lists.newArrayList());
+        if (employee.students == null) {
+            employee.students = Lists.newArrayList();
         }
 
-        employee.getStudents().add(studentId);
+        employee.students.add(studentId);
 
         firestore.collection(EMPLOYEE_COLLECTION).document(employeeId).update("students",
-                employee.getStudents());
+                employee.students);
+    }
+
+    @Override
+    public Employee updateEmployee(String employeeId, Employee updatedEmployee)
+            throws FirebaseException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        try {
+            firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
+                    .set(updatedEmployee).get();
+            return getEmployeeWithId(employeeId);
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new FirebaseException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public Employee addEmployee(Employee newEmployee) throws FirebaseException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        DocumentReference documentReference = firestore.collection(EMPLOYEE_COLLECTION).document();
+        String employeeId = documentReference.getId();
+        try {
+            documentReference.set(newEmployee).get();
+            return getEmployeeWithId(employeeId);
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new FirebaseException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public Employee deleteEmployee(String employeeId) throws FirebaseException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        Employee deletedEmployee = getEmployeeWithId(employeeId);
+        firestore.collection(EMPLOYEE_COLLECTION).document(employeeId).delete();
+        return deletedEmployee;
     }
 }

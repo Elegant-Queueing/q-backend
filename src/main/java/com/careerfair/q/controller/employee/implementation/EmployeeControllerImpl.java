@@ -29,17 +29,17 @@ public class EmployeeControllerImpl implements EmployeeController {
         return employeeService.getEmployeeWithEmail(email);
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/update/employee-id/{employee-id}")
     @Override
-    public UpdateEmployeeResponse updateEmployee(@PathVariable("id") String id,
-                                                 @RequestBody UpdateEmployeeRequest updateEmployeeRequest) {
-        return employeeService.updateEmployee(id, updateEmployeeRequest);
+    public UpdateEmployeeResponse updateEmployee(@PathVariable("employee-id") String employeeId,
+            @RequestBody UpdateEmployeeRequest updateEmployeeRequest) {
+        return employeeService.updateEmployee(employeeId, updateEmployeeRequest);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/employee-id/{employee-id}")
     @Override
-    public DeleteEmployeeResponse deleteEmployee(@PathVariable("id") String id) {
-        return employeeService.deleteEmployee(id);
+    public DeleteEmployeeResponse deleteEmployee(@PathVariable("employee-id") String employeeId) {
+        return employeeService.deleteEmployee(employeeId);
     }
 
     @PostMapping("/add")

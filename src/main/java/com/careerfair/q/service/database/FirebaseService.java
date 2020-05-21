@@ -5,7 +5,6 @@ import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.model.db.Student;
 import com.careerfair.q.util.exception.FirebaseException;
-
 import java.util.List;
 
 public interface FirebaseService {
@@ -132,6 +131,34 @@ public interface FirebaseService {
      * @return Student
      */
     Student deleteStudent(String studentId) throws FirebaseException;
+
+    /**
+     * Updates the employee with the given details
+     *
+     * @param employeeId id of the employee to be updated
+     * @param employee employee object with the updated fields
+     * @return Employee object with the updated fields
+     * @throws FirebaseException if there are problems with writing the data to the DB
+     */
+    Employee updateEmployee(String employeeId, Employee employee) throws FirebaseException;
+
+    /**
+     * Adds an employee with the given details
+     *
+     * @param newEmployee employee that is to be added
+     * @return Employee object that was added to the DB
+     * @throws FirebaseException if there are problems with writing the data to the DB
+     */
+    Employee addEmployee(Employee newEmployee) throws FirebaseException;
+
+    /**
+     * Deletes an employee with the given employeeId
+     *
+     * @param employeeId id of the employee that is to be deleted
+     * @return Employee object that was deleted
+     * @throws FirebaseException if there are problems with writing the data to the DB
+     */
+    Employee deleteEmployee(String employeeId) throws FirebaseException;
 
     /**
      * Test firebase connection

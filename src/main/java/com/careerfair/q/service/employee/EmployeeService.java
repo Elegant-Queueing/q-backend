@@ -26,24 +26,28 @@ public interface EmployeeService {
     GetEmployeeResponse getEmployeeWithEmail(String email);
 
     /**
+     * Updates the employee, with given employeeId
      *
-     * @param id
-     * @param updateEmployeeRequest
-     * @return
+     * @param employeeId id of the employee whose data is to be updated
+     * @param updateEmployeeRequest update details for the given employeeId
+     * @return UpdateEmployeeResponse
      */
-    UpdateEmployeeResponse updateEmployee(String id, UpdateEmployeeRequest updateEmployeeRequest);
+    UpdateEmployeeResponse updateEmployee(String employeeId,
+                                          UpdateEmployeeRequest updateEmployeeRequest);
 
     /**
+     * Deletes the employee associated with the given employeeId
      *
-     * @param id
-     * @return
+     * @param employeeId id of the employee whose data is to be deleted
+     * @return DeleteEmployeeResponse
      */
-    DeleteEmployeeResponse deleteEmployee(String id);
+    DeleteEmployeeResponse deleteEmployee(String employeeId);
 
     /**
+     * Adds a new employee with the given details
      *
-     * @param addEmployeeRequest
-     * @return
+     * @param addEmployeeRequest details to be added for the new employee
+     * @return AddEmployeeResponse
      */
     AddEmployeeResponse addEmployee(AddEmployeeRequest addEmployeeRequest);
 }

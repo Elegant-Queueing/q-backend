@@ -10,9 +10,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Component;
-
 import java.util.concurrent.ExecutionException;
-
 import static com.careerfair.q.util.constant.Firebase.STUDENT_COLLECTION;
 
 @Component
@@ -99,10 +97,10 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         Firestore firestore = FirestoreClient.getFirestore();
         try {
             firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent).get();
+            return getStudentWithId(studentId);
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
         }
-        return getStudentWithId(studentId);
     }
 
     @Override
@@ -112,10 +110,10 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         String studentId = documentReference.getId();
         try {
             documentReference.set(newStudent).get();
+            return getStudentWithId(studentId);
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
         }
-        return getStudentWithId(studentId);
     }
 
     @Override
