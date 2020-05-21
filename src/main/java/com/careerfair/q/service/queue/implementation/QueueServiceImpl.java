@@ -54,7 +54,6 @@ public class QueueServiceImpl implements QueueService {
         }
 
         setOverallPositionAndWaitTime(status);
-
         return new JoinQueueResponse(status);
     }
 
@@ -71,7 +70,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public void leaveQueue(String companyId, String studentId, Role role) {
-        StudentQueueStatus studentQueueStatus= getStudentQueueStatus(studentId);
+        StudentQueueStatus studentQueueStatus = getStudentQueueStatus(studentId);
         QueueType queueType = studentQueueStatus.getQueueType();
         String employeeId = studentQueueStatus.getEmployeeId();
 
