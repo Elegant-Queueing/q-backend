@@ -270,7 +270,7 @@ public class QueueServiceImpl implements QueueService {
      * @param employeeQueueData data of the queue for the employee
      * @return RemoveStudentResponse
      */
-    private RemoveStudentResponse removeStudentFromQueue(String employeeId,
+    RemoveStudentResponse removeStudentFromQueue(String employeeId,
                                                          EmployeeQueueData employeeQueueData) {
         Employee employee = getEmployeeWithId(employeeId);
         String companyId = employee.getCompanyId();
@@ -290,7 +290,7 @@ public class QueueServiceImpl implements QueueService {
      * @return StudentQueueStatus
      * @throws InvalidRequestException if student is not present in any queue
      */
-    private StudentQueueStatus getStudentQueueStatus(String studentId) {
+    StudentQueueStatus getStudentQueueStatus(String studentId) {
         StudentQueueStatus studentQueueStatus = (StudentQueueStatus) studentRedisTemplate
                 .opsForHash().get(STUDENT_CACHE_NAME, studentId);
 
@@ -310,7 +310,7 @@ public class QueueServiceImpl implements QueueService {
      * @return id of the employee with the most queue space available or null if no employee has
      *         queue space available
      */
-    private String getEmployeeWithMostQueueSpace(String companyId, Role role) {
+    String getEmployeeWithMostQueueSpace(String companyId, Role role) {
         VirtualQueueData virtualQueueData = virtualQueueWorkflow.getVirtualQueueData(companyId,
                 role);
         Set<String> employeeIds = virtualQueueData.getEmployeeIds();
@@ -335,7 +335,7 @@ public class QueueServiceImpl implements QueueService {
      * @param employeeId id of the employee
      * @return available space in employee's window and physical queue combined
      */
-    private long getEmployeeQueueSpace(String employeeId) {
+    long getEmployeeQueueSpace(String employeeId) {
         return MAX_EMPLOYEE_QUEUE_SIZE - physicalQueueWorkflow.size(employeeId)
                 - windowQueueWorkflow.size(employeeId);
     }
@@ -350,7 +350,7 @@ public class QueueServiceImpl implements QueueService {
      * @param student student to be shifted to the window queue
      * @return QueueStatus current status of the student in a queue
      */
-    private QueueStatus shiftStudentToWindow(String companyId, String employeeId, Role role,
+    QueueStatus shiftStudentToWindow(String companyId, String employeeId, Role role,
                                              Student student) {
         StudentQueueStatus studentQueueStatus = virtualQueueWorkflow.leaveQueue(companyId,
                 student.getId(), role);
@@ -365,7 +365,7 @@ public class QueueServiceImpl implements QueueService {
      * @throws InvalidRequestException throws the exception if the employee is not present at the
      *      career fair
      */
-    private Employee getEmployeeWithId(String employeeId) throws InvalidRequestException {
+    Employee getEmployeeWithId(String employeeId) throws InvalidRequestException {
         Employee employee = (Employee) employeeRedisTemplate.opsForHash().get(EMPLOYEE_CACHE_NAME,
                 employeeId);
         if (employee == null) {
@@ -380,7 +380,7 @@ public class QueueServiceImpl implements QueueService {
      *
      * @param queueStatus current status of the student in the queue
      */
-    private void setOverallPositionAndWaitTime(QueueStatus queueStatus) {
+    void setOverallPositionAndWaitTime(QueueStatus queueStatus) {
         QueueType queueType = queueStatus.getQueueType();
 
         switch (queueType) {
@@ -417,7 +417,7 @@ public class QueueServiceImpl implements QueueService {
      * @param position current *overall* position of the student
      * @return wait time in seconds
      */
-    private int getVirtualQueueWaitTime(String companyId, Role role, int position) {
+    int getVirtualQueueWaitTime(String companyId, Role role, int position) {
         double sum = 0;
         Set<String> employeeIds = virtualQueueWorkflow.getVirtualQueueData(companyId, role)
                 .getEmployeeIds();
@@ -438,7 +438,7 @@ public class QueueServiceImpl implements QueueService {
      * @param position position of the student
      * @return int representing the wait time in seconds
      */
-    private int getEmployeeQueueWaitTime(Employee employee, int position) {
+    int getEmployeeQueueWaitTime(Employee employee, int position) {
         return (int) (getIndexFromPosition(position) * calcEmployeeAverageTime(employee));
     }
 
@@ -448,7 +448,7 @@ public class QueueServiceImpl implements QueueService {
      * @param employee The employee whose average time is to be calculated
      * @return double Average time spent by the employee talking to a student
      */
-    private double calcEmployeeAverageTime(Employee employee) {
+    double calcEmployeeAverageTime(Employee employee) {
         return employee.getTotalTimeSpent() * 1. / Math.max(employee.getNumRegisteredStudents(), 1);
     }
 
@@ -458,7 +458,7 @@ public class QueueServiceImpl implements QueueService {
      * @param position one based position
      * @return int zero based position
      */
-    private int getIndexFromPosition(int position) {
+    int getIndexFromPosition(int position) {
         return Math.max(position - 1, 0);
     }
 }

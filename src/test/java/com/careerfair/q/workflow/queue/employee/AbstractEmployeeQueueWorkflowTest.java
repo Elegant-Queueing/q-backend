@@ -61,15 +61,12 @@ public class AbstractEmployeeQueueWorkflowTest {
     @Mock
     private ListOperations<String, Student> queueListOperations;
 
-    @Mock
-    private Employee employee;
-    @Mock
-    private Student student;
-    @Mock
-    private StudentQueueStatus studentQueueStatus;
-
     @InjectMocks
     private final AbstractEmployeeQueueWorkflow employeeQueueWorkflow = new EmployeeQueueWorkflow();
+
+    private Employee employee;
+    private Student student;
+    private StudentQueueStatus studentQueueStatus;
 
     @BeforeEach
     public void setupMock() {
