@@ -119,6 +119,11 @@ public class QueueServiceTest {
     @Test
     public void testJoinVirtualQueueHeadWithNoEmployeeSpace() {
         int position = 1;
+        long windowSize = 4L;
+        long physicalSize = 1L;
+
+        assertEquals(windowSize + physicalSize, MAX_EMPLOYEE_QUEUE_SIZE);
+
         virtualQueueStatus.setPosition(position);
 
         employee.setTotalTimeSpent(5);
@@ -133,8 +138,8 @@ public class QueueServiceTest {
                 any());
         doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
                 any());
-        doReturn(1L).when(physicalQueueWorkflow).size(anyString());
-        doReturn(4L).when(windowQueueWorkflow).size(anyString());
+        doReturn(physicalSize).when(physicalQueueWorkflow).size(anyString());
+        doReturn(windowSize).when(windowQueueWorkflow).size(anyString());
         doReturn(employee).when(employeeHashOperations).get(anyString(), any());
 
         JoinQueueResponse response = queueService.joinVirtualQueue("c1", Role.SWE,
@@ -159,7 +164,7 @@ public class QueueServiceTest {
     @Test
     public void testJoinVirtualQueueHeadWithEmployeeSpace() {
         int windowPosition = 1;
-        Long physicalSize = 1L;
+        long physicalSize = 1L;
 
         virtualQueueStatus.setPosition(1);
         windowQueueStatus.setPosition(windowPosition);
@@ -177,7 +182,6 @@ public class QueueServiceTest {
         doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
                 any());
         doReturn(physicalSize).when(physicalQueueWorkflow).size(anyString());
-        doReturn(0L).when(windowQueueWorkflow).size(anyString());
         doReturn(studentQueueStatus).when(virtualQueueWorkflow).leaveQueue(anyString(), anyString(),
                 any());
         doReturn(windowQueueStatus).when(windowQueueWorkflow).joinQueue(anyString(), any(), any());
