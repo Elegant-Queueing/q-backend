@@ -44,10 +44,15 @@ public class QueueServiceImpl implements QueueService {
         validationService.checkValidStudentId(student.getId());
 
         QueueStatus status = virtualQueueWorkflow.joinQueue(companyId, role, student);
-        String employeeId = getEmployeeWithMostQueueSpace(companyId, role);
-        if (employeeId != null) {
-            status = shiftStudentToWindow(companyId, employeeId, role, student);
+
+        if (status.getPosition() == 1) {
+            String employeeId = getEmployeeWithMostQueueSpace(companyId, role);
+
+            if (employeeId != null) {
+                status = shiftStudentToWindow(companyId, employeeId, role, student);
+            }
         }
+
         setOverallPositionAndWaitTime(status);
 
         return new JoinQueueResponse(status);
