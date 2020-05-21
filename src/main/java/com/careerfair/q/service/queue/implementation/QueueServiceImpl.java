@@ -105,7 +105,7 @@ public class QueueServiceImpl implements QueueService {
 
     @Override
     public GetQueueStatusResponse getQueueStatus(String studentId) {
-        StudentQueueStatus studentQueueStatus= getStudentQueueStatus(studentId);
+        StudentQueueStatus studentQueueStatus = getStudentQueueStatus(studentId);
         QueueType queueType = studentQueueStatus.getQueueType();
         QueueStatus queueStatus;
 

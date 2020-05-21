@@ -5,6 +5,7 @@ import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
 import com.careerfair.q.service.database.FirebaseService;
+import com.careerfair.q.service.queue.response.GetQueueStatusResponse;
 import com.careerfair.q.service.queue.response.JoinQueueResponse;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.service.validation.ValidationService;
@@ -331,5 +332,104 @@ public class QueueServiceTest {
         verify(windowQueueWorkflow, never()).leaveQueue(anyString(), anyString());
         verify(windowQueueWorkflow).joinQueue(anyString(), any(), any());
         verify(physicalQueueWorkflow).leaveQueue(anyString(), anyString());
+    }
+
+    @Test
+    public void testGetQueueStatusVirtual() {
+        int position = 2;
+        int numStudents = 1;
+        long timeSpent = 5;
+        int expectedWaitTime = (int) ((MAX_EMPLOYEE_QUEUE_SIZE + position - 1.) * timeSpent / numStudents);
+
+        Set<String> employees = Sets.newHashSet(Collections.singleton("e1"));
+        VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
+
+        employee.setTotalTimeSpent(timeSpent);
+        employee.setNumRegisteredStudents(numStudents);
+        studentQueueStatus.setQueueType(QueueType.VIRTUAL);
+        virtualQueueStatus.setPosition(position);
+
+        doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
+        doReturn(virtualQueueStatus).when(virtualQueueWorkflow).getQueueStatus(any());
+        doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
+                any());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+
+        GetQueueStatusResponse response = queueService.getQueueStatus("s1");
+
+        assertNotNull(response);
+        assertNotNull(response.getQueueStatus());
+
+        assertEquals(response.getQueueStatus().getCompanyId(), "c1");
+        assertEquals(response.getQueueStatus().getRole(), Role.SWE);
+        assertEquals(response.getQueueStatus().getQueueId(), "vq1");
+        assertEquals(response.getQueueStatus().getPosition(), position + MAX_EMPLOYEE_QUEUE_SIZE);
+        assertEquals(response.getQueueStatus().getQueueType(), QueueType.VIRTUAL);
+        assertEquals(response.getQueueStatus().getWaitTime(), expectedWaitTime);
+        assertNull(response.getQueueStatus().getEmployee());
+    }
+
+    @Test
+    public void testGetQueueStatusWindow() {
+        int position = 2;
+        int numStudents = 1;
+        int timeSpent = 5;
+
+        long physicalSize = 4L;
+        int expectedWaitTime = (int) ((physicalSize + position - 1.) * timeSpent / numStudents);
+
+        employee.setTotalTimeSpent(timeSpent);
+        employee.setNumRegisteredStudents(numStudents);
+        studentQueueStatus.setQueueType(QueueType.WINDOW);
+        windowQueueStatus.setPosition(position);
+
+        doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
+        doReturn(windowQueueStatus).when(windowQueueWorkflow).getQueueStatus(any());
+        doReturn(physicalSize).when(physicalQueueWorkflow).size(anyString());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+
+        GetQueueStatusResponse response = queueService.getQueueStatus("s1");
+
+        assertNotNull(response);
+        assertNotNull(response.getQueueStatus());
+
+        assertEquals(response.getQueueStatus().getCompanyId(), "c1");
+        assertEquals(response.getQueueStatus().getRole(), Role.SWE);
+        assertEquals(response.getQueueStatus().getQueueId(), "wq1");
+        assertEquals(response.getQueueStatus().getPosition(), position + physicalSize);
+        assertEquals(response.getQueueStatus().getQueueType(), QueueType.WINDOW);
+        assertEquals(response.getQueueStatus().getWaitTime(), expectedWaitTime);
+        assertEquals(response.getQueueStatus().getEmployee(), employee);
+    }
+
+    @Test
+    public void testGetQueueStatusPhysical() {
+        int position = 2;
+        int numStudents = 1;
+        int timeSpent = 5;
+
+        int expectedWaitTime = (int) ((position - 1.) * timeSpent / numStudents);
+
+        employee.setTotalTimeSpent(timeSpent);
+        employee.setNumRegisteredStudents(numStudents);
+        studentQueueStatus.setQueueType(QueueType.PHYSICAL);
+        physicalQueueStatus.setPosition(position);
+
+        doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
+        doReturn(physicalQueueStatus).when(physicalQueueWorkflow).getQueueStatus(any());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+
+        GetQueueStatusResponse response = queueService.getQueueStatus("s1");
+
+        assertNotNull(response);
+        assertNotNull(response.getQueueStatus());
+
+        assertEquals(response.getQueueStatus().getCompanyId(), "c1");
+        assertEquals(response.getQueueStatus().getRole(), Role.SWE);
+        assertEquals(response.getQueueStatus().getQueueId(), "pq1");
+        assertEquals(response.getQueueStatus().getPosition(), position);
+        assertEquals(response.getQueueStatus().getQueueType(), QueueType.PHYSICAL);
+        assertEquals(response.getQueueStatus().getWaitTime(), expectedWaitTime);
+        assertEquals(response.getQueueStatus().getEmployee(), employee);
     }
 }
