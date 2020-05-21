@@ -1,4 +1,4 @@
-package com.careerfair.q.workflow.queue.employee.physical;
+package com.careerfair.q.workflow.queue.employee.physical.implementation;
 
 import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.model.redis.Student;
@@ -7,7 +7,7 @@ import com.careerfair.q.service.queue.response.EmployeeQueueData;
 import com.careerfair.q.service.queue.response.QueueStatus;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
-import com.careerfair.q.workflow.queue.employee.physical.implementation.PhysicalQueueWorkflowImpl;
+import com.careerfair.q.util.exception.InvalidRequestException;
 import com.google.cloud.Timestamp;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,9 +22,8 @@ import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-import static com.careerfair.q.util.constant.Queue.INITIAL_TIME_SPENT;
+import static com.careerfair.q.util.constant.Queue.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -54,7 +53,7 @@ public class PhysicalQueueWorkflowTest {
     private StudentQueueStatus studentQueueStatus;
 
     @InjectMocks
-    private final PhysicalQueueWorkflow physicalQueueWorkflow = new PhysicalQueueWorkflowImpl();
+    private final PhysicalQueueWorkflowImpl physicalQueueWorkflow = new PhysicalQueueWorkflowImpl();
 
     @BeforeEach
     public void setupMock() {
@@ -101,6 +100,37 @@ public class PhysicalQueueWorkflowTest {
     }
 
     @Test
+    public void testJoinQueueBadEmployeeId() {
+        studentQueueStatus.setEmployeeId("e1");
+
+        try {
+            physicalQueueWorkflow.joinQueue("e2", student, studentQueueStatus);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(),
+                    "Mismatch between employee id=e2 and assigned employee id=e1");
+        }
+    }
+
+    @Test
+    public void testJoinQueueScanNotInTime() {
+        employee.setPhysicalQueueId("pq1");
+        studentQueueStatus.setEmployeeId("e1");
+
+        Timestamp joinedWindowQueueAt = Timestamp.ofTimeSecondsAndNanos(
+                Timestamp.now().getSeconds() - 2 * (WINDOW - BUFFER), 0);
+        studentQueueStatus.setJoinedWindowQueueAt(joinedWindowQueueAt);
+
+        try {
+            physicalQueueWorkflow.joinQueue("e1", student, studentQueueStatus);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "Student with student id=" + student.getId() +
+                    " did not scan the code of employee with employee id=e1 in time");
+        }
+    }
+
+    @Test
     public void testLeaveQueue() {
         employee.setPhysicalQueueId("pq1");
 
@@ -129,6 +159,22 @@ public class PhysicalQueueWorkflowTest {
 
         assertNotNull(employee.getPhysicalQueueId());
         assertEquals(employee.getTotalTimeSpent(), INITIAL_TIME_SPENT);
+        assertEquals(employee.getNumRegisteredStudents(), 0);
+    }
+
+    @Test
+    public void testAddQueueQueueAlreadyExist() {
+        employee.setPhysicalQueueId("pq1");
+
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+
+        try {
+            physicalQueueWorkflow.addQueue(employee.getId());
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(),
+                    "Employee with employee id=e1 is associated with physical queue with id=pq1");
+        }
     }
 
     @Test
@@ -171,7 +217,7 @@ public class PhysicalQueueWorkflowTest {
     }
 
     @Test
-    public void testRegisterStudent() throws InterruptedException, ExecutionException {
+    public void testRegisterStudent() throws InterruptedException {
         employee.setPhysicalQueueId("pq1");
         studentQueueStatus.setJoinedPhysicalQueueAt(Timestamp.now());
         studentQueueStatus.setPositionWhenJoinedPhysicalQueue(1);
@@ -196,7 +242,7 @@ public class PhysicalQueueWorkflowTest {
         assertNotNull(employeeQueueData);
         assertEquals(employeeQueueData.getStudents(), students);
         assertEquals(employeeQueueData.getNumRegisteredStudents(), 1);
-        assertNotEquals(employeeQueueData.getAverageTimePerStudent(), 0);
+        assertNotEquals(employeeQueueData.getAverageTimePerStudent(), INITIAL_TIME_SPENT);
     }
 
     @Test
@@ -272,7 +318,50 @@ public class PhysicalQueueWorkflowTest {
         assertEquals(queueStatus.getPosition(), 1);
     }
 
-    private Answer addStudentAnswer(List<Student> students) {
+    @Test
+    public void testGetQueueStatusBadQueueType() {
+        studentQueueStatus.setQueueType(QueueType.WINDOW);
+
+        try {
+            physicalQueueWorkflow.getQueueStatus(studentQueueStatus);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "QueueType in studentQueueStatus != PHYSICAL");
+        }
+    }
+
+    @Test
+    public void testUpdateQueueStatus() {
+        employee.setPhysicalQueueId("pq1");
+
+        physicalQueueWorkflow.updateStudentQueueStatus(studentQueueStatus, employee);
+
+        assertEquals(studentQueueStatus.getQueueType(), QueueType.PHYSICAL);
+        assertEquals(studentQueueStatus.getQueueId(), "pq1");
+        assertNotNull(studentQueueStatus.getJoinedPhysicalQueueAt());
+    }
+
+    @Test
+    public void testCheckQueueAssociated() {
+        employee.setPhysicalQueueId("pq1");
+
+        String queueId = physicalQueueWorkflow.checkQueueAssociated(employee);
+
+        assertEquals(queueId, "pq1");
+    }
+
+    @Test
+    public void testCheckQueueAssociatedBadQueueId() {
+        try {
+            physicalQueueWorkflow.checkQueueAssociated(employee);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(),
+                    "Employee with employee id=e1 is not associated with any physical queue");
+        }
+    }
+
+    private Answer<List<Student>> addStudentAnswer(List<Student> students) {
         return invocationOnMock -> {
             List<Student> temp = Lists.newArrayList(students);
             students.add(student);
@@ -280,7 +369,7 @@ public class PhysicalQueueWorkflowTest {
         };
     }
 
-    private Answer removeStudentAnswer(List<Student> students) {
+    private Answer<List<Student>> removeStudentAnswer(List<Student> students) {
         return invocationOnMock -> {
             List<Student> temp = Lists.newArrayList(students);
             students.remove(student);
