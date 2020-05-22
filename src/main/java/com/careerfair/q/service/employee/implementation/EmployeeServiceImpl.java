@@ -45,16 +45,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         return new UpdateEmployeeResponse(updateEmployee);
     }
 
-    private <T extends EmployeeRequest> Employee createEmployeeFromRequest(T employeeRequest) {
-        Employee employee = new Employee();
-        employee.name = employeeRequest.getName();
-        employee.companyId = employeeRequest.getCompanyId();
-        employee.bio = employeeRequest.getBio();
-        employee.email = employeeRequest.getEmail();
-        employee.role = employeeRequest.getRole();
-        return employee;
-    }
-
     @Override
     public DeleteEmployeeResponse deleteEmployee(String employeeId) {
         return new DeleteEmployeeResponse(firebaseService.deleteEmployee(employeeId));
@@ -66,6 +56,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employeeFromRequest = createEmployeeFromRequest(addEmployeeRequest);
         Employee newEmployee = firebaseService.addEmployee(employeeFromRequest);
         return new AddEmployeeResponse(newEmployee);
+    }
 
+    // Helper method to convert an EmployeeRequest object to an Employee
+    private <T extends EmployeeRequest> Employee createEmployeeFromRequest(T employeeRequest) {
+        Employee employee = new Employee();
+        employee.name = employeeRequest.getName();
+        employee.companyId = employeeRequest.getCompanyId();
+        employee.bio = employeeRequest.getBio();
+        employee.email = employeeRequest.getEmail();
+        employee.role = employeeRequest.getRole();
+        return employee;
     }
 }

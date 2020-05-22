@@ -88,11 +88,11 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
         if (employee.students == null) {
             employee.students = Lists.newArrayList();
         }
-
-        employee.students.add(studentId);
-
-        firestore.collection(EMPLOYEE_COLLECTION).document(employeeId).update("students",
-                employee.students);
+        if(!employee.students.contains(studentId)) {
+            employee.students.add(studentId);
+            firestore.collection(EMPLOYEE_COLLECTION).document(employeeId).update("students",
+                    employee.students);
+        }
     }
 
     @Override

@@ -46,21 +46,6 @@ public class StudentServiceImpl implements StudentService {
         return new UpdateStudentResponse(updateStudent);
     }
 
-    private <T extends StudentRequest> Student createStudentFromRequest(T studentRequest) {
-        Student student = new Student();
-        student.firstName = studentRequest.getFirstName();
-        student.lastName = studentRequest.getLastName();
-        student.universityId = studentRequest.getUniversityId();
-        student.major = studentRequest.getMajor();
-        student.role = studentRequest.getRole();
-        student.bio = studentRequest.getBio();
-        student.email = studentRequest.getEmail();
-        student.gpa = studentRequest.getGpa();
-        student.graduationDate = studentRequest.getGraduationDate();
-        student.international = studentRequest.getInternational();
-        return student;
-    }
-
     @Override
     public DeleteStudentResponse deleteStudent(String studentId) {
         return new DeleteStudentResponse(firebaseService.deleteStudent(studentId));
@@ -84,5 +69,21 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public void testDatabaseConnection() {
         firebaseService.test();
+    }
+
+    // Helper method to convert studentRequest object to a Student object
+    private <T extends StudentRequest> Student createStudentFromRequest(T studentRequest) {
+        Student student = new Student();
+        student.firstName = studentRequest.getFirstName();
+        student.lastName = studentRequest.getLastName();
+        student.universityId = studentRequest.getUniversityId();
+        student.major = studentRequest.getMajor();
+        student.role = studentRequest.getRole();
+        student.bio = studentRequest.getBio();
+        student.email = studentRequest.getEmail();
+        student.gpa = studentRequest.getGpa();
+        student.graduationDate = studentRequest.getGraduationDate();
+        student.international = studentRequest.getInternational();
+        return student;
     }
 }

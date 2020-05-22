@@ -81,6 +81,17 @@ public class ValidationServiceImpl implements ValidationService {
                 "graduation_date");
     }
 
+    @Override
+    public <T extends EmployeeRequest> void checkValidEmployeeRequest(T employeeRequest)
+            throws ValidationException {
+        checkRequestParameters(employeeRequest.getName(), "name");
+        checkRequestParameters(employeeRequest.getCompanyId(), "company_id");
+        checkRequestParameters(employeeRequest.getBio(), "bio");
+        checkRequestParameters(employeeRequest.getEmail(), "email");
+        checkRequestParameters(employeeRequest.getRole(), "role");
+    }
+
+    // Checks if the request parameters are valid
     private <T> void checkRequestParameters(T fieldValue, String fieldName)
             throws ValidationException {
         if (fieldValue == null) {
@@ -92,16 +103,7 @@ public class ValidationServiceImpl implements ValidationService {
         }
     }
 
-    @Override
-    public <T extends EmployeeRequest> void checkValidEmployeeRequest(T employeeRequest)
-            throws ValidationException {
-        checkRequestParameters(employeeRequest.getName(), "name");
-        checkRequestParameters(employeeRequest.getCompanyId(), "company_id");
-        checkRequestParameters(employeeRequest.getBio(), "bio");
-        checkRequestParameters(employeeRequest.getEmail(), "email");
-        checkRequestParameters(employeeRequest.getRole(), "role");
-    }
-
+    // Checks if the given email is in valid format
     private void checkValidEmail(String email) throws ValidationException {
         String emailRegex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
         if (!email.matches(emailRegex)) {
