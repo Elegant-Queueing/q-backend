@@ -139,10 +139,10 @@ public class QueueServiceImpl implements QueueService {
 
         Employee employee = (Employee) employeeRedisTemplate.opsForHash()
                 .get(EMPLOYEE_CACHE_NAME, employeeId);
+
         if (employee == null) {
             employee = new Employee(employeeId, companyId, role);
-            employeeRedisTemplate.opsForHash()
-                    .put(EMPLOYEE_CACHE_NAME, employeeId, employee);
+            employeeRedisTemplate.opsForHash().put(EMPLOYEE_CACHE_NAME, employeeId, employee);
         }
 
         virtualQueueWorkflow.addQueue(companyId, employeeId, role);
@@ -275,7 +275,7 @@ public class QueueServiceImpl implements QueueService {
      * @return RemoveStudentResponse
      */
     RemoveStudentResponse removeStudentFromQueue(String employeeId,
-                                                         EmployeeQueueData employeeQueueData) {
+                                                 EmployeeQueueData employeeQueueData) {
         Employee employee = getEmployeeWithId(employeeId);
         String companyId = employee.getCompanyId();
         Role role = employee.getRole();

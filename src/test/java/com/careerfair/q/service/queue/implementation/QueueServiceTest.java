@@ -5,15 +5,14 @@ import com.careerfair.q.model.redis.Student;
 import com.careerfair.q.model.redis.StudentQueueStatus;
 import com.careerfair.q.model.redis.VirtualQueueData;
 import com.careerfair.q.service.database.FirebaseService;
-import com.careerfair.q.service.queue.response.GetQueueStatusResponse;
-import com.careerfair.q.service.queue.response.JoinQueueResponse;
-import com.careerfair.q.service.queue.response.QueueStatus;
+import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.service.validation.ValidationService;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.WindowQueueWorkflow;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
+import org.assertj.core.util.Lists;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +26,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import java.util.Collections;
 import java.util.Set;
 
+import static com.careerfair.q.util.constant.Queue.INITIAL_TIME_SPENT;
 import static com.careerfair.q.util.constant.Queue.MAX_EMPLOYEE_QUEUE_SIZE;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -431,5 +431,124 @@ public class QueueServiceTest {
         assertEquals(response.getQueueStatus().getQueueType(), QueueType.PHYSICAL);
         assertEquals(response.getQueueStatus().getWaitTime(), expectedWaitTime);
         assertEquals(response.getQueueStatus().getEmployee(), employee);
+    }
+
+    @Test
+    public void testPauseQueue() {
+        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(), 0,
+                INITIAL_TIME_SPENT);
+
+        doNothing().when(virtualQueueWorkflow).pauseQueueForEmployee(anyString());
+        doReturn(employeeQueueData).when(physicalQueueWorkflow).getEmployeeQueueData(anyString());
+
+        PauseQueueResponse response = queueService.pauseQueue("e1");
+
+        assertNotNull(response);
+        assertNotNull(response.getEmployeeQueueData());
+
+        assertEquals(response.getEmployeeQueueData().getStudents(), Lists.newArrayList());
+        assertEquals(response.getEmployeeQueueData().getAverageTimePerStudent(), INITIAL_TIME_SPENT,
+                0.0001);
+        assertEquals(response.getEmployeeQueueData().getNumRegisteredStudents(), 0);
+    }
+
+    @Test
+    public void testRegisterStudentWithNoVirtualStudent() {
+        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(), 1, 10);
+
+        doReturn(employeeQueueData).when(physicalQueueWorkflow).registerStudent(anyString(),
+                anyString());
+        doNothing().when(firebaseService).registerStudent(anyString(), anyString());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn(null).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+
+        RemoveStudentResponse response = queueService.registerStudent(anyString(), anyString());
+
+        verify(firebaseService).registerStudent(anyString(), anyString());
+        verify(virtualQueueWorkflow, never()).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow, never()).joinQueue(anyString(), any(), any());
+
+        assertNotNull(response);
+        assertNotNull(response.getEmployeeQueueData());
+
+        assertEquals(response.getEmployeeQueueData().getNumRegisteredStudents(), 1);
+        assertEquals(response.getEmployeeQueueData().getAverageTimePerStudent(), 10, 0.001);
+    }
+
+    @Test
+    public void testRegisterStudentWithVirtualStudent() {
+        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(), 1, 10);
+
+        doReturn(employeeQueueData).when(physicalQueueWorkflow).registerStudent(anyString(),
+                anyString());
+        doNothing().when(firebaseService).registerStudent(anyString(), anyString());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn(student).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+        doReturn(studentQueueStatus).when(virtualQueueWorkflow).leaveQueue(anyString(), anyString(),
+                any());
+        doReturn(windowQueueStatus).when(windowQueueWorkflow).joinQueue(anyString(), any(), any());
+
+        RemoveStudentResponse response = queueService.registerStudent(anyString(), anyString());
+
+        verify(firebaseService).registerStudent(anyString(), anyString());
+        verify(virtualQueueWorkflow).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow).joinQueue(anyString(), any(), any());
+
+        assertNotNull(response);
+        assertNotNull(response.getEmployeeQueueData());
+
+        assertEquals(response.getEmployeeQueueData().getNumRegisteredStudents(), 1);
+        assertEquals(response.getEmployeeQueueData().getAverageTimePerStudent(), 10, 0.001);
+    }
+
+    @Test
+    public void testSkipStudentWithNoVirtualStudent() {
+        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(), 0,
+                INITIAL_TIME_SPENT);
+
+        doReturn(employeeQueueData).when(physicalQueueWorkflow).skipStudent(anyString(),
+                anyString());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn(null).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+
+        RemoveStudentResponse response = queueService.skipStudent(anyString(), anyString());
+
+        verify(firebaseService, never()).registerStudent(anyString(), anyString());
+        verify(virtualQueueWorkflow, never()).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow, never()).joinQueue(anyString(), any(), any());
+
+        assertNotNull(response);
+        assertNotNull(response.getEmployeeQueueData());
+
+        assertEquals(response.getEmployeeQueueData().getNumRegisteredStudents(), 0);
+        assertEquals(response.getEmployeeQueueData().getAverageTimePerStudent(), INITIAL_TIME_SPENT,
+                0.001);
+    }
+
+    @Test
+    public void testSkipStudentWithVirtualStudent() {
+        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(), 0,
+                INITIAL_TIME_SPENT);
+
+        doReturn(employeeQueueData).when(physicalQueueWorkflow).skipStudent(anyString(),
+                anyString());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn(student).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+        doReturn(studentQueueStatus).when(virtualQueueWorkflow).leaveQueue(anyString(), anyString(),
+                any());
+        doReturn(windowQueueStatus).when(windowQueueWorkflow).joinQueue(anyString(), any(), any());
+
+        RemoveStudentResponse response = queueService.skipStudent(anyString(), anyString());
+
+        verify(firebaseService, never()).registerStudent(anyString(), anyString());
+        verify(virtualQueueWorkflow).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow).joinQueue(anyString(), any(), any());
+
+        assertNotNull(response);
+        assertNotNull(response.getEmployeeQueueData());
+
+        assertEquals(response.getEmployeeQueueData().getNumRegisteredStudents(), 0);
+        assertEquals(response.getEmployeeQueueData().getAverageTimePerStudent(), INITIAL_TIME_SPENT,
+                0.001);
     }
 }
