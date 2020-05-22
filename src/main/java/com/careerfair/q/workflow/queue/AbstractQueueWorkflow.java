@@ -16,8 +16,8 @@ import static com.careerfair.q.util.constant.Queue.STUDENT_CACHE_NAME;
 
 public abstract class AbstractQueueWorkflow {
 
-    @Autowired private RedisTemplate<String, String> employeeRedisTemplate;
-    @Autowired private RedisTemplate<String, String> studentRedisTemplate;
+    @Autowired protected RedisTemplate<String, String> employeeRedisTemplate;
+    @Autowired protected RedisTemplate<String, String> studentRedisTemplate;
 
     /**
      * Checks and returns whether the employee is present at the career fair
@@ -64,7 +64,7 @@ public abstract class AbstractQueueWorkflow {
      * @throws InvalidRequestException throws the exception if the student is not present in the
      *      employee's queue
      */
-    protected int getStudentPosition(String studentId, List<Student> queue) {
+    protected int getStudentIndex(String studentId, List<Student> queue) {
         List<String> studentIdsInWindowQueue = queue.stream()
                 .map(Student::getId)
                 .collect(Collectors.toList());

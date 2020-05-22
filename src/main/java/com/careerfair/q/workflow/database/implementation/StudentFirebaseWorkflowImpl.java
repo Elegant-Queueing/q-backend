@@ -86,9 +86,11 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
             student.employees = Lists.newArrayList();
         }
 
-        student.employees.add(employeeId);
-        firestore.collection(STUDENT_COLLECTION).document(studentId).update("employees",
-                student.employees);
+        if (!student.employees.contains(employeeId)) {
+            student.employees.add(employeeId);
+            firestore.collection(STUDENT_COLLECTION).document(studentId).update("employees",
+                    student.employees);
+        }
     }
 
     @Override

@@ -77,7 +77,7 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
         List<Student> studentsInQueue = queueRedisTemplate.opsForList()
                 .range(virtualQueueId, 0L, -1L);
         assert studentsInQueue != null;
-        int index = getStudentPosition(studentId, studentsInQueue);
+        int index = getStudentIndex(studentId, studentsInQueue);
         if (index == -1) {
             throw new InvalidRequestException("Student with student id=" + studentId +
                     " is not present in the associated virtual queue with id=" + virtualQueueId);
