@@ -3,9 +3,13 @@ package com.careerfair.q.service.employee.response;
 import com.careerfair.q.model.db.Employee;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 public class DeleteEmployeeResponse extends EmployeeResponse {
     @JsonProperty("employee_id")

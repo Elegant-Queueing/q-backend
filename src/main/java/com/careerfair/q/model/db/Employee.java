@@ -4,9 +4,13 @@ import com.careerfair.q.util.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.cloud.firestore.annotation.Exclude;
 import com.google.cloud.firestore.annotation.PropertyName;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@AllArgsConstructor
+@NoArgsConstructor
 public class Employee {
 
     @PropertyName("employee_id")

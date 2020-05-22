@@ -17,14 +17,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
 
-    private final FirebaseService firebaseService;
-    private final ValidationService validationService;
+    @Autowired private FirebaseService firebaseService;
+    @Autowired private ValidationService validationService;
 
-    public EmployeeServiceImpl(@Autowired FirebaseService firebaseService,
-                               @Autowired ValidationService validationService) {
-        this.firebaseService = firebaseService;
-        this.validationService = validationService;
-    }
+//    public EmployeeServiceImpl(@Autowired FirebaseService firebaseService,
+//                               @Autowired ValidationService validationService) {
+//        this.firebaseService = firebaseService;
+//        this.validationService = validationService;
+//    }
 
     @Override
     public GetEmployeeResponse getEmployeeWithId(String employeeId) {
@@ -59,7 +59,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     // Helper method to convert an EmployeeRequest object to an Employee
-    private <T extends EmployeeRequest> Employee createEmployeeFromRequest(T employeeRequest) {
+     <T extends EmployeeRequest> Employee createEmployeeFromRequest(T employeeRequest) {
         Employee employee = new Employee();
         employee.name = employeeRequest.getName();
         employee.companyId = employeeRequest.getCompanyId();

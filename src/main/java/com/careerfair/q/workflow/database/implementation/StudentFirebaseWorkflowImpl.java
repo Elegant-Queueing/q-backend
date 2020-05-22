@@ -10,7 +10,9 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Component;
+
 import java.util.concurrent.ExecutionException;
+
 import static com.careerfair.q.util.constant.Firebase.STUDENT_COLLECTION;
 
 @Component

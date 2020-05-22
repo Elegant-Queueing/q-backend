@@ -5,6 +5,7 @@ import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.model.db.Student;
 import com.careerfair.q.util.exception.FirebaseException;
+
 import java.util.List;
 
 public interface FirebaseService {
