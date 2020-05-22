@@ -9,6 +9,7 @@ import com.careerfair.q.service.queue.response.*;
 import com.careerfair.q.service.validation.ValidationService;
 import com.careerfair.q.util.enums.QueueType;
 import com.careerfair.q.util.enums.Role;
+import com.careerfair.q.util.exception.InvalidRequestException;
 import com.careerfair.q.workflow.queue.employee.physical.PhysicalQueueWorkflow;
 import com.careerfair.q.workflow.queue.employee.window.WindowQueueWorkflow;
 import com.careerfair.q.workflow.queue.virtual.VirtualQueueWorkflow;
@@ -24,6 +25,7 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static com.careerfair.q.util.constant.Queue.INITIAL_TIME_SPENT;
@@ -550,5 +552,95 @@ public class QueueServiceTest {
         assertEquals(response.getEmployeeQueueData().getNumRegisteredStudents(), 0);
         assertEquals(response.getEmployeeQueueData().getAverageTimePerStudent(), INITIAL_TIME_SPENT,
                 0.001);
+    }
+
+    @Test
+    public void testGetEmployeeQueueData() {
+        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(), 0,
+                INITIAL_TIME_SPENT);
+
+        doReturn(employeeQueueData).when(physicalQueueWorkflow).getEmployeeQueueData(anyString());
+
+        GetEmployeeQueueDataResponse response = queueService.getEmployeeQueueData("e1");
+
+        assertNotNull(response);
+        assertNotNull(response.getEmployeeQueueData());
+
+        assertEquals(response.getEmployeeQueueData().getNumRegisteredStudents(), 0);
+        assertEquals(response.getEmployeeQueueData().getAverageTimePerStudent(), INITIAL_TIME_SPENT,
+                0.001);
+    }
+
+    @Test
+    public void testGetAllEmployees() {
+        List<Employee> employees = Lists.newArrayList(employee);
+        doReturn(employees).when(employeeHashOperations).values(anyString());
+
+        List<Employee> response = queueService.getAllEmployees();
+
+        assertNotNull(response);
+        assertEquals(response.size(), 1);
+    }
+
+    @Test
+    public void testGetOverallTimeEmployeesExist() {
+        long virtualSize = 50L;
+        long windowSize = 1L;
+        long physicalSize = 2L;
+        int numStudents = 1;
+        long timeSpent = 5L;
+
+        employee.setNumRegisteredStudents(numStudents);
+        employee.setTotalTimeSpent(timeSpent);
+
+        int waitTime = (int) ((physicalSize + windowSize + virtualSize - 1.) * timeSpent /
+                numStudents);
+
+        Set<String> employeeIds = Sets.newHashSet(Collections.singleton("e1"));
+        VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employeeIds);
+
+        doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
+                any());
+        doReturn(virtualSize).when(virtualQueueWorkflow).size(anyString(), any());
+        doReturn(windowSize).when(windowQueueWorkflow).size(anyString());
+        doReturn(physicalSize).when(physicalQueueWorkflow).size(anyString());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+
+        int result = queueService.getOverallWaitTime("c1", Role.SWE);
+
+        assertEquals(result, waitTime);
+    }
+
+    @Test
+    public void testGetOverallTimeNoEmployeeExist() {
+        doThrow(new InvalidRequestException("error")).when(virtualQueueWorkflow)
+                .getVirtualQueueData(anyString(), any());
+
+        try {
+            queueService.getOverallWaitTime("c1", Role.SWE);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertTrue(true);
+        }
+    }
+
+    @Test
+    public void testGetVirtualQueueSize() {
+        doReturn(1L).when(virtualQueueWorkflow).size(anyString(), any());
+
+        long size = queueService.getVirtualQueueSize("c1", Role.SWE);
+
+        assertEquals(size, 1L);
+    }
+
+    @Test
+    public void testGetEmployeeQueueSize() {
+        doReturn(1L).when(windowQueueWorkflow).size(anyString());
+        doReturn(2L).when(windowQueueWorkflow).size(anyString());
+
+        long size = queueService.getEmployeeQueueSpace("e1");
+
+        assertEquals(size, 3L);
+        assertTrue(size <= MAX_EMPLOYEE_QUEUE_SIZE);
     }
 }
