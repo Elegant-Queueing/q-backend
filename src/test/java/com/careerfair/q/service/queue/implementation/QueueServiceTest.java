@@ -238,13 +238,27 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void joinEmployeeQueueAtHead() {
+    public void testJoinEmployeeQueueAtHead() {
         testJoinEmployeeQueue(1);
     }
 
     @Test
-    public void joinEmployeeQueueNotAtHead() {
+    public void testJoinEmployeeQueueNotAtHead() {
         testJoinEmployeeQueue(2);
+    }
+
+    @Test
+    public void testJoinEmployeeQueueTooLate() {
+        doReturn(studentQueueStatus).when(windowQueueWorkflow).leaveQueue(anyString(), anyString());
+        doThrow(new InvalidRequestException("error")).when(physicalQueueWorkflow).joinQueue(
+                anyString(), any(), any());
+
+        try {
+            queueService.joinEmployeeQueue("e1", "s1");
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "error");
+        }
     }
 
     private void testJoinEmployeeQueue(int position) {
@@ -532,6 +546,26 @@ public class QueueServiceTest {
         assertNotNull(response);
         assertNotNull(response.getEmployeeQueueData());
         validateEmployeeQueueData(employeeQueueData, numStudents, timeSpent);
+    }
+
+    @Test
+    public void testAddQueueEmployeeHasQueueOpen() {
+        employee.setVirtualQueueId("vq1");
+
+        doNothing().when(validationService).checkValidCompanyId(anyString());
+        doNothing().when(validationService).checkValidEmployeeId(anyString());
+        doNothing().when(validationService).checkEmployeeAssociations(anyString(), anyString(),
+                any());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doThrow(new InvalidRequestException("error")).when(virtualQueueWorkflow).addQueue("c1",
+                "e1", Role.SWE);
+
+        try {
+            queueService.addQueue("c1", "e1", Role.SWE);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "error");
+        }
     }
 
     @Test
