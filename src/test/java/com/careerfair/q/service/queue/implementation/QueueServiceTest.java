@@ -24,6 +24,7 @@ import org.mockito.Spy;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -620,7 +621,7 @@ public class QueueServiceTest {
             queueService.getOverallWaitTime("c1", Role.SWE);
             fail();
         } catch (InvalidRequestException ex) {
-            assertTrue(true);
+            assertEquals(ex.getMessage(), "error");
         }
     }
 
@@ -642,5 +643,300 @@ public class QueueServiceTest {
 
         assertEquals(size, 3L);
         assertTrue(size <= MAX_EMPLOYEE_QUEUE_SIZE);
+    }
+
+    @Test
+    public void testRemoveStudentFromQueueWithNoStudentAtHead() {
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn(null).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+
+        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(), 0, 1);
+
+        RemoveStudentResponse response = queueService.removeStudentFromQueue("e1",
+                employeeQueueData);
+
+        assertNotNull(response);
+        assertNotNull(response.getEmployeeQueueData());
+
+        assertEquals(response.getEmployeeQueueData().getNumRegisteredStudents(), 0);
+        assertEquals(response.getEmployeeQueueData().getAverageTimePerStudent(), 1, 0.001);
+        assertEquals(response.getEmployeeQueueData().getStudents().size(), 0);
+    }
+
+    @Test
+    public void testRemoveStudentFromQueueWithStudentAtHead() {
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn(student).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+        doReturn(studentQueueStatus).when(virtualQueueWorkflow).leaveQueue(anyString(), anyString(),
+                any());
+        doReturn(windowQueueStatus).when(windowQueueWorkflow).joinQueue(anyString(), any(), any());
+
+        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(), 0, 1);
+
+        RemoveStudentResponse response = queueService.removeStudentFromQueue("e1",
+                employeeQueueData);
+
+        assertNotNull(response);
+        assertNotNull(response.getEmployeeQueueData());
+
+        assertEquals(response.getEmployeeQueueData().getNumRegisteredStudents(), 0);
+        assertEquals(response.getEmployeeQueueData().getAverageTimePerStudent(), 1, 0.001);
+        assertEquals(response.getEmployeeQueueData().getStudents().size(), 0);
+    }
+
+    @Test
+    public void testGetStudentQueueStatusPresent() {
+        doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
+
+        StudentQueueStatus response = queueService.getStudentQueueStatus("s1");
+
+        assertNotNull(response);
+
+        assertEquals(response.getName(), "student1");
+        assertEquals(response.getCompanyId(), "c1");
+        assertEquals(response.getStudentId(), "s1");
+        assertEquals(response.getRole(), Role.SWE);
+    }
+
+    @Test
+    public void testGetStudentQueueStatusNotPresent() {
+        doReturn(null).when(studentHashOperations).get(anyString(), any());
+
+        try {
+            queueService.getStudentQueueStatus("s1");
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "Student with id=s1 not present in any queue");
+        }
+    }
+
+    @Test
+    public void testGetEmployeeWithMostQueueSpace() {
+        Set<String> employees = Sets.newHashSet(Arrays.asList("e1", "e2"));
+        VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
+
+        doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
+                any());
+        doReturn(1L, 2L).when(physicalQueueWorkflow).size(anyString());
+        doReturn(0L, 2L).when(windowQueueWorkflow).size(anyString());
+
+        String response = queueService.getEmployeeWithMostQueueSpace("c1", Role.SWE);
+
+        assertEquals(response, "e1");
+    }
+
+    @Test
+    public void testGetEmployeeWithMostQueueSpaceNoEmployee() {
+        doThrow(new InvalidRequestException("error")).when(virtualQueueWorkflow)
+                .getVirtualQueueData(anyString(), any());
+
+        try {
+            queueService.getEmployeeWithMostQueueSpace("c1", Role.SWE);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "error");
+        }
+    }
+
+    @Test
+    public void testGetEmployeeQueueSpace() {
+        doReturn(1L).when(physicalQueueWorkflow).size(anyString());
+        doReturn(1L).when(windowQueueWorkflow).size(anyString());
+
+        long size = queueService.getEmployeeQueueSpace("e1");
+
+        assertEquals(size, MAX_EMPLOYEE_QUEUE_SIZE - 1L - 1L);
+    }
+
+    @Test
+    public void testShiftStudentToWindow() {
+        doReturn(studentQueueStatus).when(virtualQueueWorkflow).leaveQueue(anyString(), anyString(),
+                any());
+        doReturn(windowQueueStatus).when(windowQueueWorkflow).joinQueue(anyString(), any(), any());
+
+        QueueStatus queueStatus = queueService.shiftStudentToWindow("c1", "e1", Role.SWE, student);
+
+        assertNotNull(queueStatus);
+
+        assertEquals(queueStatus.getQueueId(), "wq1");
+        assertEquals(queueStatus.getRole(), Role.SWE);
+        assertEquals(queueStatus.getQueueType(), QueueType.WINDOW);
+        assertEquals(queueStatus.getEmployee(), employee);
+    }
+
+    @Test
+    public void testGetEmployeeWithId() {
+        Employee employee = mock(Employee.class);
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+
+        Employee result = queueService.getEmployeeWithId("e1");
+
+        assertEquals(result, employee);
+    }
+
+    @Test
+    public void testGetEmployeeWithIdBad() {
+        doReturn(null).when(employeeHashOperations).get(anyString(), any());
+
+        try {
+            queueService.getEmployeeWithId("e1");
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "No such employee with employee id=e1 exists");
+        }
+    }
+
+    @Test
+    public void testSetOverallPositionAndWaitTimeVirtual() {
+        int position = 2;
+        virtualQueueStatus.setPosition(position);
+
+        int numStudents = 1;
+        long timeSpent = 5L;
+        employee.setTotalTimeSpent(timeSpent);
+        employee.setNumRegisteredStudents(numStudents);
+
+        Set<String> employees = Sets.newHashSet(Collections.singleton("e1"));
+        VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
+
+        int expectedWaitTime = (int) (((position + MAX_EMPLOYEE_QUEUE_SIZE - 1.) * timeSpent /
+                numStudents) / employees.size());
+
+        doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
+                any());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+
+        queueService.setOverallPositionAndWaitTime(virtualQueueStatus);
+
+        verify(virtualQueueWorkflow).getVirtualQueueData(anyString(), any());
+
+        assertEquals(virtualQueueStatus.getCompanyId(), "c1");
+        assertEquals(virtualQueueStatus.getQueueId(), "vq1");
+        assertEquals(virtualQueueStatus.getRole(), Role.SWE);
+        assertEquals(virtualQueueStatus.getPosition(), MAX_EMPLOYEE_QUEUE_SIZE + position);
+        assertEquals(virtualQueueStatus.getQueueType(), QueueType.VIRTUAL);
+        assertEquals(virtualQueueStatus.getWaitTime(), expectedWaitTime);
+        assertNull(virtualQueueStatus.getEmployee());
+    }
+
+    @Test
+    public void testSetOverallPositionAndWaitTimeWindow() {
+        int position = 2;
+        windowQueueStatus.setPosition(position);
+
+        int numStudents = 1;
+        long timeSpent = 5L;
+        employee.setTotalTimeSpent(timeSpent);
+        employee.setNumRegisteredStudents(numStudents);
+
+        long physicalSize = 1L;
+        int expectedWaitTime = (int) ((position + physicalSize - 1.) * timeSpent / numStudents);
+
+        doReturn(physicalSize).when(physicalQueueWorkflow).size(anyString());
+
+        queueService.setOverallPositionAndWaitTime(windowQueueStatus);
+
+        verify(physicalQueueWorkflow).size(anyString());
+
+        assertEquals(windowQueueStatus.getCompanyId(), "c1");
+        assertEquals(windowQueueStatus.getQueueId(), "wq1");
+        assertEquals(windowQueueStatus.getRole(), Role.SWE);
+        assertEquals(windowQueueStatus.getPosition(), physicalSize + position);
+        assertEquals(windowQueueStatus.getQueueType(), QueueType.WINDOW);
+        assertEquals(windowQueueStatus.getWaitTime(), expectedWaitTime);
+        assertEquals(windowQueueStatus.getEmployee(), employee);
+    }
+
+    @Test
+    public void testSetOverallPositionAndWaitTimePhysical() {
+        int position = 2;
+        physicalQueueStatus.setPosition(position);
+
+        int numStudents = 1;
+        long timeSpent = 5L;
+        employee.setTotalTimeSpent(timeSpent);
+        employee.setNumRegisteredStudents(numStudents);
+
+        int expectedWaitTime = (int) ((position - 1.) * timeSpent / numStudents);
+
+        queueService.setOverallPositionAndWaitTime(physicalQueueStatus);
+
+        assertEquals(physicalQueueStatus.getCompanyId(), "c1");
+        assertEquals(physicalQueueStatus.getQueueId(), "pq1");
+        assertEquals(physicalQueueStatus.getRole(), Role.SWE);
+        assertEquals(physicalQueueStatus.getPosition(), position);
+        assertEquals(physicalQueueStatus.getQueueType(), QueueType.PHYSICAL);
+        assertEquals(physicalQueueStatus.getWaitTime(), expectedWaitTime);
+        assertEquals(physicalQueueStatus.getEmployee(), employee);
+    }
+
+    @Test
+    public void testGetVirtualQueueWaitTime() {
+        int position = 5;
+        int numStudents = 1;
+        long timeSpent = 5L;
+        employee.setTotalTimeSpent(timeSpent);
+        employee.setNumRegisteredStudents(numStudents);
+
+        Set<String> employees = Sets.newHashSet(Collections.singleton("e1"));
+        VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
+
+        doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
+                any());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+
+        int expectedWaitTime = (int) (((position - 1.) * timeSpent / numStudents) /
+                employees.size());
+
+        int waitTime = queueService.getVirtualQueueWaitTime("c1", Role.SWE, position);
+
+        assertEquals(waitTime, expectedWaitTime);
+    }
+
+    @Test
+    public void testGetEmployeeQueueWaitTime() {
+        int numStudents = 1;
+        long timeSpent = 5L;
+        employee.setTotalTimeSpent(timeSpent);
+        employee.setNumRegisteredStudents(numStudents);
+
+        int position = 3;
+        int expectedWaitTime = (int) ((position - 1.) * timeSpent / numStudents);
+
+        int waitTime = queueService.getEmployeeQueueWaitTime(employee, position);
+
+        assertEquals(waitTime, expectedWaitTime);
+    }
+
+    @Test
+    public void testCalcEmployeeAverageTimeNoStudentRegistered() {
+        testCalcEmployeeAverageTime(0);
+    }
+
+    @Test
+    public void testCalcEmployeeAverageTimeStudentRegistered() {
+        testCalcEmployeeAverageTime(2);
+    }
+
+    private void testCalcEmployeeAverageTime(int numRegistered) {
+        long timeSpent = 5L;
+        employee.setTotalTimeSpent(timeSpent);
+        employee.setNumRegisteredStudents(numRegistered);
+
+        double expectedWaitTime = timeSpent * 1. / Math.max(numRegistered, 1);
+
+        double waitTime = queueService.calcEmployeeAverageTime(employee);
+
+        assertEquals(waitTime, expectedWaitTime, 0.001);
+    }
+
+    @Test
+    public void testGetIndexFromPosition() {
+        testGetIndexFromPosition(0);
+        testGetIndexFromPosition(2);
+    }
+
+    private void testGetIndexFromPosition(int position) {
+        assertEquals(queueService.getIndexFromPosition(position), Math.max(position - 1, 0));
     }
 }

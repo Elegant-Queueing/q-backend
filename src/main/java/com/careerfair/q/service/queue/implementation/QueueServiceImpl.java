@@ -355,7 +355,7 @@ public class QueueServiceImpl implements QueueService {
      * @return QueueStatus current status of the student in a queue
      */
     QueueStatus shiftStudentToWindow(String companyId, String employeeId, Role role,
-                                             Student student) {
+                                     Student student) {
         StudentQueueStatus studentQueueStatus = virtualQueueWorkflow.leaveQueue(companyId,
                 student.getId(), role);
         return windowQueueWorkflow.joinQueue(employeeId, student, studentQueueStatus);
