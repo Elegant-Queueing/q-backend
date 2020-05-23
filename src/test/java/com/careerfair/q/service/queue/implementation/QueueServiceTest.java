@@ -359,6 +359,18 @@ public class QueueServiceTest {
     }
 
     @Test
+    public void testLeaveQueueDefaultQueue() {
+        try {
+            studentQueueStatus.setQueueType(QueueType.DEFAULT);
+            doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
+            queueService.leaveQueue("c1", "s1", Role.SWE);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "No such QueueType exists");
+        }
+    }
+
+    @Test
     public void testGetQueueStatusVirtual() {
         int position = 2;
         int numStudents = 1;
@@ -435,6 +447,18 @@ public class QueueServiceTest {
         assertNotNull(response);
         assertNotNull(response.getQueueStatus());
         validatePhysicalQueueStatus(response.getQueueStatus(), position, expectedWaitTime);
+    }
+
+    @Test
+    public void testGetQueueStatusDefault() {
+        try {
+            studentQueueStatus.setQueueType(QueueType.DEFAULT);
+            doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
+            queueService.getQueueStatus("s1");
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "No such QueueType exists");
+        }
     }
 
     @Test
@@ -924,6 +948,17 @@ public class QueueServiceTest {
 
         queueService.setOverallPositionAndWaitTime(physicalQueueStatus);
         validatePhysicalQueueStatus(physicalQueueStatus, position, expectedWaitTime);
+    }
+
+    @Test
+    public void testSetOverallPositionAndWaitTimeDefault() {
+        try {
+            QueueStatus queueStatus = new QueueStatus("c1", "dq1", QueueType.DEFAULT, Role.SWE);
+            queueService.setOverallPositionAndWaitTime(queueStatus);
+            fail();
+        } catch (InvalidRequestException ex) {
+            assertEquals(ex.getMessage(), "QueueType mismatch");
+        }
     }
 
     @Test
