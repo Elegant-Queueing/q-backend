@@ -438,6 +438,79 @@ public class QueueServiceTest {
     }
 
     @Test
+    public void testAddQueueNewEmployee() {
+        doNothing().when(employeeHashOperations).put(anyString(), any(), any());
+        doReturn("vq1").when(virtualQueueWorkflow).addQueue("c1", "e1", Role.SWE);
+        doReturn(employee).when(windowQueueWorkflow).addQueue(anyString());
+        doReturn(employee).when(physicalQueueWorkflow).addQueue(anyString());
+        doReturn(null).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+
+        testAddQueue(null, 0L, 0L);
+
+        verify(employeeHashOperations).put(anyString(), any(), any());
+        verify(windowQueueWorkflow).addQueue(anyString());
+        verify(physicalQueueWorkflow).addQueue(anyString());
+    }
+
+    @Test
+    public void testAddQueueReturningEmployeeNoSpace() {
+        employee.setWindowQueueId("wq1");
+        employee.setPhysicalQueueId("pq1");
+
+        testAddQueue(employee, 2L, 3L);
+
+        verify(employeeHashOperations, never()).put(anyString(), any(), any());
+        verify(windowQueueWorkflow, never()).addQueue(anyString());
+        verify(physicalQueueWorkflow, never()).addQueue(anyString());
+        verify(virtualQueueWorkflow, never()).getStudentAtHead(anyString(), any());
+    }
+
+    @Test
+    public void testAddQueueReturningEmployeeSpace() {
+        employee.setWindowQueueId("wq1");
+        employee.setPhysicalQueueId("pq1");
+
+        doReturn(student).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+        doReturn(studentQueueStatus).when(virtualQueueWorkflow).leaveQueue(anyString(), anyString(),
+                any());
+        doReturn(windowQueueStatus).when(windowQueueWorkflow).joinQueue(anyString(), any(), any());
+
+        testAddQueue(employee, 2L, 2L);
+
+        verify(employeeHashOperations, never()).put(anyString(), any(), any());
+        verify(windowQueueWorkflow, never()).addQueue(anyString());
+        verify(physicalQueueWorkflow, never()).addQueue(anyString());
+        verify(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+    }
+
+    private void testAddQueue(Employee employee, long windowSize, long physicalSize) {
+        int numStudents = 20;
+        long timeSpent = 250L;
+        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(),
+                numStudents, timeSpent);
+
+        doNothing().when(validationService).checkValidCompanyId(anyString());
+        doNothing().when(validationService).checkValidEmployeeId(anyString());
+        doNothing().when(validationService).checkEmployeeAssociations(anyString(), anyString(),
+                any());
+        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
+        doReturn("vq1").when(virtualQueueWorkflow).addQueue("c1", "e1", Role.SWE);
+        doReturn(windowSize).when(windowQueueWorkflow).size(anyString());
+        doReturn(physicalSize).when(physicalQueueWorkflow).size(anyString());
+        doReturn(employeeQueueData).when(physicalQueueWorkflow).getEmployeeQueueData(anyString());
+
+        AddQueueResponse response = queueService.addQueue("c1", "e1", Role.SWE);
+
+        verify(validationService).checkValidCompanyId(anyString());
+        verify(validationService).checkValidEmployeeId(anyString());
+        verify(validationService).checkEmployeeAssociations(anyString(), anyString(), any());
+
+        assertNotNull(response);
+        assertNotNull(response.getEmployeeQueueData());
+        validateEmployeeQueueData(employeeQueueData, numStudents, timeSpent);
+    }
+
+    @Test
     public void testPauseQueue() {
         int numStudents = 0;
         long timeSpent = INITIAL_TIME_SPENT;
@@ -915,11 +988,7 @@ public class QueueServiceTest {
 
     @Test
     public void testGetIndexFromPosition() {
-        testGetIndexFromPosition(0);
-        testGetIndexFromPosition(2);
-    }
-
-    private void testGetIndexFromPosition(int position) {
-        assertEquals(queueService.getIndexFromPosition(position), Math.max(position - 1, 0));
+        assertEquals(queueService.getIndexFromPosition(0), 0);
+        assertEquals(queueService.getIndexFromPosition(4), 3);
     }
 }
