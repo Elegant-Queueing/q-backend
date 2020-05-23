@@ -725,11 +725,11 @@ public class QueueServiceTest {
         employee.setNumRegisteredStudents(numStudents);
         employee.setTotalTimeSpent(timeSpent);
 
-        int waitTime = (int) ((physicalSize + windowSize + virtualSize - 1.) * timeSpent /
-                numStudents);
-
         Set<String> employeeIds = Sets.newHashSet(Collections.singleton("e1"));
         VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employeeIds);
+
+        int waitTime = (int) (((physicalSize + windowSize + virtualSize - 1.) * timeSpent /
+                numStudents)) / employeeIds.size();
 
         doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
                 any());
@@ -777,63 +777,6 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void testRemoveStudentFromQueueWithNoStudentAtHead() {
-        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
-        doReturn(null).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
-
-        int numStudents = 0;
-        long timeSpent = 0;
-        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(),
-                numStudents, timeSpent);
-
-        RemoveStudentResponse response = queueService.removeStudentFromQueue("e1",
-                employeeQueueData);
-
-        assertNotNull(response);
-        assertNotNull(response.getEmployeeQueueData());
-
-        assertEquals(response.getEmployeeQueueData().getStudents().size(), 0);
-        validateEmployeeQueueData(employeeQueueData, numStudents, timeSpent);
-    }
-
-    @Test
-    public void testRemoveStudentFromQueueWithStudentAtHead() {
-        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
-        doReturn(student).when(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
-        doReturn(studentQueueStatus).when(virtualQueueWorkflow).leaveQueue(anyString(), anyString(),
-                any());
-        doReturn(windowQueueStatus).when(windowQueueWorkflow).joinQueue(anyString(), any(), any());
-
-        int numStudents = 0;
-        long timeSpent = INITIAL_TIME_SPENT;
-        EmployeeQueueData employeeQueueData = new EmployeeQueueData(Lists.newArrayList(),
-                numStudents, timeSpent);
-
-        RemoveStudentResponse response = queueService.removeStudentFromQueue("e1",
-                employeeQueueData);
-
-        assertNotNull(response);
-        assertNotNull(response.getEmployeeQueueData());
-
-        assertEquals(response.getEmployeeQueueData().getStudents().size(), 0);
-        validateEmployeeQueueData(employeeQueueData, numStudents, timeSpent);
-    }
-
-    @Test
-    public void testGetStudentQueueStatusPresent() {
-        doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
-
-        StudentQueueStatus response = queueService.getStudentQueueStatus("s1");
-
-        assertNotNull(response);
-
-        assertEquals(response.getName(), "student1");
-        assertEquals(response.getCompanyId(), "c1");
-        assertEquals(response.getStudentId(), "s1");
-        assertEquals(response.getRole(), Role.SWE);
-    }
-
-    @Test
     public void testGetStudentQueueStatusNotPresent() {
         doReturn(null).when(studentHashOperations).get(anyString(), any());
 
@@ -843,21 +786,6 @@ public class QueueServiceTest {
         } catch (InvalidRequestException ex) {
             assertEquals(ex.getMessage(), "Student with id=s1 not present in any queue");
         }
-    }
-
-    @Test
-    public void testGetEmployeeWithMostQueueSpace() {
-        Set<String> employees = Sets.newHashSet(Arrays.asList("e1", "e2"));
-        VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
-
-        doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
-                any());
-        doReturn(1L, 2L).when(physicalQueueWorkflow).size(anyString());
-        doReturn(0L, 2L).when(windowQueueWorkflow).size(anyString());
-
-        String response = queueService.getEmployeeWithMostQueueSpace("c1", Role.SWE);
-
-        assertEquals(response, "e1");
     }
 
     @Test
@@ -874,41 +802,6 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void testGetEmployeeQueueSpace() {
-        doReturn(1L).when(physicalQueueWorkflow).size(anyString());
-        doReturn(1L).when(windowQueueWorkflow).size(anyString());
-
-        long size = queueService.getEmployeeQueueSpace("e1");
-
-        assertEquals(size, MAX_EMPLOYEE_QUEUE_SIZE - 1L - 1L);
-    }
-
-    @Test
-    public void testShiftStudentToWindow() {
-        doReturn(studentQueueStatus).when(virtualQueueWorkflow).leaveQueue(anyString(), anyString(),
-                any());
-        doReturn(windowQueueStatus).when(windowQueueWorkflow).joinQueue(anyString(), any(), any());
-
-        QueueStatus queueStatus = queueService.shiftStudentToWindow("c1", "e1", Role.SWE, student);
-
-        assertNotNull(queueStatus);
-        assertEquals(queueStatus.getQueueId(), "wq1");
-        assertEquals(queueStatus.getRole(), Role.SWE);
-        assertEquals(queueStatus.getQueueType(), QueueType.WINDOW);
-        assertEquals(queueStatus.getEmployee(), employee);
-    }
-
-    @Test
-    public void testGetEmployeeWithId() {
-        Employee employee = mock(Employee.class);
-        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
-
-        Employee result = queueService.getEmployeeWithId("e1");
-
-        assertEquals(result, employee);
-    }
-
-    @Test
     public void testGetEmployeeWithIdBad() {
         doReturn(null).when(employeeHashOperations).get(anyString(), any());
 
@@ -921,70 +814,6 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void testSetOverallPositionAndWaitTimeVirtual() {
-        int position = 2;
-        virtualQueueStatus.setPosition(position);
-
-        int numStudents = 1;
-        long timeSpent = 5L;
-        employee.setTotalTimeSpent(timeSpent);
-        employee.setNumRegisteredStudents(numStudents);
-
-        Set<String> employees = Sets.newHashSet(Collections.singleton("e1"));
-        VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
-
-        int expectedWaitTime = (int) (((position + MAX_EMPLOYEE_QUEUE_SIZE - 1.) * timeSpent /
-                numStudents) / employees.size());
-
-        doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
-                any());
-        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
-
-        queueService.setOverallPositionAndWaitTime(virtualQueueStatus);
-
-        verify(virtualQueueWorkflow).getVirtualQueueData(anyString(), any());
-        validateVirtualQueueStatus(virtualQueueStatus, position, expectedWaitTime);
-    }
-
-    @Test
-    public void testSetOverallPositionAndWaitTimeWindow() {
-        int position = 2;
-        windowQueueStatus.setPosition(position);
-
-        int numStudents = 1;
-        long timeSpent = 5L;
-        employee.setTotalTimeSpent(timeSpent);
-        employee.setNumRegisteredStudents(numStudents);
-
-        long physicalSize = 1L;
-        int expectedWaitTime = (int) ((position + physicalSize - 1.) * timeSpent / numStudents);
-
-        doReturn(physicalSize).when(physicalQueueWorkflow).size(anyString());
-
-        queueService.setOverallPositionAndWaitTime(windowQueueStatus);
-
-        verify(physicalQueueWorkflow).size(anyString());
-        validateWindowQueueStatus(windowQueueStatus, position, physicalSize, expectedWaitTime,
-                employee);
-    }
-
-    @Test
-    public void testSetOverallPositionAndWaitTimePhysical() {
-        int position = 2;
-        physicalQueueStatus.setPosition(position);
-
-        int numStudents = 1;
-        long timeSpent = 5L;
-        employee.setTotalTimeSpent(timeSpent);
-        employee.setNumRegisteredStudents(numStudents);
-
-        int expectedWaitTime = (int) ((position - 1.) * timeSpent / numStudents);
-
-        queueService.setOverallPositionAndWaitTime(physicalQueueStatus);
-        validatePhysicalQueueStatus(physicalQueueStatus, position, expectedWaitTime);
-    }
-
-    @Test
     public void testSetOverallPositionAndWaitTimeDefault() {
         try {
             QueueStatus queueStatus = new QueueStatus("c1", "dq1", QueueType.DEFAULT, Role.SWE);
@@ -993,71 +822,5 @@ public class QueueServiceTest {
         } catch (InvalidRequestException ex) {
             assertEquals(ex.getMessage(), "QueueType mismatch");
         }
-    }
-
-    @Test
-    public void testGetVirtualQueueWaitTime() {
-        int position = 5;
-        int numStudents = 1;
-        long timeSpent = 5L;
-        employee.setTotalTimeSpent(timeSpent);
-        employee.setNumRegisteredStudents(numStudents);
-
-        Set<String> employees = Sets.newHashSet(Collections.singleton("e1"));
-        VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
-
-        doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
-                any());
-        doReturn(employee).when(employeeHashOperations).get(anyString(), any());
-
-        int expectedWaitTime = (int) (((position - 1.) * timeSpent / numStudents) /
-                employees.size());
-
-        int waitTime = queueService.getVirtualQueueWaitTime("c1", Role.SWE, position);
-
-        assertEquals(waitTime, expectedWaitTime);
-    }
-
-    @Test
-    public void testGetEmployeeQueueWaitTime() {
-        int numStudents = 1;
-        long timeSpent = 5L;
-        employee.setTotalTimeSpent(timeSpent);
-        employee.setNumRegisteredStudents(numStudents);
-
-        int position = 3;
-        int expectedWaitTime = (int) ((position - 1.) * timeSpent / numStudents);
-
-        int waitTime = queueService.getEmployeeQueueWaitTime(employee, position);
-
-        assertEquals(waitTime, expectedWaitTime);
-    }
-
-    @Test
-    public void testCalcEmployeeAverageTimeNoStudentRegistered() {
-        testCalcEmployeeAverageTime(0);
-    }
-
-    @Test
-    public void testCalcEmployeeAverageTimeStudentRegistered() {
-        testCalcEmployeeAverageTime(2);
-    }
-
-    private void testCalcEmployeeAverageTime(int numRegistered) {
-        long timeSpent = 5L;
-        employee.setTotalTimeSpent(timeSpent);
-        employee.setNumRegisteredStudents(numRegistered);
-
-        double expectedWaitTime = timeSpent * 1. / Math.max(numRegistered, 1);
-
-        double waitTime = queueService.calcEmployeeAverageTime(employee);
-
-        assertEquals(waitTime, expectedWaitTime, 0.001);
-    }
-
-    @Test
-    public void testGetIndexFromPosition() {
-        assertEquals(queueService.getIndexFromPosition(0), 0);
-        assertEquals(queueService.getIndexFromPosition(4), 3);
     }
 }
