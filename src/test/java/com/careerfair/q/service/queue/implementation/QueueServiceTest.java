@@ -25,7 +25,6 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -137,11 +136,11 @@ public class QueueServiceTest {
         employee.setTotalTimeSpent(timeSpent);
         employee.setNumRegisteredStudents(numStudents);
 
-        Set<String> employees = Sets.newHashSet(Collections.singleton("e1"));
+        Set<String> employees = Sets.newHashSet(Arrays.asList("e1", "e2"));
         VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
 
-        int expectedWaitTime = (int) (((position + MAX_EMPLOYEE_QUEUE_SIZE - 1.) * timeSpent /
-                numStudents) / employees.size());
+        int expectedWaitTime = (int) ((position + MAX_EMPLOYEE_QUEUE_SIZE - 1.) * timeSpent /
+                numStudents);
 
         doNothing().when(validationService).checkValidCompanyId(anyString());
         doNothing().when(validationService).checkValidStudentId(anyString());
@@ -157,6 +156,9 @@ public class QueueServiceTest {
         verify(validationService).checkValidStudentId(anyString());
         verify(validationService).checkValidCompanyId(anyString());
         verify(virtualQueueWorkflow).joinQueue(anyString(), any(), any());
+
+        verify(virtualQueueWorkflow, never()).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow, never()).joinQueue(anyString(), any(), any());
 
         assertNotNull(response);
         assertNotNull(response.getQueueStatus());
@@ -180,6 +182,10 @@ public class QueueServiceTest {
 
         QueueStatus queueStatus = testJoinVirtualQueueAtHead(windowSize, physicalSize, numStudents,
                 timeSpent);
+
+        verify(virtualQueueWorkflow, never()).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow, never()).joinQueue(anyString(), any(), any());
+
         validateVirtualQueueStatus(queueStatus, position, expectedWaitTime);
     }
 
@@ -200,8 +206,12 @@ public class QueueServiceTest {
                 any());
         doReturn(windowQueueStatus).when(windowQueueWorkflow).joinQueue(anyString(), any(), any());
 
-        QueueStatus queueStatus = testJoinVirtualQueueAtHead(0L, physicalSize, numStudents,
-                timeSpent);
+        QueueStatus queueStatus = testJoinVirtualQueueAtHead(0L, physicalSize,
+                numStudents, timeSpent);
+
+        verify(virtualQueueWorkflow).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow).joinQueue(anyString(), any(), any());
+
         validateWindowQueueStatus(queueStatus, windowPosition, physicalSize, expectedWaitTime,
                 employee);
     }
@@ -211,7 +221,7 @@ public class QueueServiceTest {
         employee.setNumRegisteredStudents(numStudents);
         employee.setTotalTimeSpent(timeSpent);
 
-        Set<String> employees = Sets.newHashSet(Collections.singleton("e1"));
+        Set<String> employees = Sets.newHashSet(Arrays.asList("e1", "e2"));
         VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
 
         doNothing().when(validationService).checkValidCompanyId(anyString());
@@ -301,7 +311,7 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void testLeaveQueueWindowWithNoHeadStudent() {
+    public void testLeaveQueueWindowWithNoStudentInVirtual() {
         studentQueueStatus.setQueueType(QueueType.WINDOW);
         studentQueueStatus.setEmployeeId("e1");
 
@@ -318,7 +328,7 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void testLeaveQueueWindowWithHeadStudent() {
+    public void testLeaveQueueWindowWithStudentInVirtual() {
         studentQueueStatus.setQueueType(QueueType.WINDOW);
         studentQueueStatus.setEmployeeId("e1");
 
@@ -330,14 +340,15 @@ public class QueueServiceTest {
 
         queueService.leaveQueue("c1", "s1", Role.SWE);
 
-        verify(virtualQueueWorkflow).leaveQueue(anyString(), anyString(), any());
         verify(windowQueueWorkflow).leaveQueue(anyString(), anyString());
-        verify(windowQueueWorkflow).joinQueue(anyString(), any(), any());
         verify(physicalQueueWorkflow, never()).leaveQueue(anyString(), anyString());
+
+        verify(virtualQueueWorkflow).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow).joinQueue(anyString(), any(), any());
     }
 
     @Test
-    public void testLeaveQueuePhysicalWithNoHeadStudent() {
+    public void testLeaveQueuePhysicalWithNoStudentInVirtual() {
         studentQueueStatus.setQueueType(QueueType.PHYSICAL);
         studentQueueStatus.setEmployeeId("e1");
 
@@ -354,7 +365,7 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void testLeaveQueuePhysicalWithHeadStudent() {
+    public void testLeaveQueuePhysicalWithStudentInVirtual() {
         studentQueueStatus.setQueueType(QueueType.PHYSICAL);
         studentQueueStatus.setEmployeeId("e1");
 
@@ -366,16 +377,17 @@ public class QueueServiceTest {
 
         queueService.leaveQueue("c1", "s1", Role.SWE);
 
-        verify(virtualQueueWorkflow).leaveQueue(anyString(), anyString(), any());
         verify(windowQueueWorkflow, never()).leaveQueue(anyString(), anyString());
-        verify(windowQueueWorkflow).joinQueue(anyString(), any(), any());
         verify(physicalQueueWorkflow).leaveQueue(anyString(), anyString());
+
+        verify(virtualQueueWorkflow).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow).joinQueue(anyString(), any(), any());
     }
 
     @Test
-    public void testLeaveQueueDefaultQueue() {
+    public void testLeaveQueueNone() {
         try {
-            studentQueueStatus.setQueueType(QueueType.DEFAULT);
+            studentQueueStatus.setQueueType(QueueType.NONE);
             doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
             queueService.leaveQueue("c1", "s1", Role.SWE);
             fail();
@@ -389,10 +401,12 @@ public class QueueServiceTest {
         int position = 2;
         int numStudents = 1;
         long timeSpent = 5;
-        int expectedWaitTime = (int) ((MAX_EMPLOYEE_QUEUE_SIZE + position - 1.) * timeSpent / numStudents);
 
-        Set<String> employees = Sets.newHashSet(Collections.singleton("e1"));
+        Set<String> employees = Sets.newHashSet(Arrays.asList("e1", "e2"));
         VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employees);
+
+        int expectedWaitTime = (int) ((MAX_EMPLOYEE_QUEUE_SIZE + position - 1.) * timeSpent /
+                numStudents);
 
         employee.setTotalTimeSpent(timeSpent);
         employee.setNumRegisteredStudents(numStudents);
@@ -464,9 +478,9 @@ public class QueueServiceTest {
     }
 
     @Test
-    public void testGetQueueStatusDefault() {
+    public void testGetQueueStatusNone() {
         try {
-            studentQueueStatus.setQueueType(QueueType.DEFAULT);
+            studentQueueStatus.setQueueType(QueueType.NONE);
             doReturn(studentQueueStatus).when(studentHashOperations).get(anyString(), any());
             queueService.getQueueStatus("s1");
             fail();
@@ -519,6 +533,9 @@ public class QueueServiceTest {
         verify(windowQueueWorkflow, never()).addQueue(anyString());
         verify(physicalQueueWorkflow, never()).addQueue(anyString());
         verify(virtualQueueWorkflow).getStudentAtHead(anyString(), any());
+
+        verify(virtualQueueWorkflow).leaveQueue(anyString(), anyString(), any());
+        verify(windowQueueWorkflow).joinQueue(anyString(), any(), any());
     }
 
     private void testAddQueue(Employee employee, long windowSize, long physicalSize) {
@@ -725,11 +742,11 @@ public class QueueServiceTest {
         employee.setNumRegisteredStudents(numStudents);
         employee.setTotalTimeSpent(timeSpent);
 
-        Set<String> employeeIds = Sets.newHashSet(Collections.singleton("e1"));
+        Set<String> employeeIds = Sets.newHashSet(Arrays.asList("e1", "e2"));
         VirtualQueueData virtualQueueData = new VirtualQueueData("vq1", employeeIds);
 
-        int waitTime = (int) (((physicalSize + windowSize + virtualSize - 1.) * timeSpent /
-                numStudents)) / employeeIds.size();
+        int waitTime = (int) ((physicalSize + windowSize + virtualSize - 1.) * timeSpent /
+                numStudents);
 
         doReturn(virtualQueueData).when(virtualQueueWorkflow).getVirtualQueueData(anyString(),
                 any());
@@ -816,7 +833,7 @@ public class QueueServiceTest {
     @Test
     public void testSetOverallPositionAndWaitTimeDefault() {
         try {
-            QueueStatus queueStatus = new QueueStatus("c1", "dq1", QueueType.DEFAULT, Role.SWE);
+            QueueStatus queueStatus = new QueueStatus("c1", "dq1", QueueType.NONE, Role.SWE);
             queueService.setOverallPositionAndWaitTime(queueStatus);
             fail();
         } catch (InvalidRequestException ex) {
