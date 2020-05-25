@@ -22,7 +22,7 @@ public class AuthenticationFilter extends HttpFilter {
             FirebaseAuth.getInstance().verifyIdToken(request.getHeader(TOKEN));
             chain.doFilter(request, response);
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Call not authorized");
         }
     }
 }
