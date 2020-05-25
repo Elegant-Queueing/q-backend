@@ -147,6 +147,7 @@ You may set up the environment required to run this Spring Boot app in 2 ways:
 - Click on AMI. It should be on the left panel, under 'Images'.
 - Next to the search bar, should be a filter saying 'Owned by me'. Change that to public images.
 - Search for ```q-public-ami``` and press enter.
+- You should see 1 AMI with that name. Make sure your location (top right) is set to Oregon.
 - Select the AMI and click on Launch.
 - Choose an instance setting that suits your needs and budget (there should be a free one too) and launch the instance.
 - Once the instance is running, you can see it if you go to Service -> EC2 -> Instances.
