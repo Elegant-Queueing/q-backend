@@ -115,7 +115,7 @@ Use the same steps mentioned in the 'User Documentation -> Setup' section to get
 
 ### Build, Run
 - After setting everything up, use the terminal to cd into the code repository.
-- To build the project, use the terminal to run: ```mvn build```
+- To build the project, use the terminal to run: ```mvn clean install```
 - To run the app, run: ```mvn spring-boot:run```
 - Maven will run all the tests and you will see a message saying that the spring boot application has started on port 8080.
 - While this is running, open another terminal (or SSH into your instance using another terminal if you set everything up remotely) and run Redis using: ```redis-server```
