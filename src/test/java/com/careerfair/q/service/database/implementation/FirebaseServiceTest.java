@@ -1,5 +1,6 @@
 package com.careerfair.q.service.database.implementation;
 
+import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.model.db.Student;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -40,6 +42,7 @@ public class FirebaseServiceTest {
     private Student student;
     private Employee employee;
     private Fair fair;
+    private Company company;
 
     @BeforeEach
     public void setupMocks() {
@@ -47,22 +50,26 @@ public class FirebaseServiceTest {
         student = new Student("s1", "f1", "l1", "u1",
                 "m1", Role.SWE, "b1", "s1@u1.edu", 4.0,
                 Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true,
-                Arrays.asList("e1"));
+                Collections.singletonList("e1"));
 
         employee = new Employee("e1", "n1", "c1",
-                Role.SWE, "b1", "e1@c1.com", Arrays.asList("s1"));
+                Role.SWE, "b1", "e1@c1.com", Collections.singletonList("s1"));
 
         fair = new Fair("f1", "n1", "u1", "d1",
-                Arrays.asList("c1"), Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
+                Collections.singletonList("c1"),
+                Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1192508815, 0));
+
+        company = new Company("c1", Collections.singletonList(Role.SWE),
+                Collections.singletonList("e1"), "b1", "www.c1.com");
     }
 
     @Test
     public void testCheckValidStudentId() {
         doNothing().when(studentFirebaseWorkflow).checkValidStudentId(anyString());
-        firebaseService.checkValidStudentId(anyString());
+        firebaseService.checkValidStudentId("s1");
         verify(studentFirebaseWorkflow, times(1))
-                .checkValidStudentId(anyString());
+                .checkValidStudentId("s1");
     }
 
     @Test
@@ -82,7 +89,7 @@ public class FirebaseServiceTest {
         doReturn(student).when(studentFirebaseWorkflow).getStudentWithId(anyString());
         Student getStudent = firebaseService.getStudentWithId("s1");
 
-        checkValidStudent(getStudent, "f1", "l1", "u1",
+        checkValidStudent(getStudent, "s1","f1", "l1", "u1",
                 "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
                 Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
     }
@@ -104,7 +111,7 @@ public class FirebaseServiceTest {
         doReturn(student).when(studentFirebaseWorkflow).getStudentWithEmail(anyString());
         Student getStudent = firebaseService.getStudentWithEmail("s1@u1.edu");
 
-        checkValidStudent(getStudent, "f1", "l1", "u1",
+        checkValidStudent(getStudent, "s1", "f1", "l1", "u1",
                 "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
                 Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
     }
@@ -124,9 +131,9 @@ public class FirebaseServiceTest {
     @Test
     public void testCheckValidEmployeeId() {
         doNothing().when(employeeFirebaseWorkflow).checkValidEmployeeId(anyString());
-        firebaseService.checkValidEmployeeId(anyString());
+        firebaseService.checkValidEmployeeId("e1");
         verify(employeeFirebaseWorkflow, times(1))
-                .checkValidEmployeeId(anyString());
+                .checkValidEmployeeId("e1");
     }
 
     @Test
@@ -134,7 +141,7 @@ public class FirebaseServiceTest {
         doReturn(employee).when(employeeFirebaseWorkflow).getEmployeeWithId(anyString());
         Employee getEmployee = firebaseService.getEmployeeWithId("e1");
 
-        checkValidEmployee(getEmployee, "n1", "c1", "b1",
+        checkValidEmployee(getEmployee, "e1", "n1", "c1", "b1",
                 Role.SWE, "e1@c1.com");
     }
 
@@ -155,7 +162,7 @@ public class FirebaseServiceTest {
         doReturn(employee).when(employeeFirebaseWorkflow).getEmployeeWithEmail(anyString());
         Employee getEmployee = firebaseService.getEmployeeWithEmail("e1@c1.com");
 
-        checkValidEmployee(getEmployee, "n1", "c1", "b1",
+        checkValidEmployee(getEmployee, "e1","n1", "c1", "b1",
                 Role.SWE, "e1@c1.com");
     }
 
@@ -176,8 +183,9 @@ public class FirebaseServiceTest {
         doReturn(fair).when(fairFirebaseWorkflow).getFairWithId(anyString());
         Fair getFair = firebaseService.getFairWithId("f1");
 
-        checkValidFair(getFair, "n1", "u1", "d1",
-                Arrays.asList("c1"), Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
+        checkValidFair(getFair, "f1", "n1", "u1", "d1",
+                Collections.singletonList("c1"),
+                Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1192508815, 0));
     }
 
@@ -194,34 +202,63 @@ public class FirebaseServiceTest {
     }
 
     @Test
-    public void testCheckValidId() {
-
+    public void testCheckValidCompanyId() {
+        doNothing().when(fairFirebaseWorkflow).checkValidCompanyId(anyString());
+        firebaseService.checkValidCompanyId("c1");
+        verify(fairFirebaseWorkflow, times(1))
+                .checkValidCompanyId("c1");
     }
 
     @Test
     public void testGetCompanyWithValidFairAndCompanyId() {
+        doReturn(company).when(fairFirebaseWorkflow).getCompanyWithId(anyString(), anyString());
+        Company getCompany = firebaseService.getCompanyWithId("f1", "c1");
 
+        checkValidCompany(getCompany, "c1", Collections.singletonList(Role.SWE),
+                Collections.singletonList("e1"), "b1", "www.c1.com");
     }
 
     @Test
     public void testGetCompanyWithInvalidFairId() {
-
+        doThrow(new FirebaseException("No fair exists with id=f10"))
+                .when(fairFirebaseWorkflow).getCompanyWithId(anyString(), anyString());
+        try {
+            firebaseService.getCompanyWithId("f10", "c1");
+            fail();
+        } catch (FirebaseException ex) {
+            assertEquals(ex.getMessage(),"No fair exists with id=f10");
+        }
     }
 
     @Test
     public void testGetCompanyWithInvalidCompanyId() {
-
+        doThrow(new FirebaseException("The company with company id=c10 is not present " +
+                "in the fair with fair id=f1"))
+                .when(fairFirebaseWorkflow).getCompanyWithId(anyString(), anyString());
+        try {
+            firebaseService.getCompanyWithId("f1", "c10");
+            fail();
+        } catch (FirebaseException ex) {
+            assertEquals(ex.getMessage(),"The company with company id=c10 is not present " +
+                    "in the fair with fair id=f1");
+        }
     }
 
-    @Test
-    public void testGetCompanyWithInvalidFairAndCompanyId() {
-
+    private void checkValidCompany(Company company, String name, List<Role> roles,
+                                   List<String> employees, String bio, String website) {
+        assertNotNull(company);
+        assertEquals(company.name, name);
+        assertEquals(company.roles, roles);
+        assertEquals(company.employees, employees);
+        assertEquals(company.bio, bio);
+        assertEquals(company.website, website);
     }
 
-    private void checkValidFair(Fair fair, String name, String universityId,
+    private void checkValidFair(Fair fair, String fairId, String name, String universityId,
             String description, List<String> companies, Timestamp startTime, Timestamp endTime) {
 
         assertNotNull(fair);
+        assertEquals(fair.fairId, fairId);
         assertEquals(fair.name, name);
         assertEquals(fair.universityId, universityId);
         assertEquals(fair.description, description);
@@ -230,11 +267,12 @@ public class FirebaseServiceTest {
         assertEquals(fair.endTime, endTime);
 
     }
-    private void checkValidStudent(Student student, String firstName,
+    private void checkValidStudent(Student student, String studentId, String firstName,
             String lastName, String universityId, String major, Role role, String bio, String email,
             Double gpa, Timestamp gradDate, Boolean international) {
 
         assertNotNull(student);
+        assertEquals(student.studentId, studentId);
         assertEquals(student.firstName, firstName);
         assertEquals(student.lastName, lastName);
         assertEquals(student.universityId, universityId);
@@ -247,10 +285,11 @@ public class FirebaseServiceTest {
         assertEquals(student.international, international);
     }
 
-    private void checkValidEmployee(Employee employee, String name,
+    private void checkValidEmployee(Employee employee, String employeeId, String name,
                                     String companyId, String bio, Role role, String email) {
 
         assertNotNull(employee);
+        assertEquals(employee.employeeId, employeeId);
         assertEquals(employee.name, name);
         assertEquals(employee.companyId, companyId);
         assertEquals(employee.bio, bio);
