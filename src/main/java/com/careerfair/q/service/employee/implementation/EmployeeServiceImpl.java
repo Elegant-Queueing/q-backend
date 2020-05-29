@@ -20,12 +20,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Autowired private FirebaseService firebaseService;
     @Autowired private ValidationService validationService;
 
-//    public EmployeeServiceImpl(@Autowired FirebaseService firebaseService,
-//                               @Autowired ValidationService validationService) {
-//        this.firebaseService = firebaseService;
-//        this.validationService = validationService;
-//    }
-
     @Override
     public GetEmployeeResponse getEmployeeWithId(String employeeId) {
         return new GetEmployeeResponse(firebaseService.getEmployeeWithId(employeeId));

@@ -1,7 +1,7 @@
 package com.careerfair.q.model.db;
 
 import com.careerfair.q.util.enums.Role;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.firestore.annotation.Exclude;
 import com.google.cloud.firestore.annotation.PropertyName;
 import lombok.AllArgsConstructor;
@@ -21,6 +21,7 @@ public class Employee {
     public String name;
 
     @PropertyName("company_id")
+    @JsonProperty("company_id")
     public String companyId;
 
     @PropertyName("role")
@@ -33,6 +34,5 @@ public class Employee {
     public String email;
 
     @PropertyName("students")
-    @JsonIgnore
     public List<String> students;
 }

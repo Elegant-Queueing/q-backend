@@ -4,19 +4,20 @@ import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.EmployeeFirebaseWorkflow;
 import com.google.api.client.util.Lists;
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.careerfair.q.util.constant.Firebase.EMPLOYEE_COLLECTION;
 
 @Component
 public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
+
+    private final List<String> UPDATE_FIELDS = Arrays.asList("name", "role", "bio", "email");
 
     @Override
     public void checkValidEmployeeId(String employeeId) throws FirebaseException {
@@ -99,9 +100,10 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
     public Employee updateEmployee(String employeeId, Employee updatedEmployee)
             throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
+
         try {
             firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
-                    .set(updatedEmployee).get();
+                    .set(updatedEmployee, SetOptions.mergeFields(UPDATE_FIELDS)).get();
             return getEmployeeWithId(employeeId);
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
@@ -113,6 +115,8 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
         Firestore firestore = FirestoreClient.getFirestore();
         DocumentReference documentReference = firestore.collection(EMPLOYEE_COLLECTION).document();
         String employeeId = documentReference.getId();
+
+        // TODO: this currently will also add a field students and set that to null
         try {
             documentReference.set(newEmployee).get();
             return getEmployeeWithId(employeeId);

@@ -2,7 +2,6 @@ package com.careerfair.q.model.db;
 
 import com.careerfair.q.service.database.deserializer.TimestampDeserializer;
 import com.careerfair.q.util.enums.Role;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.Exclude;
@@ -47,6 +46,6 @@ public class Student {
     public Boolean international;
 
     @PropertyName("employees")
-    @JsonIgnore
+    @Exclude
     public List<String> employees;
 }

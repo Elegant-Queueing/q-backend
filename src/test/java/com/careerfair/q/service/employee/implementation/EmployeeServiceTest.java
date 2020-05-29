@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
 
 public class EmployeeServiceTest {
 
@@ -47,7 +47,7 @@ public class EmployeeServiceTest {
 
     @Test
     public void testGetEmployeeWithId() {
-        when(firebaseService.getEmployeeWithId(anyString())).thenReturn(employee);
+        doReturn(employee).when(firebaseService).getEmployeeWithId(anyString());
         GetEmployeeResponse getEmployeeResponse = employeeService
                 .getEmployeeWithId("e1");
 
@@ -62,8 +62,7 @@ public class EmployeeServiceTest {
 
     @Test
     public void testGetEmployeeWithEmail() {
-        when(firebaseService.getEmployeeWithEmail(anyString())).thenReturn(employee);
-        System.out.println(employeeService);
+        doReturn(employee).when(firebaseService).getEmployeeWithEmail(anyString());
         GetEmployeeResponse getEmployeeResponse = employeeService
                 .getEmployeeWithEmail("e1@c1.com");
 
@@ -96,8 +95,8 @@ public class EmployeeServiceTest {
         assertEquals(updatedEmployee.bio, updatedNameRequest.getBio());
         assertEquals(updatedEmployee.email, updatedNameRequest.getEmail());
         assertEquals(updatedEmployee.role, updatedNameRequest.getRole());
-        
-        when(firebaseService.updateEmployee(anyString(), any())).thenReturn(updatedEmployee);
+
+        doReturn(updatedEmployee).when(firebaseService).updateEmployee(anyString(), any());
 
         UpdateEmployeeResponse updateEmployeeNameResponse = employeeService
                 .updateEmployee("e1", updatedNameRequest);
@@ -131,8 +130,8 @@ public class EmployeeServiceTest {
         assertEquals(updatedEmployee.bio, updateRequest.getBio());
         assertEquals(updatedEmployee.email, updateRequest.getEmail());
         assertEquals(updatedEmployee.role, updateRequest.getRole());
-        
-        when(firebaseService.updateEmployee(anyString(), any())).thenReturn(updatedEmployee);
+
+        doReturn(updatedEmployee).when(firebaseService).updateEmployee(anyString(), any());
 
         UpdateEmployeeResponse updateEmployeeNameResponse = employeeService
                 .updateEmployee("e1", updateRequest);
@@ -148,7 +147,7 @@ public class EmployeeServiceTest {
 
     @Test
     public void testDeleteEmployee() {
-        when(firebaseService.deleteEmployee(anyString())).thenReturn(employee);
+        doReturn(employee).when(firebaseService).deleteEmployee(anyString());
         DeleteEmployeeResponse deleteEmployeeResponse = employeeService
                 .deleteEmployee("e1");
 
@@ -183,7 +182,7 @@ public class EmployeeServiceTest {
         assertEquals(newStudent.email, addEmployeeRequest.getEmail());
         assertEquals(newStudent.role, addEmployeeRequest.getRole());
 
-        when(firebaseService.addEmployee(any())).thenReturn(employee);
+        doReturn(employee).when(firebaseService).addEmployee(any());
 
         AddEmployeeResponse addEmployeeResponse = employeeService.addEmployee(addEmployeeRequest);
 
