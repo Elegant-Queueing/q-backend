@@ -42,6 +42,7 @@ public class FirebaseServiceTest {
     private Student student;
     private Employee employee;
     private Fair fair;
+    private Fair startupFair;
     private Company company;
 
     @BeforeEach
@@ -59,6 +60,11 @@ public class FirebaseServiceTest {
                 Collections.singletonList("c1"),
                 Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1192508815, 0));
+
+        startupFair = new Fair("f2", "n2", "u1", "d2",
+                Collections.singletonList("c2"),
+                Timestamp.ofTimeSecondsAndNanos(1193506815, 0),
+                Timestamp.ofTimeSecondsAndNanos(1193508815, 0));
 
         company = new Company("c1", Collections.singletonList(Role.SWE),
                 Collections.singletonList("e1"), "b1", "www.c1.com");
@@ -241,6 +247,33 @@ public class FirebaseServiceTest {
         } catch (FirebaseException ex) {
             assertEquals(ex.getMessage(),"The company with company id=c10 is not present " +
                     "in the fair with fair id=f1");
+        }
+    }
+
+    @Test
+    public void testGetAllFairs() {
+        doReturn(Arrays.asList(fair, startupFair)).when(fairFirebaseWorkflow).getAllFairs();
+        List<Fair> getFairs = firebaseService.getAllFairs();
+        assertNotNull(getFairs);
+        assertEquals(2, getFairs.size());
+        checkValidFair(getFairs.get(0), "f1", "n1", "u1", "d1",
+                Collections.singletonList("c1"),
+                Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
+                Timestamp.ofTimeSecondsAndNanos(1192508815, 0));
+        checkValidFair(getFairs.get(1), "f2", "n2", "u1", "d2",
+                Collections.singletonList("c2"),
+                Timestamp.ofTimeSecondsAndNanos(1193506815, 0),
+                Timestamp.ofTimeSecondsAndNanos(1193508815, 0));
+    }
+
+    @Test
+    public void testGetAllFairsError() {
+        doThrow(new FirebaseException("error")).when(fairFirebaseWorkflow).getAllFairs();
+        try {
+            firebaseService.getAllFairs();
+            fail();
+        } catch(FirebaseException ex) {
+            assertEquals(ex.getMessage(), "error");
         }
     }
 
