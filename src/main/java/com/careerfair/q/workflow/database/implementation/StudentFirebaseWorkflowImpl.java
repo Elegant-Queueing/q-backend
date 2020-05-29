@@ -4,19 +4,21 @@ import com.careerfair.q.model.db.Student;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.StudentFirebaseWorkflow;
 import com.google.api.client.util.Lists;
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.careerfair.q.util.constant.Firebase.STUDENT_COLLECTION;
 
 @Component
 public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
+
+    private final List<String> UPDATE_FIELDS = Arrays.asList("first_name", "last_name",
+            "role", "major", "gpa", "grad_date","bio", "email", "international");
 
     @Override
     public void checkValidStudentId(String studentId) throws FirebaseException {
@@ -99,7 +101,8 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
             throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
         try {
-            firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent).get();
+            firestore.collection(STUDENT_COLLECTION).document(studentId)
+                    .set(updatedStudent, SetOptions.mergeFields(UPDATE_FIELDS)).get();
             return getStudentWithId(studentId);
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
