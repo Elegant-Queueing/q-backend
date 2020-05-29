@@ -45,7 +45,6 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
             if (student == null) {
                 throw new FirebaseException("No student with student id=" + studentId + " exists");
             }
-
             student.studentId = studentId;
             return student;
         } catch (ExecutionException | InterruptedException ex) {
@@ -101,10 +100,10 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         Firestore firestore = FirestoreClient.getFirestore();
         try {
             firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent).get();
+            return getStudentWithId(studentId);
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
         }
-        return getStudentWithId(studentId);
     }
 
     @Override
@@ -114,10 +113,10 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         String studentId = documentReference.getId();
         try {
             documentReference.set(newStudent).get();
+            return getStudentWithId(studentId);
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
         }
-        return getStudentWithId(studentId);
     }
 
     @Override

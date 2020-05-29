@@ -46,6 +46,32 @@ public class StudentServiceImpl implements StudentService {
         return new UpdateStudentResponse(updateStudent);
     }
 
+    @Override
+    public DeleteStudentResponse deleteStudent(String studentId) {
+        return new DeleteStudentResponse(firebaseService.deleteStudent(studentId));
+    }
+
+    @Override
+    public AddStudentResponse addStudent(AddStudentRequest addStudentRequest) {
+        validationService.checkValidStudentRequest(addStudentRequest);
+        Student studentFromRequest = createStudentFromRequest(addStudentRequest);
+        Student newStudent = firebaseService.addStudent(studentFromRequest);
+        return new AddStudentResponse(newStudent);
+    }
+
+    @Override
+    public UpdateStudentResponse uploadStudentResume(String id,
+                                                     UpdateStudentRequest uploadStudentResume) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public void testDatabaseConnection() {
+        firebaseService.test();
+    }
+
+    // Helper method to convert studentRequest object to a Student object
     private <T extends StudentRequest> Student createStudentFromRequest(T studentRequest) {
         Student student = new Student();
         student.firstName = studentRequest.getFirstName();
@@ -59,30 +85,5 @@ public class StudentServiceImpl implements StudentService {
         student.graduationDate = studentRequest.getGraduationDate();
         student.international = studentRequest.getInternational();
         return student;
-    }
-
-    @Override
-    public DeleteStudentResponse deleteStudent(String studentId) {
-        return new DeleteStudentResponse(firebaseService.deleteStudent(studentId));
-    }
-
-    @Override
-    public AddStudentResponse addStudent(AddStudentRequest addStudentRequest) {
-        validationService.checkValidStudentRequest(addStudentRequest);
-        Student studentFromRequest = createStudentFromRequest(addStudentRequest);
-        Student addedStudent = firebaseService.addStudent(studentFromRequest);
-        return new AddStudentResponse(addedStudent);
-    }
-
-    @Override
-    public UpdateStudentResponse uploadStudentResume(String id,
-                                                     UpdateStudentRequest uploadStudentResume) {
-        // TODO
-        return null;
-    }
-
-    @Override
-    public void testDatabaseConnection() {
-        firebaseService.test();
     }
 }

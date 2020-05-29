@@ -1,12 +1,13 @@
-package com.careerfair.q.service.employee.response;
+package com.careerfair.q.service.employee.request;
 
-import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.util.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public abstract class EmployeeResponse {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class EmployeeRequest {
     @JsonProperty("name")
     private String name;
 
@@ -21,12 +22,4 @@ public abstract class EmployeeResponse {
 
     @JsonProperty("email")
     private String email;
-
-    public EmployeeResponse(Employee employee) {
-        this.name = employee.name;
-        this.companyId = employee.companyId;
-        this.role = employee.role;
-        this.bio = employee.bio;
-        this.email = employee.email;
-    }
 }

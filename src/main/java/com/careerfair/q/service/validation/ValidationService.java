@@ -1,5 +1,6 @@
 package com.careerfair.q.service.validation;
 
+import com.careerfair.q.service.employee.request.EmployeeRequest;
 import com.careerfair.q.service.student.request.StudentRequest;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.ValidationException;
@@ -50,5 +51,14 @@ public interface ValidationService {
      * @throws ValidationException if any of the required fields are invalid or missing
      */
     <T extends StudentRequest> void checkValidStudentRequest(T studentRequest)
+            throws ValidationException;
+
+    /**
+     * Checks if update/add employee requests are valid
+     *
+     * @param employeeRequest employee add or update request object
+     * @throws ValidationException if any of the required fields are invalid or missing
+     */
+    <T extends EmployeeRequest> void checkValidEmployeeRequest(T employeeRequest)
             throws ValidationException;
 }

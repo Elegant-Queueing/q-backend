@@ -4,19 +4,20 @@ import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.EmployeeFirebaseWorkflow;
 import com.google.api.client.util.Lists;
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static com.careerfair.q.util.constant.Firebase.EMPLOYEE_COLLECTION;
 
 @Component
 public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
+
+    private final List<String> UPDATE_FIELDS = Arrays.asList("name", "role", "bio", "email");
 
     @Override
     public void checkValidEmployeeId(String employeeId) throws FirebaseException {
@@ -47,7 +48,7 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
                 throw new FirebaseException("No employee with employee id=" + employeeId);
             }
 
-            employee.setEmployeeId(employeeId);
+            employee.employeeId = employeeId;
             return employee;
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
@@ -68,7 +69,7 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
                     Employee employee = documentSnapshot.toObject(Employee.class);
                     assert employee != null;
 
-                    employee.setEmployeeId(documentSnapshot.getId());
+                    employee.employeeId = documentSnapshot.getId();
                     return employee;
                 }
             }
@@ -85,14 +86,49 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
         Firestore firestore = FirestoreClient.getFirestore();
         Employee employee = getEmployeeWithId(employeeId);
 
-        if (employee.getStudents() == null) {
-            employee.setStudents(Lists.newArrayList());
+        if (employee.students == null) {
+            employee.students = Lists.newArrayList();
         }
-
-        if (!employee.getStudents().contains(studentId)) {
-            employee.getStudents().add(studentId);
+        if(!employee.students.contains(studentId)) {
+            employee.students.add(studentId);
             firestore.collection(EMPLOYEE_COLLECTION).document(employeeId).update("students",
-                    employee.getStudents());
+                    employee.students);
         }
+    }
+
+    @Override
+    public Employee updateEmployee(String employeeId, Employee updatedEmployee)
+            throws FirebaseException {
+        Firestore firestore = FirestoreClient.getFirestore();
+
+        try {
+            firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
+                    .set(updatedEmployee, SetOptions.mergeFields(UPDATE_FIELDS)).get();
+            return getEmployeeWithId(employeeId);
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new FirebaseException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public Employee addEmployee(Employee newEmployee) throws FirebaseException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        DocumentReference documentReference = firestore.collection(EMPLOYEE_COLLECTION).document();
+        String employeeId = documentReference.getId();
+
+        try {
+            documentReference.set(newEmployee).get();
+            return getEmployeeWithId(employeeId);
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new FirebaseException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public Employee deleteEmployee(String employeeId) throws FirebaseException {
+        Firestore firestore = FirestoreClient.getFirestore();
+        Employee deletedEmployee = getEmployeeWithId(employeeId);
+        firestore.collection(EMPLOYEE_COLLECTION).document(employeeId).delete();
+        return deletedEmployee;
     }
 }

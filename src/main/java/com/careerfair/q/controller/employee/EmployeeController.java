@@ -27,24 +27,28 @@ public interface EmployeeController {
     GetEmployeeResponse getEmployeeWithEmail(String email);
 
     /**
+     * Updates the given employees details based on the request details
      *
-     * @param id
-     * @param updateEmployeeRequest
-     * @return
+     * @param employeeId id of the employee to update
+     * @param updateEmployeeRequest details of what attributes are to be updated
+     * @return UpdateEmployeeResponse
      */
-    UpdateEmployeeResponse updateEmployee(String id, UpdateEmployeeRequest updateEmployeeRequest);
+    UpdateEmployeeResponse updateEmployee(String employeeId,
+                                          UpdateEmployeeRequest updateEmployeeRequest);
 
     /**
+     * Deletes an employee with the given employeeId
      *
-     * @param id
-     * @return
+     * @param employeeId id of the employee to be deleted
+     * @return DeleteEmployeeResponse
      */
-    DeleteEmployeeResponse deleteEmployee(String id);
+    DeleteEmployeeResponse deleteEmployee(String employeeId);
 
     /**
+     * Adds an employee with the given request details
      *
-     * @param addEmployeeRequest
-     * @return
+     * @param addEmployeeRequest details of the employee to be added
+     * @return AddEmployeeResponse
      */
     AddEmployeeResponse addEmployee(AddEmployeeRequest addEmployeeRequest);
 }
