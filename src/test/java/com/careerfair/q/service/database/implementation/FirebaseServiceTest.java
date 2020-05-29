@@ -277,6 +277,40 @@ public class FirebaseServiceTest {
         }
     }
 
+    @Test
+    public void testRegisterStudent() {
+
+    }
+
+    @Test
+    public void testUpdateStudent() {
+
+    }
+
+    @Test
+    public void testAddStudent() {
+
+    }
+
+    @Test
+    public void testDeleteStudent() {
+
+    }
+
+    @Test
+    public void testUpdateEmployee() {
+
+    }
+
+    @Test
+    public void testAddEmployee() {
+    }
+
+    @Test
+    public void testDeleteEmployee() {
+
+    }
+
     private void checkValidCompany(Company company, String name, List<Role> roles,
                                    List<String> employees, String bio, String website) {
         assertNotNull(company);
