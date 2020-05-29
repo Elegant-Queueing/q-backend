@@ -65,24 +65,24 @@ public class EmployeeServiceTest {
 
     @Test
     public void testUpdateEmployeeName() {
-        UpdateEmployeeRequest updatedNameRequest = new UpdateEmployeeRequest();
-        updatedNameRequest.setName("n2");
-        updatedNameRequest.setCompanyId("c1");
-        updatedNameRequest.setRole(Role.SWE);
-        updatedNameRequest.setBio("b1");
-        updatedNameRequest.setEmail("e1@c1.com");
+        UpdateEmployeeRequest updateNameRequest = new UpdateEmployeeRequest();
+        updateNameRequest.setName("n2");
+        updateNameRequest.setCompanyId("c1");
+        updateNameRequest.setRole(Role.SWE);
+        updateNameRequest.setBio("b1");
+        updateNameRequest.setEmail("e1@c1.com");
 
         // skipping validation test and assuming it is a valid request
-        doNothing().when(validationService).checkValidStudentRequest(any());
+        doNothing().when(validationService).checkValidEmployeeRequest(any());
         Employee updatedEmployee = employeeService
-                .createEmployeeFromRequest(updatedNameRequest);
+                .createEmployeeFromRequest(updateNameRequest);
 
-        checkValidEmployee(updatedEmployee, updatedNameRequest);
+        checkValidEmployee(updatedEmployee, updateNameRequest);
 
         doReturn(updatedEmployee).when(firebaseService).updateEmployee(anyString(), any());
 
         UpdateEmployeeResponse updateEmployeeNameResponse = employeeService
-                .updateEmployee("e1", updatedNameRequest);
+                .updateEmployee("e1", updateNameRequest);
 
         checkValidResponse(updateEmployeeNameResponse, "n2", "c1", "b1",
                 Role.SWE, "e1@c1.com");
@@ -125,19 +125,19 @@ public class EmployeeServiceTest {
     @Test
     public void testAddEmployee() {
         AddEmployeeRequest addEmployeeRequest = new AddEmployeeRequest();
-        addEmployeeRequest.setName("n1");
+        addEmployeeRequest.setName("n2");
         addEmployeeRequest.setCompanyId("c1");
         addEmployeeRequest.setBio("b1");
         addEmployeeRequest.setRole(Role.SWE);
         addEmployeeRequest.setEmail("e1@c1.com");
 
         // skipping validation test and assuming it is a valid request
-        doNothing().when(validationService).checkValidStudentRequest(any());
+        doNothing().when(validationService).checkValidEmployeeRequest(any());
         Employee newEmployee = employeeService.createEmployeeFromRequest(addEmployeeRequest);
         checkValidEmployee(newEmployee, addEmployeeRequest);
-        doReturn(employee).when(firebaseService).addEmployee(any());
+        doReturn(newEmployee).when(firebaseService).addEmployee(any());
         AddEmployeeResponse addEmployeeResponse = employeeService.addEmployee(addEmployeeRequest);
-        checkValidResponse(addEmployeeResponse, "n1", "c1", "b1",
+        checkValidResponse(addEmployeeResponse, "n2", "c1", "b1",
                 Role.SWE, "e1@c1.com");
     }
 
