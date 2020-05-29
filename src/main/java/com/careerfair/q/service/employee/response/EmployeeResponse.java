@@ -3,11 +3,9 @@ package com.careerfair.q.service.employee.response;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.util.enums.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
+@Data
 public abstract class EmployeeResponse {
     @JsonProperty("name")
     private String name;

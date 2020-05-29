@@ -32,5 +32,6 @@ public class Employee {
     public String email;
 
     @PropertyName("students")
+    @Exclude
     public List<String> students;
 }

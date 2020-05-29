@@ -116,7 +116,6 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
         DocumentReference documentReference = firestore.collection(EMPLOYEE_COLLECTION).document();
         String employeeId = documentReference.getId();
 
-        // TODO: this currently will also add a field students and set that to null
         try {
             documentReference.set(newEmployee).get();
             return getEmployeeWithId(employeeId);

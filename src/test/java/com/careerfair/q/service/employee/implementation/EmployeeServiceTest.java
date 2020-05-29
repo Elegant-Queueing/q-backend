@@ -3,11 +3,9 @@ package com.careerfair.q.service.employee.implementation;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.employee.request.AddEmployeeRequest;
+import com.careerfair.q.service.employee.request.EmployeeRequest;
 import com.careerfair.q.service.employee.request.UpdateEmployeeRequest;
-import com.careerfair.q.service.employee.response.AddEmployeeResponse;
-import com.careerfair.q.service.employee.response.DeleteEmployeeResponse;
-import com.careerfair.q.service.employee.response.GetEmployeeResponse;
-import com.careerfair.q.service.employee.response.UpdateEmployeeResponse;
+import com.careerfair.q.service.employee.response.*;
 import com.careerfair.q.service.validation.ValidationService;
 import com.careerfair.q.util.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,13 +49,8 @@ public class EmployeeServiceTest {
         GetEmployeeResponse getEmployeeResponse = employeeService
                 .getEmployeeWithId("e1");
 
-        assertNotNull(getEmployeeResponse);
-        assertEquals(getEmployeeResponse.getName(), "n1");
-        assertEquals(getEmployeeResponse.getCompanyId(), "c1");
-        assertEquals(getEmployeeResponse.getBio(), "b1");
-        assertEquals(getEmployeeResponse.getRole(), Role.SWE);
-        assertEquals(getEmployeeResponse.getEmail(), "e1@c1.com");
-        assertEquals(getEmployeeResponse.getStudents(), Arrays.asList("s1"));
+        checkValidResponse(getEmployeeResponse, "n1", "c1", "b1",
+                Role.SWE, "e1@c1.com");
     }
 
     @Test
@@ -66,13 +59,8 @@ public class EmployeeServiceTest {
         GetEmployeeResponse getEmployeeResponse = employeeService
                 .getEmployeeWithEmail("e1@c1.com");
 
-        assertNotNull(getEmployeeResponse);
-        assertEquals(getEmployeeResponse.getName(), "n1");
-        assertEquals(getEmployeeResponse.getCompanyId(), "c1");
-        assertEquals(getEmployeeResponse.getBio(), "b1");
-        assertEquals(getEmployeeResponse.getRole(), Role.SWE);
-        assertEquals(getEmployeeResponse.getEmail(), "e1@c1.com");
-        assertEquals(getEmployeeResponse.getStudents(), Arrays.asList("s1"));
+        checkValidResponse(getEmployeeResponse, "n1", "c1", "b1",
+                Role.SWE, "e1@c1.com");
     }
 
     @Test
@@ -88,26 +76,16 @@ public class EmployeeServiceTest {
         doNothing().when(validationService).checkValidStudentRequest(any());
         Employee updatedEmployee = employeeService
                 .createEmployeeFromRequest(updatedNameRequest);
-        
-        assertNotNull(updatedEmployee);
-        assertEquals(updatedEmployee.name, updatedNameRequest.getName());
-        assertEquals(updatedEmployee.companyId, updatedNameRequest.getCompanyId());
-        assertEquals(updatedEmployee.bio, updatedNameRequest.getBio());
-        assertEquals(updatedEmployee.email, updatedNameRequest.getEmail());
-        assertEquals(updatedEmployee.role, updatedNameRequest.getRole());
+
+        checkValidEmployee(updatedEmployee, updatedNameRequest);
 
         doReturn(updatedEmployee).when(firebaseService).updateEmployee(anyString(), any());
 
         UpdateEmployeeResponse updateEmployeeNameResponse = employeeService
                 .updateEmployee("e1", updatedNameRequest);
 
-        // students is not an attribute in response or request
-        assertNotNull(updateEmployeeNameResponse);
-        assertEquals(updateEmployeeNameResponse.getName(), "n2");
-        assertEquals(updateEmployeeNameResponse.getCompanyId(), "c1");
-        assertEquals(updateEmployeeNameResponse.getBio(), "b1");
-        assertEquals(updateEmployeeNameResponse.getRole(), Role.SWE);
-        assertEquals(updateEmployeeNameResponse.getEmail(), "e1@c1.com");
+        checkValidResponse(updateEmployeeNameResponse, "n2", "c1", "b1",
+                Role.SWE, "e1@c1.com");
     }
 
     @Test
@@ -124,25 +102,13 @@ public class EmployeeServiceTest {
         Employee updatedEmployee = employeeService
                 .createEmployeeFromRequest(updateRequest);
 
-        assertNotNull(updatedEmployee);
-        assertEquals(updatedEmployee.name, updateRequest.getName());
-        assertEquals(updatedEmployee.companyId, updateRequest.getCompanyId());
-        assertEquals(updatedEmployee.bio, updateRequest.getBio());
-        assertEquals(updatedEmployee.email, updateRequest.getEmail());
-        assertEquals(updatedEmployee.role, updateRequest.getRole());
-
+        checkValidEmployee(updatedEmployee, updateRequest);
         doReturn(updatedEmployee).when(firebaseService).updateEmployee(anyString(), any());
-
         UpdateEmployeeResponse updateEmployeeNameResponse = employeeService
                 .updateEmployee("e1", updateRequest);
 
-        // students is not an attribute in response or request
-        assertNotNull(updateEmployeeNameResponse);
-        assertEquals(updateEmployeeNameResponse.getName(), "n2");
-        assertEquals(updateEmployeeNameResponse.getCompanyId(), "c2");
-        assertEquals(updateEmployeeNameResponse.getBio(), "b2");
-        assertEquals(updateEmployeeNameResponse.getRole(), Role.DS);
-        assertEquals(updateEmployeeNameResponse.getEmail(), "e1@c2.com");
+        checkValidResponse(updateEmployeeNameResponse, "n2", "c2", "b2",
+                Role.DS, "e1@c2.com");
     }
 
     @Test
@@ -151,13 +117,8 @@ public class EmployeeServiceTest {
         DeleteEmployeeResponse deleteEmployeeResponse = employeeService
                 .deleteEmployee("e1");
 
-        assertNotNull(deleteEmployeeResponse);
-        assertEquals(deleteEmployeeResponse.getEmployeeId(), "e1");
-        assertEquals(deleteEmployeeResponse.getName(), "n1");
-        assertEquals(deleteEmployeeResponse.getCompanyId(), "c1");
-        assertEquals(deleteEmployeeResponse.getBio(), "b1");
-        assertEquals(deleteEmployeeResponse.getRole(), Role.SWE);
-        assertEquals(deleteEmployeeResponse.getEmail(), "e1@c1.com");
+        checkValidResponse(deleteEmployeeResponse, "n1", "c1", "b1",
+                Role.SWE, "e1@c1.com");
         assertEquals(deleteEmployeeResponse.getStudents(), Arrays.asList("s1"));
     }
 
@@ -172,26 +133,30 @@ public class EmployeeServiceTest {
 
         // skipping validation test and assuming it is a valid request
         doNothing().when(validationService).checkValidStudentRequest(any());
-
-        Employee newStudent = employeeService.createEmployeeFromRequest(addEmployeeRequest);
-
-        assertNotNull(newStudent);
-        assertEquals(newStudent.name, addEmployeeRequest.getName());
-        assertEquals(newStudent.companyId, addEmployeeRequest.getCompanyId());
-        assertEquals(newStudent.bio, addEmployeeRequest.getBio());
-        assertEquals(newStudent.email, addEmployeeRequest.getEmail());
-        assertEquals(newStudent.role, addEmployeeRequest.getRole());
-
+        Employee newEmployee = employeeService.createEmployeeFromRequest(addEmployeeRequest);
+        checkValidEmployee(newEmployee, addEmployeeRequest);
         doReturn(employee).when(firebaseService).addEmployee(any());
-
         AddEmployeeResponse addEmployeeResponse = employeeService.addEmployee(addEmployeeRequest);
+        checkValidResponse(addEmployeeResponse, "n1", "c1", "b1",
+                Role.SWE, "e1@c1.com");
+    }
 
-        // students is not an attribute in response or request
-        assertNotNull(addEmployeeResponse);
-        assertEquals(addEmployeeResponse.getName(), "n1");
-        assertEquals(addEmployeeResponse.getCompanyId(), "c1");
-        assertEquals(addEmployeeResponse.getBio(), "b1");
-        assertEquals(addEmployeeResponse.getRole(), Role.SWE);
-        assertEquals(addEmployeeResponse.getEmail(), "e1@c1.com");
+    private void checkValidResponse(EmployeeResponse employeeResponse, String name,
+                                    String companyId, String bio, Role role, String email) {
+        assertNotNull(employeeResponse);
+        assertEquals(employeeResponse.getName(), name);
+        assertEquals(employeeResponse.getCompanyId(), companyId);
+        assertEquals(employeeResponse.getBio(), bio);
+        assertEquals(employeeResponse.getRole(), role);
+        assertEquals(employeeResponse.getEmail(), email);
+    }
+
+    private void checkValidEmployee(Employee employee, EmployeeRequest request) {
+        assertNotNull(employee);
+        assertEquals(employee.name, request.getName());
+        assertEquals(employee.companyId, request.getCompanyId());
+        assertEquals(employee.bio, request.getBio());
+        assertEquals(employee.email, request.getEmail());
+        assertEquals(employee.role, request.getRole());
     }
 }
