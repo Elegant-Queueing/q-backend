@@ -98,7 +98,6 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
     public Student updateStudent(String studentId, Student updatedStudent)
             throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
-        System.out.println(updatedStudent.employees);
         try {
             firestore.collection(STUDENT_COLLECTION).document(studentId).set(updatedStudent).get();
             return getStudentWithId(studentId);
