@@ -17,15 +17,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class StudentServiceImpl implements StudentService {
 
-    private final FirebaseService firebaseService;
-    private final ValidationService validationService;
-
-    public StudentServiceImpl(@Autowired FirebaseService firebaseService,
-                              @Autowired ValidationService validationService) {
-        this.firebaseService = firebaseService;
-        this.validationService = validationService;
-    }
-
+    @Autowired private FirebaseService firebaseService;
+    @Autowired private ValidationService validationService;
 
     @Override
     public GetStudentResponse getStudentWithId(String studentId) {
@@ -72,7 +65,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     // Helper method to convert studentRequest object to a Student object
-    private <T extends StudentRequest> Student createStudentFromRequest(T studentRequest) {
+    <T extends StudentRequest> Student createStudentFromRequest(T studentRequest) {
         Student student = new Student();
         student.firstName = studentRequest.getFirstName();
         student.lastName = studentRequest.getLastName();

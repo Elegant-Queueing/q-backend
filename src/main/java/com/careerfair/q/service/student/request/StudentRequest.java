@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.cloud.Timestamp;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StudentRequest {
     @JsonProperty("first_name")
