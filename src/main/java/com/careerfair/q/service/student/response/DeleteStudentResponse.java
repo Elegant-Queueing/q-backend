@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class DeleteStudentResponse extends StudentResponse {
+
     @JsonProperty("student_id")
     private String studentId;
 

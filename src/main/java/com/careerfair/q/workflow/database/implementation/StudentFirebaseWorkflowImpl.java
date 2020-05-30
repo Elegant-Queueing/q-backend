@@ -17,7 +17,7 @@ import static com.careerfair.q.util.constant.Firebase.STUDENT_COLLECTION;
 @Component
 public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
 
-    private final List<String> UPDATE_FIELDS = Arrays.asList("first_name", "last_name",
+    private final static List<String> UPDATE_FIELDS = Arrays.asList("first_name", "last_name",
             "role", "major", "gpa", "grad_date","bio", "email", "international");
 
     @Override

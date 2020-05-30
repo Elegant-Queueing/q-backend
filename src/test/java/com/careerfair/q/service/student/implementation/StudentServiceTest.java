@@ -15,10 +15,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
+import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -40,44 +39,30 @@ public class StudentServiceTest {
     @BeforeEach
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
-        student = new Student("s1", "f1", "l1", "u1",
-                "m1", Role.SWE, "b1", "s1@u1.edu", 4.0,
-                Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true,
-                Arrays.asList("e1"));
+        student = createDummyStudent();
     }
 
     @Test
     public void testGetStudentWithId() {
         doReturn(student).when(firebaseService).getStudentWithId(anyString());
         GetStudentResponse getStudentResponse = studentService.getStudentWithId("s1");
-        checkValidResponse(getStudentResponse, "f1", "l1", "u1",
-                "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
-                Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
+        checkValidResponse(getStudentResponse, "f1", "l1", "u1", "m1", Role.SWE, "b1","s1@u1.edu",
+                4.0, Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
     }
 
     @Test
     public void testGetStudentWithEmail() {
         doReturn(student).when(firebaseService).getStudentWithEmail(anyString());
         GetStudentResponse getStudentResponse = studentService.getStudentWithEmail("s1@u1.edu");
-        checkValidResponse(getStudentResponse, "f1", "l1", "u1",
-                "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
-                Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
+        checkValidResponse(getStudentResponse, "f1", "l1", "u1", "m1", Role.SWE, "b1","s1@u1.edu",
+                4.0, Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
     }
 
     @Test
     public void testUpdateStudentFirstName() {
         UpdateStudentRequest updateNameRequest = new UpdateStudentRequest();
-        updateNameRequest.setFirstName("f2");
-        updateNameRequest.setLastName("l1");
-        updateNameRequest.setUniversityId("u1");
-        updateNameRequest.setMajor("m1");
-        updateNameRequest.setRole(Role.SWE);
-        updateNameRequest.setBio("b1");
-        updateNameRequest.setEmail("s1@u1.edu");
-        updateNameRequest.setGpa(4.0);
-        updateNameRequest.setGraduationDate(Timestamp.ofTimeSecondsAndNanos(1592506815,
-                0));
-        updateNameRequest.setInternational(true);
+        populateRequestObject(updateNameRequest, "f2", "l1", "u1", "m1", Role.SWE, "b1",
+                "s1@u1.edu", 4.0, Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
 
         doNothing().when(validationService).checkValidStudentRequest(any());
         Student updatedStudent = studentService.createStudentFromRequest(updateNameRequest);
@@ -95,17 +80,8 @@ public class StudentServiceTest {
     @Test
     public void testUpdateStudentMultipleAttributes() {
         UpdateStudentRequest updateNameRequest = new UpdateStudentRequest();
-        updateNameRequest.setFirstName("f2");
-        updateNameRequest.setLastName("l2");
-        updateNameRequest.setUniversityId("u2");
-        updateNameRequest.setMajor("m2");
-        updateNameRequest.setRole(Role.DS);
-        updateNameRequest.setBio("b2");
-        updateNameRequest.setEmail("s2@u2.edu");
-        updateNameRequest.setGpa(3.0);
-        updateNameRequest.setGraduationDate(Timestamp.ofTimeSecondsAndNanos(1592506825,
-                0));
-        updateNameRequest.setInternational(false);
+        populateRequestObject(updateNameRequest, "f2", "l2", "u2", "m2", Role.DS, "b2",
+                "s2@u2.edu", 3.0, Timestamp.ofTimeSecondsAndNanos(1592506825, 0), false);
 
         doNothing().when(validationService).checkValidStudentRequest(any());
         Student updatedStudent = studentService.createStudentFromRequest(updateNameRequest);
@@ -128,23 +104,14 @@ public class StudentServiceTest {
         checkValidResponse(deleteStudentResponse,"f1", "l1", "u1",
                 "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
                 Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
-        assertEquals(deleteStudentResponse.getEmployees(), Arrays.asList("e1"));
+        assertEquals(deleteStudentResponse.getEmployees(), Collections.singletonList("e1"));
     }
 
     @Test
     public void testAddStudent() {
         AddStudentRequest addStudentRequest = new AddStudentRequest();
-        addStudentRequest.setFirstName("f2");
-        addStudentRequest.setLastName("l2");
-        addStudentRequest.setUniversityId("u2");
-        addStudentRequest.setMajor("m2");
-        addStudentRequest.setRole(Role.DS);
-        addStudentRequest.setBio("b2");
-        addStudentRequest.setEmail("s2@u2.edu");
-        addStudentRequest.setGpa(3.0);
-        addStudentRequest.setGraduationDate(Timestamp.ofTimeSecondsAndNanos(1592506825,
-                0));
-        addStudentRequest.setInternational(false);
+        populateRequestObject(addStudentRequest, "f2", "l2", "u2", "m2", Role.DS, "b2",
+                "s2@u2.edu", 3.0, Timestamp.ofTimeSecondsAndNanos(1592506825, 0), false);
 
         doNothing().when(validationService).checkValidStudentRequest(any());
         Student newStudent = studentService.createStudentFromRequest(addStudentRequest);
@@ -184,5 +151,37 @@ public class StudentServiceTest {
         assertEquals(student.gpa, request.getGpa());
         assertEquals(student.graduationDate, request.getGraduationDate());
         assertEquals(student.international, request.getInternational());
+    }
+
+    private Student createDummyStudent() {
+        student = new Student();
+        student.studentId = "s1";
+        student.firstName = "f1";
+        student.lastName = "l1";
+        student.universityId = "u1";
+        student.major = "m1";
+        student.bio = "b1";
+        student.role = Role.SWE;
+        student.email = "s1@u1.edu";
+        student.gpa = 4.0;
+        student.graduationDate = Timestamp.ofTimeSecondsAndNanos(1592506815, 0);
+        student.international = true;
+        student.employees = Collections.singletonList("e1");
+        return student;
+    }
+
+    private <T extends StudentRequest> void populateRequestObject(T request, String firstName,
+            String lastName, String universityId, String major, Role role, String bio, String email,
+            Double gpa, Timestamp gradDate, Boolean international) {
+        request.setFirstName(firstName);
+        request.setLastName(lastName);
+        request.setUniversityId(universityId);
+        request.setMajor(major);
+        request.setRole(role);
+        request.setBio(bio);
+        request.setEmail(email);
+        request.setGpa(gpa);
+        request.setGraduationDate(gradDate);
+        request.setInternational(international);
     }
 }
