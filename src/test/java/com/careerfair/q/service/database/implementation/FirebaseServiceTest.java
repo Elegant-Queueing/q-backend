@@ -4,6 +4,7 @@ import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.model.db.Student;
+import com.careerfair.q.util.constant.Firebase;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.EmployeeFirebaseWorkflow;
@@ -39,6 +40,7 @@ public class FirebaseServiceTest {
     private final FirebaseServiceImpl firebaseService = new FirebaseServiceImpl();
 
     private Student student;
+    private Student updatedStudent;
     private Employee employee;
     private Fair fair;
     private Fair fairTwo;
@@ -48,16 +50,21 @@ public class FirebaseServiceTest {
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
 
-        student = createDummyStudent();
+        student = createDummyStudent("s1", "f1", "l1", "u1", "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
+                Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true,
+                Collections.singletonList("e1"));
+
+        updatedStudent = createDummyStudent("s1", "f2", "l2", "u1", "m1", Role.SWE, "b2","s1@u1.edu",
+                4.0, Timestamp.ofTimeSecondsAndNanos(1592506825, 0), true, Collections.singletonList("e1"));
+
         employee = createDummyEmployee();
 
-        fair = createDummyFair("f1", "n1", "u1", "d1",
-                Collections.singletonList("c1"),
+        fair = createDummyFair("f1", "n1", "u1", "d1", Collections.singletonList("c1"),
                 Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1192508815, 0));
 
-        fairTwo = createDummyFair("f2", "n2", "u1", "d2",
-                Collections.singletonList("c2"),
+
+        fairTwo = createDummyFair("f2", "n2", "u1", "d2", Collections.singletonList("c2"),
                 Timestamp.ofTimeSecondsAndNanos(1193506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1193508815, 0));
 
@@ -68,8 +75,7 @@ public class FirebaseServiceTest {
     public void testCheckValidStudentId() {
         doNothing().when(studentFirebaseWorkflow).checkValidStudentId(anyString());
         firebaseService.checkValidStudentId("s1");
-        verify(studentFirebaseWorkflow, times(1))
-                .checkValidStudentId("s1");
+        verify(studentFirebaseWorkflow, times(1)).checkValidStudentId("s1");
     }
 
     @Test
@@ -89,8 +95,7 @@ public class FirebaseServiceTest {
         doReturn(student).when(studentFirebaseWorkflow).getStudentWithId(anyString());
         Student getStudent = firebaseService.getStudentWithId("s1");
 
-        checkValidStudent(getStudent, "s1","f1", "l1", "u1",
-                "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
+        checkValidStudent(getStudent, "s1","f1", "l1", "u1", "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
                 Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
     }
 
@@ -111,8 +116,7 @@ public class FirebaseServiceTest {
         doReturn(student).when(studentFirebaseWorkflow).getStudentWithEmail(anyString());
         Student getStudent = firebaseService.getStudentWithEmail("s1@u1.edu");
 
-        checkValidStudent(getStudent, "s1", "f1", "l1", "u1",
-                "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
+        checkValidStudent(getStudent, "s1", "f1", "l1", "u1", "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
                 Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
     }
 
@@ -132,8 +136,7 @@ public class FirebaseServiceTest {
     public void testCheckValidEmployeeId() {
         doNothing().when(employeeFirebaseWorkflow).checkValidEmployeeId(anyString());
         firebaseService.checkValidEmployeeId("e1");
-        verify(employeeFirebaseWorkflow, times(1))
-                .checkValidEmployeeId("e1");
+        verify(employeeFirebaseWorkflow, times(1)).checkValidEmployeeId("e1");
     }
 
     @Test
@@ -141,8 +144,7 @@ public class FirebaseServiceTest {
         doReturn(employee).when(employeeFirebaseWorkflow).getEmployeeWithId(anyString());
         Employee getEmployee = firebaseService.getEmployeeWithId("e1");
 
-        checkValidEmployee(getEmployee, "e1", "n1", "c1", "b1",
-                Role.SWE, "e1@c1.com");
+        checkValidEmployee(getEmployee, "e1", "n1", "c1", "b1", Role.SWE, "e1@c1.com");
     }
 
     @Test
@@ -162,8 +164,7 @@ public class FirebaseServiceTest {
         doReturn(employee).when(employeeFirebaseWorkflow).getEmployeeWithEmail(anyString());
         Employee getEmployee = firebaseService.getEmployeeWithEmail("e1@c1.com");
 
-        checkValidEmployee(getEmployee, "e1","n1", "c1", "b1",
-                Role.SWE, "e1@c1.com");
+        checkValidEmployee(getEmployee, "e1","n1", "c1", "b1", Role.SWE, "e1@c1.com");
     }
 
     @Test
@@ -183,8 +184,7 @@ public class FirebaseServiceTest {
         doReturn(fair).when(fairFirebaseWorkflow).getFairWithId(anyString());
         Fair getFair = firebaseService.getFairWithId("f1");
 
-        checkValidFair(getFair, "f1", "n1", "u1", "d1",
-                Collections.singletonList("c1"),
+        checkValidFair(getFair, "f1", "n1", "u1", "d1", Collections.singletonList("c1"),
                 Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1192508815, 0));
     }
@@ -205,8 +205,7 @@ public class FirebaseServiceTest {
     public void testCheckValidCompanyId() {
         doNothing().when(fairFirebaseWorkflow).checkValidCompanyId(anyString());
         firebaseService.checkValidCompanyId("c1");
-        verify(fairFirebaseWorkflow, times(1))
-                .checkValidCompanyId("c1");
+        verify(fairFirebaseWorkflow, times(1)).checkValidCompanyId("c1");
     }
 
     @Test
@@ -250,12 +249,10 @@ public class FirebaseServiceTest {
         List<Fair> getFairs = firebaseService.getAllFairs();
         assertNotNull(getFairs);
         assertEquals(2, getFairs.size());
-        checkValidFair(getFairs.get(0), "f1", "n1", "u1", "d1",
-                Collections.singletonList("c1"),
+        checkValidFair(getFairs.get(0), "f1", "n1", "u1", "d1", Collections.singletonList("c1"),
                 Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1192508815, 0));
-        checkValidFair(getFairs.get(1), "f2", "n2", "u1", "d2",
-                Collections.singletonList("c2"),
+        checkValidFair(getFairs.get(1), "f2", "n2", "u1", "d2", Collections.singletonList("c2"),
                 Timestamp.ofTimeSecondsAndNanos(1193506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1193508815, 0));
     }
@@ -272,25 +269,106 @@ public class FirebaseServiceTest {
     }
 
     @Test
-    public void testRegisterStudent() {
-
+    public void testRegisterStudentValid() {
+        doNothing().when(studentFirebaseWorkflow).registerEmployeeToStudent(anyString(),
+                anyString());
+        doNothing().when(employeeFirebaseWorkflow).registerStudentToEmployee(anyString(),
+                anyString());
+        firebaseService.registerStudent("s1", "e1");
+        verify(studentFirebaseWorkflow, times(1)).registerEmployeeToStudent("s1", "e1");
+        verify(employeeFirebaseWorkflow, times(1)).registerStudentToEmployee("e1", "s1");
     }
 
     @Test
-    public void testUpdateStudent() {
-
+    public void testRegisterStudentInvalidStudentId() {
+        doThrow(new FirebaseException("No employee with employee id=e10"))
+                .when(studentFirebaseWorkflow).registerEmployeeToStudent(anyString(), anyString());
+        doNothing().when(employeeFirebaseWorkflow).registerStudentToEmployee(anyString(),
+                anyString());
+        try {
+            firebaseService.registerStudent("s1", "e10");
+            fail();
+        } catch(FirebaseException ex) {
+            assertEquals(ex.getMessage(), "No employee with employee id=e10");
+        }
     }
 
     @Test
-    public void testAddStudent() {
-
+    public void testRegisterStudentInvalidEmployeeId() {
+        doThrow(new FirebaseException("No student with student id=s10"))
+                .when(employeeFirebaseWorkflow).registerStudentToEmployee(anyString(), anyString());
+        doNothing().when(studentFirebaseWorkflow).registerEmployeeToStudent(anyString(),
+                anyString());
+        try {
+            firebaseService.registerStudent("s10", "e1");
+            fail();
+        } catch(FirebaseException ex) {
+            assertEquals(ex.getMessage(), "No student with student id=s10");
+        }
     }
 
     @Test
-    public void testDeleteStudent() {
-
+    public void testUpdateValidStudent() {
+        doReturn(updatedStudent).when(studentFirebaseWorkflow).updateStudent(anyString(), any());
+        Student updatedStudentReturned = firebaseService.updateStudent("s1", student);
+        checkValidStudent(updatedStudentReturned, "s1", "f2", "l2", "u1", "m1", Role.SWE, "b2","s1@u1.edu", 4.0,
+        Timestamp.ofTimeSecondsAndNanos(1592506825, 0), true);
     }
 
+    @Test
+    public void testUpdateInvalidStudent() {
+        // implementation of updateStudent and updateEmployee does not check for valid id??
+
+        // test and see what happens
+
+        doThrow(new FirebaseException("No student with student id=s10"))
+                .when(studentFirebaseWorkflow).updateStudent(anyString(), any());
+        try {
+            firebaseService.updateStudent("s10", updatedStudent);
+            fail();
+        } catch(FirebaseException ex) {
+            assertEquals(ex.getMessage(), "No student with student id=s10");
+        }
+    }
+
+    @Test
+    public void testAddStudentValid() {
+        doReturn(student).when(studentFirebaseWorkflow).addStudent(any());
+        Student newStudent = firebaseService.addStudent(student);
+        checkValidStudent(newStudent, "s1", "f1", "l1", "u1", "m1", Role.SWE, "b1","s1@u1.edu", 4.0,
+                Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
+    }
+
+    @Test
+    public void testAddStudentError() {
+        doThrow(new FirebaseException("Error")).when(studentFirebaseWorkflow).addStudent(any());
+        try {
+            firebaseService.addStudent(student);
+            fail();
+        } catch(FirebaseException ex) {
+            assertEquals(ex.getMessage(), "Error");
+        }
+    }
+
+    @Test
+    public void testDeleteStudentValid() {
+        doReturn(student).when(studentFirebaseWorkflow).deleteStudent(anyString());
+        Student deletedStudent = firebaseService.deleteStudent("s1");
+        checkValidStudent(deletedStudent, "s1", "f1", "l1", "u1", "m1", Role.SWE, "b1","s1@u1.edu",
+                4.0, Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true);
+    }
+
+    @Test
+    public void testDeleteStudentInvalidStudentId() {
+        doThrow(new FirebaseException("No student with student id=s10 exists"))
+                .when(studentFirebaseWorkflow).deleteStudent(anyString());
+        try {
+            firebaseService.deleteStudent("s10");
+            fail();
+        } catch(FirebaseException ex) {
+            assertEquals(ex.getMessage(), "No student with student id=s10 exists");
+        }
+    }
     @Test
     public void testUpdateEmployee() {
 
@@ -358,20 +436,22 @@ public class FirebaseServiceTest {
         assertEquals(employee.email, email);
     }
 
-    private Student createDummyStudent() {
-        student = new Student();
-        student.studentId = "s1";
-        student.firstName = "f1";
-        student.lastName = "l1";
-        student.universityId = "u1";
-        student.major = "m1";
-        student.bio = "b1";
-        student.role = Role.SWE;
-        student.email = "s1@u1.edu";
-        student.gpa = 4.0;
-        student.graduationDate = Timestamp.ofTimeSecondsAndNanos(1592506815, 0);
-        student.international = true;
-        student.employees = Collections.singletonList("e1");
+    private Student createDummyStudent(String studentId, String firstName, String lastName,
+            String universityId, String major, Role role, String bio, String email, Double gpa,
+            Timestamp gradDate, Boolean international, List<String> employees) {
+        Student student = new Student();
+        student.studentId = studentId;
+        student.firstName = firstName;
+        student.lastName = lastName;
+        student.universityId = universityId;
+        student.major = major;
+        student.bio = bio;
+        student.role = role;
+        student.email = email;
+        student.gpa = gpa;
+        student.graduationDate = gradDate;
+        student.international = international;
+        student.employees = employees;
         return student;
     }
 
