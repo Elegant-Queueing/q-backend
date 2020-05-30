@@ -4,7 +4,6 @@ import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.model.db.Student;
-import com.careerfair.q.util.constant.Firebase;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.EmployeeFirebaseWorkflow;
@@ -42,6 +41,7 @@ public class FirebaseServiceTest {
     private Student student;
     private Student updatedStudent;
     private Employee employee;
+    private Employee updatedEmployee;
     private Fair fair;
     private Fair fairTwo;
     private Company company;
@@ -57,7 +57,11 @@ public class FirebaseServiceTest {
         updatedStudent = createDummyStudent("s1", "f2", "l2", "u1", "m1", Role.SWE, "b2","s1@u1.edu",
                 4.0, Timestamp.ofTimeSecondsAndNanos(1592506825, 0), true, Collections.singletonList("e1"));
 
-        employee = createDummyEmployee();
+        employee = createDummyEmployee("e1","n1", "c1", "b1", Role.SWE, "e1@c1.com",
+                Collections.singletonList("s1"));
+
+        updatedEmployee = createDummyEmployee("e1","n2", "c2", "b2", Role.DS, "e1@c2.com",
+                Collections.singletonList("s1"));
 
         fair = createDummyFair("f1", "n1", "u1", "d1", Collections.singletonList("c1"),
                 Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
@@ -317,10 +321,6 @@ public class FirebaseServiceTest {
 
     @Test
     public void testUpdateInvalidStudent() {
-        // implementation of updateStudent and updateEmployee does not check for valid id??
-
-        // test and see what happens
-
         doThrow(new FirebaseException("No student with student id=s10"))
                 .when(studentFirebaseWorkflow).updateStudent(anyString(), any());
         try {
@@ -371,16 +371,58 @@ public class FirebaseServiceTest {
     }
     @Test
     public void testUpdateEmployee() {
-
+        doReturn(updatedEmployee).when(employeeFirebaseWorkflow).updateEmployee(anyString(), any());
+        Employee updatedEmployeeReturn = firebaseService.updateEmployee("e1", updatedEmployee);
+        checkValidEmployee(updatedEmployeeReturn, "e1","n2", "c2", "b2", Role.DS, "e1@c2.com");
     }
 
     @Test
-    public void testAddEmployee() {
+    public void testUpdateInvalidEmployee() {
+        doThrow(new FirebaseException("No employee with employee id=e10"))
+                .when(employeeFirebaseWorkflow).updateEmployee(anyString(), any());
+        try {
+            firebaseService.updateEmployee("e10", updatedEmployee);
+            fail();
+        } catch(FirebaseException ex) {
+            assertEquals(ex.getMessage(), "No employee with employee id=e10");
+        }
     }
 
     @Test
-    public void testDeleteEmployee() {
+    public void testAddEmployeeValid() {
+        doReturn(employee).when(employeeFirebaseWorkflow).addEmployee(any());
+        Employee newEmployee = firebaseService.addEmployee(employee);
+        checkValidEmployee(newEmployee, "e1","n1", "c1", "b1", Role.SWE, "e1@c1.com");
+    }
 
+    @Test
+    public void testAddEmployeeError() {
+        doThrow(new FirebaseException("Error")).when(employeeFirebaseWorkflow).addEmployee(any());
+        try {
+            firebaseService.addEmployee(employee);
+            fail();
+        } catch (FirebaseException ex) {
+            assertEquals(ex.getMessage(), "Error");
+        }
+    }
+
+    @Test
+    public void testDeleteEmployeeValid() {
+        doReturn(employee).when(employeeFirebaseWorkflow).deleteEmployee(anyString());
+        Employee deletedEmployee = firebaseService.deleteEmployee("e1");
+        checkValidEmployee(deletedEmployee, "e1","n1", "c1", "b1", Role.SWE, "e1@c1.com");
+    }
+
+    @Test
+    public void testDeleteEmployeeInvalidEmployeeId() {
+        doThrow(new FirebaseException("No employee with employee id=e10"))
+                .when(employeeFirebaseWorkflow).deleteEmployee(anyString());
+        try {
+            firebaseService.deleteEmployee("e10");
+            fail();
+        } catch(FirebaseException ex) {
+            assertEquals(ex.getMessage(), "No employee with employee id=e10");
+        }
     }
 
     private void checkValidCompany(Company company, String name, List<Role> roles,
@@ -455,15 +497,16 @@ public class FirebaseServiceTest {
         return student;
     }
 
-    private Employee createDummyEmployee() {
+    private Employee createDummyEmployee(String employeeId, String name, String companyId,
+            String bio, Role role, String email, List<String> students) {
         Employee employee = new Employee();
-        employee.employeeId = "e1";
-        employee.companyId = "c1";
-        employee.name = "n1";
-        employee.bio = "b1";
-        employee.role = Role.SWE;
-        employee.email = "e1@c1.com";
-        employee.students = Collections.singletonList("s1");
+        employee.employeeId = employeeId;
+        employee.companyId = companyId;
+        employee.name = name;
+        employee.bio = bio;
+        employee.role = role;
+        employee.email = email;
+        employee.students = students;
         return employee;
     }
 
