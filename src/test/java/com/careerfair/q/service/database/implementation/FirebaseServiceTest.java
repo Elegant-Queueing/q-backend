@@ -47,10 +47,7 @@ public class FirebaseServiceTest {
     @BeforeEach
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
-        student = new Student("s1", "f1", "l1", "u1",
-                "m1", Role.SWE, "b1", "s1@u1.edu", 4.0,
-                Timestamp.ofTimeSecondsAndNanos(1592506815, 0), true,
-                Collections.singletonList("e1"));
+        student = createDummyStudent();
 
         employee = new Employee("e1", "n1", "c1",
                 Role.SWE, "b1", "e1@c1.com", Collections.singletonList("s1"));
@@ -361,5 +358,22 @@ public class FirebaseServiceTest {
         assertEquals(employee.bio, bio);
         assertEquals(employee.role, role);
         assertEquals(employee.email, email);
+    }
+
+    private Student createDummyStudent() {
+        student = new Student();
+        student.studentId = "s1";
+        student.firstName = "f1";
+        student.lastName = "l1";
+        student.universityId = "u1";
+        student.major = "m1";
+        student.bio = "b1";
+        student.role = Role.SWE;
+        student.email = "s1@u1.edu";
+        student.gpa = 4.0;
+        student.graduationDate = Timestamp.ofTimeSecondsAndNanos(1592506815, 0);
+        student.international = true;
+        student.employees = Collections.singletonList("e1");
+        return student;
     }
 }
