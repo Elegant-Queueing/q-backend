@@ -4,7 +4,6 @@ import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.model.db.Fair;
 import com.careerfair.q.model.db.Student;
-import com.careerfair.q.util.constant.Firebase;
 import com.careerfair.q.util.enums.Role;
 import com.careerfair.q.util.exception.FirebaseException;
 import com.careerfair.q.workflow.database.EmployeeFirebaseWorkflow;
@@ -42,7 +41,7 @@ public class FirebaseServiceTest {
     private Student student;
     private Employee employee;
     private Fair fair;
-    private Fair startupFair;
+    private Fair fairTwo;
     private Company company;
 
     @BeforeEach
@@ -61,7 +60,7 @@ public class FirebaseServiceTest {
                 Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1192508815, 0));
 
-        startupFair = new Fair("f2", "n2", "u1", "d2",
+        fairTwo = new Fair("f2", "n2", "u1", "d2",
                 Collections.singletonList("c2"),
                 Timestamp.ofTimeSecondsAndNanos(1193506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1193508815, 0));
@@ -252,7 +251,7 @@ public class FirebaseServiceTest {
 
     @Test
     public void testGetAllFairs() {
-        doReturn(Arrays.asList(fair, startupFair)).when(fairFirebaseWorkflow).getAllFairs();
+        doReturn(Arrays.asList(fair, fairTwo)).when(fairFirebaseWorkflow).getAllFairs();
         List<Fair> getFairs = firebaseService.getAllFairs();
         assertNotNull(getFairs);
         assertEquals(2, getFairs.size());
@@ -267,7 +266,7 @@ public class FirebaseServiceTest {
     }
 
     @Test
-    public void testGetAllFairsError() {
+    public void testGetAllFairsFail() {
         doThrow(new FirebaseException("error")).when(fairFirebaseWorkflow).getAllFairs();
         try {
             firebaseService.getAllFairs();
