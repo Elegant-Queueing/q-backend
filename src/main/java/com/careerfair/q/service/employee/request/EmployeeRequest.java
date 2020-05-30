@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EmployeeRequest {
+
     @JsonProperty("name")
     private String name;
 
