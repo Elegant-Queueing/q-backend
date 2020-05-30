@@ -47,23 +47,21 @@ public class FirebaseServiceTest {
     @BeforeEach
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
+
         student = createDummyStudent();
+        employee = createDummyEmployee();
 
-        employee = new Employee("e1", "n1", "c1",
-                Role.SWE, "b1", "e1@c1.com", Collections.singletonList("s1"));
-
-        fair = new Fair("f1", "n1", "u1", "d1",
+        fair = createDummyFair("f1", "n1", "u1", "d1",
                 Collections.singletonList("c1"),
                 Timestamp.ofTimeSecondsAndNanos(1192506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1192508815, 0));
 
-        fairTwo = new Fair("f2", "n2", "u1", "d2",
+        fairTwo = createDummyFair("f2", "n2", "u1", "d2",
                 Collections.singletonList("c2"),
                 Timestamp.ofTimeSecondsAndNanos(1193506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1193508815, 0));
 
-        company = new Company("c1", Collections.singletonList(Role.SWE),
-                Collections.singletonList("e1"), "b1", "www.c1.com");
+        company = createDummyCompany();
     }
 
     @Test
@@ -375,5 +373,40 @@ public class FirebaseServiceTest {
         student.international = true;
         student.employees = Collections.singletonList("e1");
         return student;
+    }
+
+    private Employee createDummyEmployee() {
+        Employee employee = new Employee();
+        employee.employeeId = "e1";
+        employee.companyId = "c1";
+        employee.name = "n1";
+        employee.bio = "b1";
+        employee.role = Role.SWE;
+        employee.email = "e1@c1.com";
+        employee.students = Collections.singletonList("s1");
+        return employee;
+    }
+
+    private Fair createDummyFair(String fairId, String name, String universityId,
+            String description, List<String> companies, Timestamp startTime, Timestamp endTime) {
+        Fair fair = new Fair();
+        fair.setFairId(fairId);
+        fair.setName(name);
+        fair.setUniversityId(universityId);
+        fair.setDescription(description);
+        fair.setCompanies(companies);
+        fair.setStartTime(startTime);
+        fair.setEndTime(endTime);
+        return fair;
+    }
+
+    private Company createDummyCompany() {
+        Company company = new Company();
+        company.setName("c1");
+        company.setRoles(Collections.singletonList(Role.SWE));
+        company.setEmployees(Collections.singletonList("e1"));
+        company.setBio("b1");
+        company.setWebsite("www.c1.com");
+        return company;
     }
 }

@@ -12,8 +12,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 public class Fair {
 
     @PropertyName("fair_id")
