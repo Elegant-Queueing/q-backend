@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public abstract class EmployeeResponse {
+
     @JsonProperty("name")
     private String name;
 

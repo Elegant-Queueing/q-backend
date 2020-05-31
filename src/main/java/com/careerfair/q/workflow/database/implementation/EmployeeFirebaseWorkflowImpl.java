@@ -17,7 +17,7 @@ import static com.careerfair.q.util.constant.Firebase.EMPLOYEE_COLLECTION;
 @Component
 public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
 
-    private final List<String> UPDATE_FIELDS = Arrays.asList("name", "role", "bio", "email");
+    private final static List<String> UPDATE_FIELDS = Arrays.asList("name", "role", "bio", "email");
 
     @Override
     public void checkValidEmployeeId(String employeeId) throws FirebaseException {
@@ -100,6 +100,7 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
     public Employee updateEmployee(String employeeId, Employee updatedEmployee)
             throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
+        checkValidEmployeeId(employeeId);
 
         try {
             firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)

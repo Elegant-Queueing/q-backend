@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -39,8 +39,7 @@ public class EmployeeServiceTest {
     @BeforeEach
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
-        employee = new Employee("e1", "n1", "c1",
-                Role.SWE, "b1", "e1@c1.com", Arrays.asList("s1"));
+        employee = createDummyEmployee();
     }
 
     @Test
@@ -66,11 +65,7 @@ public class EmployeeServiceTest {
     @Test
     public void testUpdateEmployeeName() {
         UpdateEmployeeRequest updateNameRequest = new UpdateEmployeeRequest();
-        updateNameRequest.setName("n2");
-        updateNameRequest.setCompanyId("c1");
-        updateNameRequest.setRole(Role.SWE);
-        updateNameRequest.setBio("b1");
-        updateNameRequest.setEmail("e1@c1.com");
+        populateRequestObject(updateNameRequest, "n2", "c1", Role.SWE, "b1", "e1@c1.com");
 
         // skipping validation test and assuming it is a valid request
         doNothing().when(validationService).checkValidEmployeeRequest(any());
@@ -91,11 +86,7 @@ public class EmployeeServiceTest {
     @Test
     public void testUpdateEmployeeMultipleAttributes() {
         UpdateEmployeeRequest updateRequest = new UpdateEmployeeRequest();
-        updateRequest.setName("n2");
-        updateRequest.setCompanyId("c2");
-        updateRequest.setRole(Role.DS);
-        updateRequest.setBio("b2");
-        updateRequest.setEmail("e1@c2.com");
+        populateRequestObject(updateRequest, "n2", "c2", Role.DS, "b2", "e1@c2.com");
 
         // skipping validation test and assuming it is a valid request
         doNothing().when(validationService).checkValidStudentRequest(any());
@@ -119,17 +110,13 @@ public class EmployeeServiceTest {
 
         checkValidResponse(deleteEmployeeResponse, "n1", "c1", "b1",
                 Role.SWE, "e1@c1.com");
-        assertEquals(deleteEmployeeResponse.getStudents(), Arrays.asList("s1"));
+        assertEquals(deleteEmployeeResponse.getStudents(), Collections.singletonList("s1"));
     }
 
     @Test
     public void testAddEmployee() {
         AddEmployeeRequest addEmployeeRequest = new AddEmployeeRequest();
-        addEmployeeRequest.setName("n2");
-        addEmployeeRequest.setCompanyId("c1");
-        addEmployeeRequest.setBio("b1");
-        addEmployeeRequest.setRole(Role.SWE);
-        addEmployeeRequest.setEmail("e1@c1.com");
+        populateRequestObject(addEmployeeRequest, "n2", "c1", Role.SWE, "b1", "e1@c1.com");
 
         // skipping validation test and assuming it is a valid request
         doNothing().when(validationService).checkValidEmployeeRequest(any());
@@ -158,5 +145,26 @@ public class EmployeeServiceTest {
         assertEquals(employee.bio, request.getBio());
         assertEquals(employee.email, request.getEmail());
         assertEquals(employee.role, request.getRole());
+    }
+
+    private Employee createDummyEmployee() {
+        Employee employee = new Employee();
+        employee.employeeId = "e1";
+        employee.companyId = "c1";
+        employee.name = "n1";
+        employee.bio = "b1";
+        employee.role = Role.SWE;
+        employee.email = "e1@c1.com";
+        employee.students = Collections.singletonList("s1");
+        return employee;
+    }
+
+    private <T extends EmployeeRequest> void populateRequestObject(EmployeeRequest request,
+            String name, String companyId, Role role, String bio, String email) {
+        request.setName(name);
+        request.setCompanyId(companyId);
+        request.setRole(role);
+        request.setBio(bio);
+        request.setEmail(email);
     }
 }
