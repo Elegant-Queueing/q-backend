@@ -6,21 +6,20 @@ import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.fair.response.GetAllFairsResponse;
 import com.careerfair.q.service.fair.response.GetCompanyResponse;
 import com.careerfair.q.service.fair.response.GetFairResponse;
+import com.careerfair.q.service.fair.response.GetWaitTimeResponse;
 import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.util.enums.Role;
 import com.google.cloud.Timestamp;
+import com.google.common.collect.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -39,6 +38,7 @@ class FairServiceTest {
     private Fair fair;
     private Fair fairTwo;
     private Company company;
+    private int overallWaitTime;
 
     @BeforeEach
     public void setupMocks() {
@@ -50,6 +50,7 @@ class FairServiceTest {
                 Timestamp.ofTimeSecondsAndNanos(1193506815, 0),
                 Timestamp.ofTimeSecondsAndNanos(1193508815, 0));
         company = createDummyCompany();
+        overallWaitTime = 1000;
     }
 
     @Test
@@ -86,7 +87,12 @@ class FairServiceTest {
 
     @Test
     void testGetCompanyWaitTime() {
-        doReturn(100).when(queueService).getOverallWaitTime(anyString(), any());
+        doReturn(overallWaitTime).when(queueService).getOverallWaitTime(anyString(), any());
+        GetWaitTimeResponse getWaitTimeResponse = fairService.getCompanyWaitTime("c1", Role.SWE);
+        assertNotNull(getWaitTimeResponse);
+        Map<String, Integer> expected = Maps.newHashMap();
+        expected.put("c1", overallWaitTime);
+        assertTrue(Maps.difference(getWaitTimeResponse.getCompanyWaitTimes(), expected).areEqual());
     }
 
     @Test
