@@ -3,7 +3,6 @@ package com.careerfair.q.model.db;
 import com.careerfair.q.util.enums.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.firestore.annotation.PropertyName;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
