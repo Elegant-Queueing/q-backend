@@ -6,6 +6,7 @@ import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.fair.response.GetAllFairsResponse;
 import com.careerfair.q.service.fair.response.GetCompanyResponse;
 import com.careerfair.q.service.fair.response.GetFairResponse;
+import com.careerfair.q.service.queue.QueueService;
 import com.careerfair.q.util.enums.Role;
 import com.google.cloud.Timestamp;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 
@@ -27,6 +29,9 @@ class FairServiceTest {
 
     @Mock
     private FirebaseService firebaseService;
+
+    @Mock
+    private QueueService queueService;
 
     @InjectMocks
     private final FairServiceImpl fairService = new FairServiceImpl();
@@ -81,6 +86,7 @@ class FairServiceTest {
 
     @Test
     void testGetCompanyWaitTime() {
+        doReturn(100).when(queueService).getOverallWaitTime(anyString(), any());
     }
 
     @Test
