@@ -74,6 +74,10 @@ public class FirebaseServiceImpl implements FirebaseService {
     }
 
     @Override
+    public Company getCompanyWithName(String companyName) throws FirebaseException {
+        return fairFirebaseWorkflow.getCompanyWithName(companyName);
+    }
+    @Override
     public Company getCompanyWithId(String fairId, String companyId) throws FirebaseException {
         return fairFirebaseWorkflow.getCompanyWithId(fairId, companyId);
     }

@@ -12,6 +12,10 @@ import java.util.List;
 @Setter
 public class Company {
 
+    @PropertyName("company_id")
+    @JsonProperty("company_id")
+    public String companyId;
+
     @PropertyName("name")
     @JsonProperty("name")
     public String name;

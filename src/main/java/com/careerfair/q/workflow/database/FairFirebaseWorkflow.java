@@ -27,6 +27,15 @@ public interface FairFirebaseWorkflow {
     Company getCompanyWithId(String fairId, String companyId) throws FirebaseException;
 
     /**
+     * Gets the data of the company with the given name
+     *
+     * @param companyName name of the company
+     * @return Company
+     * @throws FirebaseException if the company with name does not exist in the database
+     */
+    Company getCompanyWithName(String companyName) throws FirebaseException;
+
+    /**
      * Gets the fair associated with the given id
      *
      * @param fairId id of the fair
