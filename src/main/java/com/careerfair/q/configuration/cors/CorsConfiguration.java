@@ -1,4 +1,4 @@
-package com.careerfair.q.configuration.web;
+package com.careerfair.q.configuration.cors;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @CrossOrigin
-public class WebConfig implements WebMvcConfigurer {
+public class CorsConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
