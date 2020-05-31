@@ -100,6 +100,8 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
     public Student updateStudent(String studentId, Student updatedStudent)
             throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
+        checkValidStudentId(studentId);
+
         try {
             firestore.collection(STUDENT_COLLECTION).document(studentId)
                     .set(updatedStudent, SetOptions.mergeFields(UPDATE_FIELDS)).get();
@@ -114,6 +116,7 @@ public class StudentFirebaseWorkflowImpl implements StudentFirebaseWorkflow {
         Firestore firestore = FirestoreClient.getFirestore();
         DocumentReference documentReference = firestore.collection(STUDENT_COLLECTION).document();
         String studentId = documentReference.getId();
+
         try {
             documentReference.set(newStudent).get();
             return getStudentWithId(studentId);
