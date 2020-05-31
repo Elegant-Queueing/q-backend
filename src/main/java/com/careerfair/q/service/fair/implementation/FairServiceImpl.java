@@ -17,14 +17,8 @@ import java.util.Map;
 @Service
 public class FairServiceImpl implements FairService {
 
-    private final FirebaseService firebaseService;
-    private final QueueService queueService;
-
-    public FairServiceImpl(@Autowired FirebaseService firebaseService,
-                           @Autowired QueueService queueService) {
-        this.firebaseService = firebaseService;
-        this.queueService = queueService;
-    }
+    @Autowired private FirebaseService firebaseService;
+    @Autowired private QueueService queueService;
 
     @Override
     public GetAllFairsResponse getAllFairs() {
