@@ -101,6 +101,7 @@ public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
             throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
         checkValidEmployeeId(employeeId);
+
         try {
             firestore.collection(EMPLOYEE_COLLECTION).document(employeeId)
                     .set(updatedEmployee, SetOptions.mergeFields(UPDATE_FIELDS)).get();
