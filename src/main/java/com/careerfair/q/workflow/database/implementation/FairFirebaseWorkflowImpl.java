@@ -84,7 +84,7 @@ public class FairFirebaseWorkflowImpl implements FairFirebaseWorkflow {
                 }
             }
 
-            throw new FirebaseException("No company with name=" + name);
+            throw new FirebaseException("No company exists with name=" + name);
         } catch (ExecutionException | InterruptedException ex) {
             throw new FirebaseException(ex.getMessage());
         }
