@@ -21,17 +21,9 @@ import java.util.Map;
 @Service
 public class FirebaseServiceImpl implements FirebaseService {
 
-    private final StudentFirebaseWorkflow studentFirebaseWorkflow;
-    private final EmployeeFirebaseWorkflow employeeFirebaseWorkflow;
-    private final FairFirebaseWorkflow fairFirebaseWorkflow;
-
-    public FirebaseServiceImpl(@Autowired StudentFirebaseWorkflow studentFirebaseWorkflow,
-                               @Autowired EmployeeFirebaseWorkflow employeeFirebaseWorkflow,
-                               @Autowired FairFirebaseWorkflow fairFirebaseWorkflow) {
-        this.studentFirebaseWorkflow = studentFirebaseWorkflow;
-        this.employeeFirebaseWorkflow = employeeFirebaseWorkflow;
-        this.fairFirebaseWorkflow = fairFirebaseWorkflow;
-    }
+    @Autowired private StudentFirebaseWorkflow studentFirebaseWorkflow;
+    @Autowired private EmployeeFirebaseWorkflow employeeFirebaseWorkflow;
+    @Autowired private FairFirebaseWorkflow fairFirebaseWorkflow;
 
     @Override
     public void checkValidStudentId(String studentId) throws FirebaseException {
