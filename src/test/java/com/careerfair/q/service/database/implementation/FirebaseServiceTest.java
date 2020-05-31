@@ -79,7 +79,7 @@ public class FirebaseServiceTest {
     public void testCheckValidStudentId() {
         doNothing().when(studentFirebaseWorkflow).checkValidStudentId(anyString());
         firebaseService.checkValidStudentId("s1");
-        verify(studentFirebaseWorkflow, times(1)).checkValidStudentId("s1");
+        verify(studentFirebaseWorkflow, times(1)).checkValidStudentId(anyString());
     }
 
     @Test
@@ -140,7 +140,7 @@ public class FirebaseServiceTest {
     public void testCheckValidEmployeeId() {
         doNothing().when(employeeFirebaseWorkflow).checkValidEmployeeId(anyString());
         firebaseService.checkValidEmployeeId("e1");
-        verify(employeeFirebaseWorkflow, times(1)).checkValidEmployeeId("e1");
+        verify(employeeFirebaseWorkflow, times(1)).checkValidEmployeeId(anyString());
     }
 
     @Test
@@ -209,7 +209,7 @@ public class FirebaseServiceTest {
     public void testCheckValidCompanyId() {
         doNothing().when(fairFirebaseWorkflow).checkValidCompanyId(anyString());
         firebaseService.checkValidCompanyId("c1");
-        verify(fairFirebaseWorkflow, times(1)).checkValidCompanyId("c1");
+        verify(fairFirebaseWorkflow, times(1)).checkValidCompanyId(anyString());
     }
 
     @Test
@@ -279,8 +279,10 @@ public class FirebaseServiceTest {
         doNothing().when(employeeFirebaseWorkflow).registerStudentToEmployee(anyString(),
                 anyString());
         firebaseService.registerStudent("s1", "e1");
-        verify(studentFirebaseWorkflow, times(1)).registerEmployeeToStudent("s1", "e1");
-        verify(employeeFirebaseWorkflow, times(1)).registerStudentToEmployee("e1", "s1");
+        verify(studentFirebaseWorkflow, times(1)).registerEmployeeToStudent(anyString(),
+                anyString());
+        verify(employeeFirebaseWorkflow, times(1)).registerStudentToEmployee(anyString(),
+                anyString());
     }
 
     @Test
