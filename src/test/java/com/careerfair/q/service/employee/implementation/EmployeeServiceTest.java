@@ -91,7 +91,7 @@ public class EmployeeServiceTest {
     @Test
     public void testUpdateEmployeeMultipleAttributes() {
         UpdateEmployeeRequest updateRequest = new UpdateEmployeeRequest();
-        populateRequestObject(updateRequest, "n2", "c1", Role.DS, "b2", "e1@c2.com");
+        populateRequestObject(updateRequest, "n2", "c1", Role.DS, "b2", "e1@c1.com");
 
         // skipping validation test and assuming it is a valid request
         doNothing().when(validationService).checkValidStudentRequest(any());
@@ -106,7 +106,7 @@ public class EmployeeServiceTest {
                 .updateEmployee("e1", updateRequest);
 
         checkValidResponse(updateEmployeeNameResponse, "n2", "c1", "b2",
-                Role.DS, "e1@c2.com");
+                Role.DS, "e1@c1.com");
     }
 
     @Test
