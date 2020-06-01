@@ -9,6 +9,9 @@ import lombok.Data;
 @Data
 public abstract class StudentResponse {
 
+    @JsonProperty("student_id")
+    private String studentId;
+
     @JsonProperty("first_name")
     private String firstName;
 
@@ -40,6 +43,7 @@ public abstract class StudentResponse {
     private Boolean international;
 
     public StudentResponse(Student student) {
+        this.studentId = student.studentId;
         this.firstName = student.firstName;
         this.lastName = student.lastName;
         this.universityId = student.universityId;

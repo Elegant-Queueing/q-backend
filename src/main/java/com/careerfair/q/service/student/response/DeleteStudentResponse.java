@@ -11,15 +11,11 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class DeleteStudentResponse extends StudentResponse {
 
-    @JsonProperty("student_id")
-    private String studentId;
-
     @JsonProperty("employees")
     private List<String> employees;
 
     public DeleteStudentResponse(Student student) {
         super(student);
-        this.studentId = student.studentId;
         this.employees = student.employees;
     }
 }
