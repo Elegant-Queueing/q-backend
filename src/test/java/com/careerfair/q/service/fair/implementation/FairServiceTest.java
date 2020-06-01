@@ -2,6 +2,7 @@ package com.careerfair.q.service.fair.implementation;
 
 import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Fair;
+import com.careerfair.q.model.redis.Employee;
 import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.fair.response.GetAllFairsResponse;
 import com.careerfair.q.service.fair.response.GetCompanyResponse;
@@ -39,6 +40,8 @@ class FairServiceTest {
     private Fair fairTwo;
     private Company company;
     private int overallWaitTime;
+    private Employee employee;
+    private Employee employeeTwo;
 
     @BeforeEach
     public void setupMocks() {
@@ -51,6 +54,8 @@ class FairServiceTest {
                 Timestamp.ofTimeSecondsAndNanos(1193508815, 0));
         company = createDummyCompany();
         overallWaitTime = 1000;
+        employee = createDummyEmployee("e1", "c1", Role.SWE, "p1", "w1", "v1", 100, 1);
+        employeeTwo = createDummyEmployee("e2", "c2", Role.SWE, "p2", "w2", "v2", 100, 1);
     }
 
     @Test
@@ -97,6 +102,16 @@ class FairServiceTest {
 
     @Test
     void testGetAllCompaniesWaitTime() {
+        doReturn(Arrays.asList(employee, employeeTwo)).when(queueService).getAllEmployees();
+        doReturn(overallWaitTime).when(queueService).getOverallWaitTime(anyString(), any());
+
+        GetWaitTimeResponse getWaitTimeResponse = fairService.getAllCompaniesWaitTime(Role.SWE);
+        assertNotNull(getWaitTimeResponse);
+        assertEquals(getWaitTimeResponse.getCompanyWaitTimes().size(), 2);
+        Map<String, Integer> expected = Maps.newHashMap();
+        expected.put("c1", overallWaitTime);
+        expected.put("c2", overallWaitTime);
+        assertTrue(Maps.difference(getWaitTimeResponse.getCompanyWaitTimes(), expected).areEqual());
     }
 
     private Fair createDummyFair(String fairId, String name, String universityId,
@@ -143,5 +158,17 @@ class FairServiceTest {
         assertEquals(company.employees, employees);
         assertEquals(company.bio, bio);
         assertEquals(company.website, website);
+    }
+
+    private Employee createDummyEmployee(String id, String companyId, Role role,
+            String virtualQueueId, String windowQueueId, String physicalQueueId,
+            long totalTimeSpent, int numRegisteredStudents) {
+        Employee employee = new Employee(id, companyId, role);
+        employee.setPhysicalQueueId(physicalQueueId);
+        employee.setWindowQueueId(windowQueueId);
+        employee.setVirtualQueueId(virtualQueueId);
+        employee.setTotalTimeSpent(totalTimeSpent);
+        employee.setNumRegisteredStudents(numRegisteredStudents);
+        return employee;
     }
 }
