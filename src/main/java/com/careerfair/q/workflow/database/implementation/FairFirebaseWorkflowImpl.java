@@ -65,6 +65,32 @@ public class FairFirebaseWorkflowImpl implements FairFirebaseWorkflow {
     }
 
     @Override
+    public Company getCompanyWithName(String companyName) {
+        Firestore dbFirestore = FirestoreClient.getFirestore();
+        CollectionReference collectionReference = dbFirestore.collection(COMPANY_COLLECTION);
+
+        try {
+            for (DocumentReference documentReference : collectionReference.listDocuments()) {
+                DocumentSnapshot documentSnapshot = documentReference.get().get();
+                String documentName = (String) documentSnapshot.get("name");
+                assert documentName != null;
+
+                if (companyName.toLowerCase().equals(documentName.toLowerCase())) {
+                    Company company = documentSnapshot.toObject(Company.class);
+                    assert company != null;
+
+                    company.companyId = documentSnapshot.getId();
+                    return company;
+                }
+            }
+
+            throw new FirebaseException("No company exists with name=" + companyName);
+        } catch (ExecutionException | InterruptedException ex) {
+            throw new FirebaseException(ex.getMessage());
+        }
+    }
+
+    @Override
     public Fair getFairWithId(String fairId) throws FirebaseException {
         Firestore firestore = FirestoreClient.getFirestore();
 

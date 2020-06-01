@@ -1,5 +1,6 @@
 package com.careerfair.q.service.employee.implementation;
 
+import com.careerfair.q.model.db.Company;
 import com.careerfair.q.model.db.Employee;
 import com.careerfair.q.service.database.FirebaseService;
 import com.careerfair.q.service.employee.request.AddEmployeeRequest;
@@ -35,11 +36,13 @@ public class EmployeeServiceTest {
     private final EmployeeServiceImpl employeeService = new EmployeeServiceImpl();
 
     private Employee employee;
+    private Company company;
 
     @BeforeEach
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
         employee = createDummyEmployee();
+        company = createDummyCompany();
     }
 
     @Test
@@ -69,6 +72,8 @@ public class EmployeeServiceTest {
 
         // skipping validation test and assuming it is a valid request
         doNothing().when(validationService).checkValidEmployeeRequest(any());
+        doReturn(company).when(firebaseService).getCompanyWithName(anyString());
+
         Employee updatedEmployee = employeeService
                 .createEmployeeFromRequest(updateNameRequest);
 
@@ -86,10 +91,12 @@ public class EmployeeServiceTest {
     @Test
     public void testUpdateEmployeeMultipleAttributes() {
         UpdateEmployeeRequest updateRequest = new UpdateEmployeeRequest();
-        populateRequestObject(updateRequest, "n2", "c2", Role.DS, "b2", "e1@c2.com");
+        populateRequestObject(updateRequest, "n2", "c1", Role.DS, "b2", "e1@c1.com");
 
         // skipping validation test and assuming it is a valid request
         doNothing().when(validationService).checkValidStudentRequest(any());
+        doReturn(company).when(firebaseService).getCompanyWithName(anyString());
+
         Employee updatedEmployee = employeeService
                 .createEmployeeFromRequest(updateRequest);
 
@@ -98,8 +105,8 @@ public class EmployeeServiceTest {
         UpdateEmployeeResponse updateEmployeeNameResponse = employeeService
                 .updateEmployee("e1", updateRequest);
 
-        checkValidResponse(updateEmployeeNameResponse, "n2", "c2", "b2",
-                Role.DS, "e1@c2.com");
+        checkValidResponse(updateEmployeeNameResponse, "n2", "c1", "b2",
+                Role.DS, "e1@c1.com");
     }
 
     @Test
@@ -120,6 +127,8 @@ public class EmployeeServiceTest {
 
         // skipping validation test and assuming it is a valid request
         doNothing().when(validationService).checkValidEmployeeRequest(any());
+        doReturn(company).when(firebaseService).getCompanyWithName(anyString());
+
         Employee newEmployee = employeeService.createEmployeeFromRequest(addEmployeeRequest);
         checkValidEmployee(newEmployee, addEmployeeRequest);
         doReturn(newEmployee).when(firebaseService).addEmployee(any());
@@ -166,5 +175,16 @@ public class EmployeeServiceTest {
         request.setRole(role);
         request.setBio(bio);
         request.setEmail(email);
+    }
+
+    private Company createDummyCompany() {
+        Company company = new Company();
+        company.setName("c1");
+        company.setCompanyId("c1");
+        company.setRoles(Collections.singletonList(Role.SWE));
+        company.setEmployees(Collections.singletonList("e1"));
+        company.setBio("b1");
+        company.setWebsite("www.c1.com");
+        return company;
     }
 }

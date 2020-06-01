@@ -248,6 +248,27 @@ public class FirebaseServiceTest {
     }
 
     @Test
+    public void testGetCompanyWithValidName() {
+        doReturn(company).when(fairFirebaseWorkflow).getCompanyWithName(anyString());
+        Company getCompany = firebaseService.getCompanyWithName("c1");
+
+        checkValidCompany(getCompany, "c1", Collections.singletonList(Role.SWE),
+                Collections.singletonList("e1"), "b1", "www.c1.com");
+    }
+
+    @Test
+    public void testGetCompanyWithInvalidName() {
+        doThrow(new FirebaseException("No company exists with name=c10"))
+                .when(fairFirebaseWorkflow).getCompanyWithName(anyString());
+        try {
+            firebaseService.getCompanyWithName("c10");
+            fail();
+        } catch (FirebaseException ex) {
+            assertEquals(ex.getMessage(),"No company exists with name=c10");
+        }
+    }
+
+    @Test
     public void testGetAllFairs() {
         doReturn(Arrays.asList(fair, fairTwo)).when(fairFirebaseWorkflow).getAllFairs();
         List<Fair> getFairs = firebaseService.getAllFairs();

@@ -17,7 +17,8 @@ import static com.careerfair.q.util.constant.Firebase.EMPLOYEE_COLLECTION;
 @Component
 public class EmployeeFirebaseWorkflowImpl implements EmployeeFirebaseWorkflow {
 
-    private final static List<String> UPDATE_FIELDS = Arrays.asList("name", "role", "bio", "email");
+    private final static List<String> UPDATE_FIELDS = Arrays.asList("name", "role", "bio", "email",
+            "company_id");
 
     @Override
     public void checkValidEmployeeId(String employeeId) throws FirebaseException {

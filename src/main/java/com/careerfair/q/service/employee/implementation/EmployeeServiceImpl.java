@@ -56,7 +56,8 @@ public class EmployeeServiceImpl implements EmployeeService {
      <T extends EmployeeRequest> Employee createEmployeeFromRequest(T employeeRequest) {
         Employee employee = new Employee();
         employee.name = employeeRequest.getName();
-        employee.companyId = employeeRequest.getCompanyId();
+        employee.companyId = firebaseService.getCompanyWithName(employeeRequest.getCompanyId())
+                .getCompanyId();
         employee.bio = employeeRequest.getBio();
         employee.email = employeeRequest.getEmail();
         employee.role = employeeRequest.getRole();
