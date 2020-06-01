@@ -7,6 +7,8 @@ import lombok.Data;
 
 @Data
 public abstract class EmployeeResponse {
+    @JsonProperty("employee_id")
+    private String employeeId;
 
     @JsonProperty("name")
     private String name;
@@ -24,6 +26,7 @@ public abstract class EmployeeResponse {
     private String email;
 
     public EmployeeResponse(Employee employee) {
+        this.employeeId = employee.employeeId;
         this.name = employee.name;
         this.companyId = employee.companyId;
         this.role = employee.role;
