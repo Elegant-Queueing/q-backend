@@ -14,10 +14,10 @@ This repository contains all the code for Q's backend service. On a high level, 
 
 The backend service is a Spring Boot Application that exposes API endpoints. A user (e.g. a front-end developer) can use these APIs by running the Spring Boot Application, thereby exposing the API endpoints to their own application. These APIs may be used to allow students and employees to create profiles and simulate virtual queuing for career fairs.
 
-### Setup
-- Set up an environment of your choice using the detailed Environment setup instructions [here](#detailed-env)
-- Get the code using [this](#detailed-code) section of this document.
-- Set up a database on Firebase using [this](#detailed-firebase) section.
+### <a name="user-setup"></a>Setup
+- Set up an environment of your choice using the detailed environment setup instructions [here](#detailed-env)
+- Get the code using the ['Getting the code'](#detailed-code) section of this document.
+- Set up a database on Firebase using [this firebase setup](#detailed-firebase) section.
 
 ### Running the Spring Boot Application
 - After setting everything up, use the terminal to cd into the code repository.
@@ -61,11 +61,10 @@ Replace the {address} with localhost or your public DNS. Replace the {employee_i
 ```
 ### Work in progress
 
-Authentication: Login, Sign up, API authentication </br>
+Authorization
 Resume upload </br>
 Image upload </br>
 Resume tagging </br>
-Employee service POST API calls </br>
 
 ### Reporting a bug
 
@@ -81,7 +80,7 @@ To report a bug:
 ## Developer Documentation
 
 ### Obtaining the source code
-Use the 'Setup -> Getting the code' section to get the code
+Get the code using the ['Getting the code'](#detailed-code) section of this document.
 
 ### Layout of the directory structure
 
@@ -111,7 +110,7 @@ workflow: This package contains any subtask the service might have. Each sub-pac
 Any test files can be found under test/ folder. The directory under this folder should exactly match that in src/ with each test file in those packages testing the corresponding source file. Currently, this is not setup and is a work in progress and will basically emulate the above once all the tests have been written.
 
 ### Setup
-Use the same steps mentioned in the 'User Documentation -> Setup' section to get everything setup. Also, install the Lombok plugin in your IDE so that the tags like @Data work.
+Use the same steps mentioned in the [User Documentation/Setup](#user-setup) section to get everything setup. Also, install the Lombok plugin in your IDE so that the tags like @Data work.
 
 ### Build, Run
 - After setting everything up, use the terminal to cd into the code repository.
