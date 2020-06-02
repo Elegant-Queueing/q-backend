@@ -105,9 +105,11 @@ util: The util package consists of 3 packages - enum/, constant/, and exception/
 
 workflow: This package contains any subtask the service might have. Each sub-package should have a corresponding service/ associated with it.
 
-#### Test files
+test: This package contains all the tests for all the classes.
 
-Any test files can be found under test/ folder. The directory under this folder should exactly match that in src/ with each test file in those packages testing the corresponding source file. Currently, this is not setup and is a work in progress and will basically emulate the above once all the tests have been written.
+#### Test files / Adding tests
+
+Any test files can be found under test/ folder. The directory under this folder should exactly match that in src/ with each test file in those packages testing the corresponding source file. This where the developer must add any test files. Please look at the test/ folder and existing tests for reference.
 
 ### Developer Setup
 - Set up an environment of your choice using the detailed environment setup instructions [here](#detailed-env)
