@@ -2,7 +2,7 @@
 
 This document provides the user and developer documentations for q-backend.
 
-The code on the ```master``` branch is the latest released code.
+The code on the ```final-release``` branch is the latest released code.
 
 ## User Documentation
 
@@ -14,10 +14,10 @@ This repository contains all the code for Q's backend service. On a high level, 
 
 The backend service is a Spring Boot Application that exposes API endpoints. A user (e.g. a front-end developer) can use these APIs by running the Spring Boot Application, thereby exposing the API endpoints to their own application. These APIs may be used to allow students and employees to create profiles and simulate virtual queuing for career fairs.
 
-### Setup
-- Set up an environment of your choice using the 'Setup -> Environment' section of this document.
-- Get the code using the 'Setup -> Getting the code' section of this document.
-- Set up a database on Firebase using the 'Setup -> Firebase' section.
+### User Setup
+- Set up an environment of your choice using the detailed environment setup instructions [here](#detailed-env).
+- Get the code using the ['Getting the code'](#detailed-code) section of this document.
+- Set up a database on Firebase using [this firebase setup](#detailed-firebase) section.
 
 ### Running the Spring Boot Application
 - After setting everything up, use the terminal to cd into the code repository.
@@ -61,11 +61,10 @@ Replace the {address} with localhost or your public DNS. Replace the {employee_i
 ```
 ### Work in progress
 
-Authentication: Login, Sign up, API authentication </br>
+Authorization
 Resume upload </br>
 Image upload </br>
 Resume tagging </br>
-Employee service POST API calls </br>
 
 ### Reporting a bug
 
@@ -81,7 +80,7 @@ To report a bug:
 ## Developer Documentation
 
 ### Obtaining the source code
-Use the 'Setup -> Getting the code' section to get the code
+Get the code using the ['Getting the code'](#detailed-code) section of this document.
 
 ### Layout of the directory structure
 
@@ -106,12 +105,17 @@ util: The util package consists of 3 packages - enum/, constant/, and exception/
 
 workflow: This package contains any subtask the service might have. Each sub-package should have a corresponding service/ associated with it.
 
-#### Test files
+test: This package contains all the tests for all the classes.
 
-Any test files can be found under test/ folder. The directory under this folder should exactly match that in src/ with each test file in those packages testing the corresponding source file. Currently, this is not setup and is a work in progress and will basically emulate the above once all the tests have been written.
+#### Test files / Adding tests
 
-### Setup
-Use the same steps mentioned in the 'User Documentation -> Setup' section to get everything setup. Also, install the Lombok plugin in your IDE so that the tags like @Data work.
+Any test files can be found under test/ folder. The directory under this folder should exactly match that in src/ with each test file in those packages testing the corresponding source file. This where the developer must add any test files. Please look at the test/ folder and existing tests for reference.
+
+### Developer Setup
+- Set up an environment of your choice using the detailed environment setup instructions [here](#detailed-env)
+- Get the code using the ['Getting the code'](#detailed-code) section of this document.
+- Set up a database on Firebase using [this firebase setup](#detailed-firebase) section.
+- Install the Lombok plugin in your IDE so that the tags like @Data work.
 
 ### Build, Run
 - After setting everything up, use the terminal to cd into the code repository.
@@ -123,19 +127,21 @@ Use the same steps mentioned in the 'User Documentation -> Setup' section to get
 ### Test
 To run the tests, run: ```mvn clean test```
 
+We are using Github Actions to have a CI setup where tests are run on each push to master. For more details about the setup, look into the folder: ```q-backend/.github/workflows```. To see the build histories, use the Actions tab on GitHub (next to Issues, Pull requests)
+
 ### Release process
 The latest commit on the ```master``` branch is considered our latest release.
 
 To release a build (assuming the PR for the code was approved and passed all tests):
-- From within your repository, run ```mvn build```. This will create the Javadocs for the project.
+- From within your repository, run ```mvn clean install```. This will create the Javadocs for the project.
 - Clone the repository that is hosting q-backend's Javadocs using: ```git clone https://github.com/Elegant-Queueing/q-docs.git```
-- Replace all the current files with the new files created by your lates ```mvn build``` command.
+- Replace all the current files with the new files created by your lates ```mvn clean install``` command.
 - Push to the repository, and make sure the website ```https://elegant-queueing.github.io/q-docs/``` reflects the changes.
 - Merge your PR.
 
-## Setup
+## Detailed Setup Instructions
 
-### Environment
+### <a name="detailed-env"></a> Environment
 You may set up the environment required to run this Spring Boot app in 2 ways:
 - Set up an instance remotely on AWS using our public AMI
 - Set up locally by installing all the dependencies and prerequisites
@@ -168,19 +174,17 @@ This instance will have all the prerequisite software set up for you.
 - Download and install Maven v3.6.0: https://maven.apache.org/install.html
 - Make sure to test the installation using: ```mvn -version```
 
-### Getting the code
+### <a name="detailed-code"></a> Getting the code
 
 - Clone the repo using: ```git clone https://github.com/Elegant-Queueing/q-backend.git```
 - Make sure you're on ```master``` since it has the code from the latest release
 
-### Firebase
-NOTE: The Q team already has a dev database. To get access to it, please contact the team. To create your own database, use the following information.
+### <a name="detailed-firebase"></a> Firebase
+NOTE: The Q team already has a dev database. To get access to it, please contact the team on CSE 403's Slack workspace. Once you have access to it, make changes to the code using the video: https://drive.google.com/file/d/1eiZPQq5OnAkD-kf628ZCYe6tTYlACvDB/view
 
-First, set up the database using the video: https://drive.google.com/file/d/1TMxiXX76JmJRJR1CP60grtf9WiX7aRxs/view
+Unfortunately, we do not give public access to people who are not a part of the Q team, or are not enrolled in CSE 403, Spring 2020.
 
-Then, make changes to the code using the video: https://drive.google.com/file/d/1eiZPQq5OnAkD-kf628ZCYe6tTYlACvDB/view
-
-Schema:
+Here's the schema for reference:
 
 ```
 companies:
@@ -229,4 +233,3 @@ universities:
 	name: String
 	past_fairs: Map<'fair_id', String [must be valid fairID]>  // the key is literally the word: fair_id
 ```
-	
