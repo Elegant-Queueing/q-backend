@@ -78,13 +78,19 @@ public class QueueControllerImpl implements QueueController {
         return queueService.skipStudent(employeeId, studentId);
     }
 
-//    @DeleteMapping("/clearAll")
-//    public void clearAll() {
-//        queueService.clearAll();
-//    }
-//
-//    @GetMapping("/getAll")
-//    public String getAll() {
-//        return queueService.getAll();
-//    }
+    @GetMapping("/data/is-open/employee-id/{employee-id}")
+    @Override
+    public boolean getEmployeeQueueIsOpen(@PathVariable("employee-id") String employeeId) {
+        return queueService.getEmployeeQueueIsOpen(employeeId);
+    }
+
+    @DeleteMapping("/clearAll")
+    public void clearAll() {
+        queueService.clearAll();
+    }
+
+    @GetMapping("/getAll")
+    public String getAll() {
+        return queueService.getAll();
+    }
 }
