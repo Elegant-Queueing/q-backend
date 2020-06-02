@@ -125,6 +125,8 @@ Any test files can be found under test/ folder. The directory under this folder 
 ### Test
 To run the tests, run: ```mvn clean test```
 
+We are using Github Actions to have a CI setup where tests are run on each push to master. For more details about the setup, look into the folder: ```q-backend/.github/workflows```. To see the build histories, use the Actions tab on GitHub (next to Issues, Pull requests)
+
 ### Release process
 The latest commit on the ```master``` branch is considered our latest release.
 
