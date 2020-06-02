@@ -15,9 +15,9 @@ This repository contains all the code for Q's backend service. On a high level, 
 The backend service is a Spring Boot Application that exposes API endpoints. A user (e.g. a front-end developer) can use these APIs by running the Spring Boot Application, thereby exposing the API endpoints to their own application. These APIs may be used to allow students and employees to create profiles and simulate virtual queuing for career fairs.
 
 ### Setup
-- Set up an environment of your choice using the detailed Environment setup instructions [here](#detailed-setup-instructions)
-- Get the code using the 'Setup -> Getting the code' section of this document. [here](#temp)
-- Set up a database on Firebase using the 'Setup -> Firebase' section.
+- Set up an environment of your choice using the detailed Environment setup instructions [here](#detailed-env)
+- Get the code using [this](#detailed-code) section of this document.
+- Set up a database on Firebase using [this](#detailed-firebase) section.
 
 ### Running the Spring Boot Application
 - After setting everything up, use the terminal to cd into the code repository.
@@ -123,7 +123,7 @@ Use the same steps mentioned in the 'User Documentation -> Setup' section to get
 ### Test
 To run the tests, run: ```mvn clean test```
 
-### <a name="pookie"></a> Release process
+### Release process
 The latest commit on the ```master``` branch is considered our latest release.
 
 To release a build (assuming the PR for the code was approved and passed all tests):
@@ -135,7 +135,7 @@ To release a build (assuming the PR for the code was approved and passed all tes
 
 ## Detailed Setup Instructions
 
-### Environment
+### <a name="detailed-env"></a> Environment
 You may set up the environment required to run this Spring Boot app in 2 ways:
 - Set up an instance remotely on AWS using our public AMI
 - Set up locally by installing all the dependencies and prerequisites
@@ -168,12 +168,12 @@ This instance will have all the prerequisite software set up for you.
 - Download and install Maven v3.6.0: https://maven.apache.org/install.html
 - Make sure to test the installation using: ```mvn -version```
 
-### Getting the code
+### <a name="detailed-code"></a> Getting the code
 
 - Clone the repo using: ```git clone https://github.com/Elegant-Queueing/q-backend.git```
 - Make sure you're on ```master``` since it has the code from the latest release
 
-### <a name="temp"></a> Firebase
+### <a name="detailed-firebase"></a> Firebase
 NOTE: The Q team already has a dev database. To get access to it, please contact the team. Once you have access to it, make changes to the code using the video: https://drive.google.com/file/d/1eiZPQq5OnAkD-kf628ZCYe6tTYlACvDB/view
 
 Unfortunately, we do not give public access to people who are not a part of the Q team, or are not enrolled in CSE 403, Spring 2020.
