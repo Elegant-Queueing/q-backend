@@ -85,4 +85,10 @@ public interface QueueController {
      * @return RemoveStudentResponse
      */
     RemoveStudentResponse removeStudent(String employeeId, String studentId);
+
+    /**
+     * Returns true if the employee's queue is open, false otherwise
+     * @return true if the employee's queue is open, false otherwise
+     */
+    boolean getEmployeeQueueIsOpen(String employeeId);
 }

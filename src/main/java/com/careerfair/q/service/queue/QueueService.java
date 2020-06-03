@@ -122,13 +122,19 @@ public interface QueueService {
      */
     long getEmployeeQueueSize(String employeeId);
 
-//    /**
-//     * Clears all data in Redis. USED FOR TESTING ONLY
-//     */
-//    void clearAll();
-//
-//    /**
-//     * Gets all data in Redis. USED FOR TESTING ONLY
-//     */
-//    String getAll();
+    /**
+     * Clears all data in Redis. USED FOR TESTING ONLY
+     */
+    void clearAll();
+
+    /**
+     * Gets all data in Redis. USED FOR TESTING ONLY
+     */
+    String getAll();
+
+    /**
+     * Returns true if the employee's queue is open, false otherwise
+     * @return true if the employee's queue is open, false otherwise
+     */
+    boolean getEmployeeQueueIsOpen(String employeeId);
 }
