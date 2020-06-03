@@ -47,7 +47,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public AddEmployeeResponse addEmployee(AddEmployeeRequest addEmployeeRequest) {
         validationService.checkValidEmployeeRequest(addEmployeeRequest);
-        Employee employeeFromRequest = createEmployeeFromRequest(addEmployeeRequest);
+        Employee employeeFromRequest = createEmployeeFromAddRequest(addEmployeeRequest);
         Employee newEmployee = firebaseService.addEmployee(employeeFromRequest);
         return new AddEmployeeResponse(newEmployee);
     }
@@ -56,11 +56,22 @@ public class EmployeeServiceImpl implements EmployeeService {
      <T extends EmployeeRequest> Employee createEmployeeFromRequest(T employeeRequest) {
         Employee employee = new Employee();
         employee.name = employeeRequest.getName();
-        employee.companyId = firebaseService.getCompanyWithName(employeeRequest.getCompanyId())
-                .getCompanyId();
+        employee.companyId = employeeRequest.getCompanyId();
         employee.bio = employeeRequest.getBio();
         employee.email = employeeRequest.getEmail();
         employee.role = employeeRequest.getRole();
         return employee;
     }
+
+    private Employee createEmployeeFromAddRequest(AddEmployeeRequest addEmployeeRequest) {
+        Employee employee = new Employee();
+        employee.name = addEmployeeRequest.getName();
+        employee.companyId = firebaseService.getCompanyWithName(addEmployeeRequest.getCompanyId())
+                .getCompanyId();
+        employee.bio = addEmployeeRequest.getBio();
+        employee.email = addEmployeeRequest.getEmail();
+        employee.role = addEmployeeRequest.getRole();
+        return employee;
+    }
 }
+

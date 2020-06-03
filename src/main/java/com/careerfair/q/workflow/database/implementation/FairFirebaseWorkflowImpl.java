@@ -75,7 +75,7 @@ public class FairFirebaseWorkflowImpl implements FairFirebaseWorkflow {
                 String documentName = (String) documentSnapshot.get("name");
                 assert documentName != null;
 
-                if (companyName.toLowerCase().equals(documentName.toLowerCase())) {
+                if (documentName.toLowerCase().equals(companyName.toLowerCase())) {
                     Company company = documentSnapshot.toObject(Company.class);
                     assert company != null;
 
