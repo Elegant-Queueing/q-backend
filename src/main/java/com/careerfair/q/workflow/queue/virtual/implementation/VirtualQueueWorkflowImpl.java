@@ -187,9 +187,15 @@ public class VirtualQueueWorkflowImpl extends AbstractQueueWorkflow
 
     @Override
     public Student getStudentAtHead(String companyId, Role role) {
-        String virtualQueueId = getVirtualQueueData(companyId, role).getVirtualQueueId();
+        VirtualQueueData virtualQueueData = (VirtualQueueData) companyRedisTemplate.opsForHash()
+                .get(companyId, role);
+        if (virtualQueueData == null) {
+            return null;
+        }
 
+        String virtualQueueId = virtualQueueData.getVirtualQueueId();
         Long size = queueRedisTemplate.opsForList().size(virtualQueueId);
+
         if (size == null || size == 0L) {
             return null;
         }
