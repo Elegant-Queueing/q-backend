@@ -130,7 +130,7 @@ To run the tests, run: ```mvn clean test```
 We are using Github Actions to have a CI setup where tests are run on each push to master. For more details about the setup, look into the folder: ```q-backend/.github/workflows```. To see the build histories, use the Actions tab on GitHub (next to Issues, Pull requests)
 
 ### Release process
-The latest commit on the ```master``` branch is considered our latest release.
+The latest commit on the ```final-release``` branch is considered our latest release.
 
 To release a build (assuming the PR for the code was approved and passed all tests):
 - From within your repository, run ```mvn clean install```. This will create the Javadocs for the project.
@@ -177,7 +177,7 @@ This instance will have all the prerequisite software set up for you.
 ### <a name="detailed-code"></a> Getting the code
 
 - Clone the repo using: ```git clone https://github.com/Elegant-Queueing/q-backend.git```
-- Make sure you're on ```master``` since it has the code from the latest release
+- Make sure you're on ```final-release``` since it has the code from the latest release
 
 ### <a name="detailed-firebase"></a> Firebase
 NOTE: The Q team already has a dev database. To get access to it, please contact the team on CSE 403's Slack workspace. Once you have access to it, make changes to the code using the video: https://drive.google.com/file/d/1eiZPQq5OnAkD-kf628ZCYe6tTYlACvDB/view
